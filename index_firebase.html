@@ -2219,13 +2219,14 @@ body.dark-mode .chart-btn{background:rgba(17,24,39,.7);border-color:#1f2550;colo
           <div id="ptab-sql" style="display:none">
             <div class="card" style="border-color:rgba(139,92,246,.35);background:rgba(139,92,246,.04)">
               <div class="card-title"><span class="dot" style="background:var(--purple)"></span>Exportar Alterações →
-                Supabase SQL</div>
+                Exportar Alterações →
+                Firebase SQL</div>
               <p style="font-size:13px;color:var(--text2);margin-bottom:6px">
                 Se estiver em modo <b style="color:var(--accent3)">offline</b>, as alterações ficam guardadas
                 localmente.
                 Use este painel para gerar o ficheiro <code
                   style="color:var(--accent);background:var(--bg2);padding:2px 8px;border-radius:4px">.sql</code> e
-                executar no <b>Supabase Dashboard → SQL Editor</b>.
+                executar no <b>Firebase Console → Firestore</b>.
                 </p>
               <p style="font-size:12px;color:var(--text3);margin-bottom:20px">Em modo <b style="color:var(--green)">online</b> as
                 alterações são aplicadas directamente — o SQL serve como
@@ -2263,142 +2264,282 @@ body.dark-mode .chart-btn{background:rgba(17,24,39,.7);border-color:#1f2550;colo
 
   <div class="toast" id="toast"></div>
 
+  <!-- ════════════════════════════════════════════════════
+       FIREBASE SDK (compat v9 — funciona sem bundler)
+       ════════════════════════════════════════════════════ -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
   <script>
     // ══════════════════════════════════════════════════
-    // SUPABASE CONFIG
+    // FIREBASE CONFIG
+    // ── Substitua pelos valores do seu projecto Firebase ──
+    // Aceda a: https://console.firebase.google.com
+    // → Projecto → Configurações → Aplicações web → Configuração SDK
     // ══════════════════════════════════════════════════
-                    const SUPABASE_URL = 'https://bbkegyntlapjdoumkeyl.supabase.co';
-                    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJia2VneW50bGFwamRvdW1rZXlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxOTk3OTAsImV4cCI6MjA4OTc3NTc5MH0.MV9T6yy0ep-cvO0T_6TsafxwiBPwGdzX9EIK2YgGyWQ';
-                    let SB_ONLINE = false;
+    const firebaseConfig = {
+      apiKey:            "COLE_AQUI_apiKey",
+      authDomain:        "COLE_AQUI_authDomain",
+      projectId:         "COLE_AQUI_projectId",
+      storageBucket:     "COLE_AQUI_storageBucket",
+      messagingSenderId: "COLE_AQUI_messagingSenderId",
+      appId:             "COLE_AQUI_appId"
+    };
 
-                    async function sbFetch(path, opts = {}) {
-                      const url = `${SUPABASE_URL}/rest/v1/${path}`;
-                      const headers = { 'apikey': SUPABASE_ANON, 'Authorization': 'Bearer ' + SUPABASE_ANON, 'Content-Type': 'application/json', 'Prefer': 'return=representation', ...(opts.headers || {}) };
-                      const r = await fetch(url, { ...opts, headers });
-                      if (!r.ok) { const e = await r.text(); throw new Error(`[${r.status}] ${e}`); }
-                      const t = await r.text();
-                      return t ? JSON.parse(t) : [];
-                    }
-                    const sbSelect = (t, q = '') => sbFetch(`${t}?${q}`, { method: 'GET' });
-                    const sbInsert = (t, d) => sbFetch(t, { method: 'POST', body: JSON.stringify(d) });
-                    const sbDelete = (t, id) => sbFetch(`${t}?id=eq.${id}`, { method: 'DELETE', headers: { 'Prefer': '' } });
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
-              async function testSB() {
-                setDbStatus('connecting');
-              try {
-                const response = await fetch(`${SUPABASE_URL}/rest/v1/coordenacoes?limit=1`, {
-                  method: 'GET',
-                  headers: {
-                    'apikey': SUPABASE_ANON,
-                    'Authorization': 'Bearer ' + SUPABASE_ANON,
-                    'Content-Type': 'application/json'
-                  }
-                });
-                
-                if (!response.ok) {
-                  throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-                
-                SB_ONLINE = true;
-                setDbStatus('online');
-                console.log('✓ Supabase conectado com sucesso');
-              } catch (e) {
-                SB_ONLINE = false;
-                setDbStatus('offline');
-                console.error('❌ Erro ao conectar Supabase:', {
-                  message: e.message,
-                  url: SUPABASE_URL,
-                  stack: e.stack
-                });
-                showToast('Modo offline — usando localStorage', 'info');
-              }
-            }
-
-        function setDbStatus(s) {
-          const dot = document.getElementById('dbDot'), lbl = document.getElementById('dbLabel');
-          dot.className = 'db-dot';
-          if (s === 'online') { dot.classList.add('online'); lbl.textContent = 'Supabase Online'; }
-          else if (s === 'offline') { dot.classList.add('offline'); lbl.textContent = 'Modo Local'; }
-          else if (s === 'error') { dot.classList.add('error'); lbl.textContent = 'Erro BD'; }
-          else { lbl.textContent = 'A ligar...'; }
+    // Persistência offline integrada do Firebase — resolve o problema de "pausa"
+    // ao ficar muito tempo sem entrar. Os dados ficam em cache local e
+    // sincronizam automaticamente quando voltar online.
+    db.enablePersistence({ synchronizeTabs: true })
+      .catch(err => {
+        if (err.code === 'failed-precondition') {
+          console.warn('Persistência offline: múltiplos tabs abertos — desativada.');
+        } else if (err.code === 'unimplemented') {
+          console.warn('Persistência offline não suportada neste browser.');
         }
+      });
 
-                    // LOCAL STORAGE FALLBACK
+    let SB_ONLINE = false; // mantido para compatibilidade com o resto do código
+
+    // ── Testar ligação ao Firebase ──
+    async function testSB() {
+      setDbStatus('connecting');
+      try {
+        // Uma leitura simples para confirmar ligação
+        await db.collection('coordenacoes').limit(1).get();
+        SB_ONLINE = true;
+        setDbStatus('online');
+        console.log('✓ Firebase conectado com sucesso');
+      } catch (e) {
+        SB_ONLINE = false;
+        setDbStatus('offline');
+        console.warn('⚠ Firebase offline — dados locais activos:', e.message);
+        showToast('Modo offline — dados locais activos', 'info');
+      }
+    }
+
+    function setDbStatus(s) {
+      const dot = document.getElementById('dbDot'), lbl = document.getElementById('dbLabel');
+      dot.className = 'db-dot';
+      if (s === 'online')      { dot.classList.add('online');  lbl.textContent = 'Firebase Online'; }
+      else if (s === 'offline'){ dot.classList.add('offline'); lbl.textContent = 'Modo Local'; }
+      else if (s === 'error')  { dot.classList.add('error');   lbl.textContent = 'Erro BD'; }
+      else                     { lbl.textContent = 'A ligar...'; }
+    }
+
+                    // ══════════════════════════════════════════════════
+                    // CAMADA DE DADOS — FIREBASE FIRESTORE
+                    // Colecções: coordenacoes | utilizadores | fichas_mobilizacao | presenca
+                    // localStorage é usado apenas como cache e sessão de login.
+                    // O Firebase tem persistência offline nativa — os dados
+                    // ficam disponíveis mesmo sem internet e sincronizam
+                    // automaticamente quando a ligação for restaurada.
+                    // ══════════════════════════════════════════════════
+
                     const DB = {
                       get(k) { try { return JSON.parse(localStorage.getItem(k) || 'null') } catch { return null } },
                       set(k, v) { localStorage.setItem(k, JSON.stringify(v)) }
                     };
 
-                    function initLocalDB() {
-                      if (!DB.get('coordenacoes')) DB.set('coordenacoes', [
-                        { id: 1, nome: 'Coordenação Norte' }, { id: 2, nome: 'Coordenação Sul' }, { id: 3, nome: 'Coordenação Centro' }
-                      ]);
-                    if (!DB.get('users')) DB.set('users', [
-                      { id: 1, nome: 'Administrador', email: 'admin@sismob.ao', senha: 'admin123', tipo: 'admin', coordId: null },
-                      { id: 2, nome: 'João Supervisor', email: 'joao@sismob.ao', senha: 'joao123', tipo: 'supervisor', coordId: 1 },
-                      { id: 3, nome: 'Maria Silva', email: 'maria@sismob.ao', senha: 'maria123', tipo: 'supervisor', coordId: 2 }
-                    ]);
-                    if (!DB.get('fichas')) DB.set('fichas', []);
-                  }
+                    // Converte um documento Firestore em objecto JS simples
+                    function fsDoc(snap) {
+                      return { id: snap.id, ...snap.data() };
+                    }
+
+                    async function initLocalDB() {
+                      // Seed inicial: apenas se o Firestore estiver vazio
+                      try {
+                        const cordsSnap = await db.collection('coordenacoes').limit(1).get();
+                        if (cordsSnap.empty) {
+                          const batch = db.batch();
+                          ['Coordenação Norte', 'Coordenação Sul', 'Coordenação Centro'].forEach(nome => {
+                            batch.set(db.collection('coordenacoes').doc(), { nome, created_at: firebase.firestore.FieldValue.serverTimestamp() });
+                          });
+                          await batch.commit();
+                        }
+                        const usersSnap = await db.collection('utilizadores').where('email', '==', 'admin@sismob.ao').limit(1).get();
+                        if (usersSnap.empty) {
+                          await db.collection('utilizadores').add({ nome: 'Administrador', email: 'admin@sismob.ao', senha: 'admin123', tipo: 'admin', coord_id: null, created_at: firebase.firestore.FieldValue.serverTimestamp() });
+                          await db.collection('utilizadores').add({ nome: 'João Supervisor', email: 'joao@sismob.ao', senha: 'joao123', tipo: 'supervisor', coord_id: null, created_at: firebase.firestore.FieldValue.serverTimestamp() });
+                          await db.collection('utilizadores').add({ nome: 'Maria Silva', email: 'maria@sismob.ao', senha: 'maria123', tipo: 'supervisor', coord_id: null, created_at: firebase.firestore.FieldValue.serverTimestamp() });
+                        }
+                      } catch(e) {
+                        // offline — seed feita quando voltar online
+                        console.warn('initLocalDB offline:', e.message);
+                        // garantir dados locais mínimos
+                        if (!DB.get('coordenacoes')) DB.set('coordenacoes', [
+                          { id: '1', nome: 'Coordenação Norte' }, { id: '2', nome: 'Coordenação Sul' }, { id: '3', nome: 'Coordenação Centro' }
+                        ]);
+                        if (!DB.get('users')) DB.set('users', [
+                          { id: '1', nome: 'Administrador', email: 'admin@sismob.ao', senha: 'admin123', tipo: 'admin', coordId: null }
+                        ]);
+                        if (!DB.get('fichas')) DB.set('fichas', []);
+                      }
+                    }
 
                     let _fichas = [], _cords = [], _users = [];
 
                     async function loadCords() {
-                      if (SB_ONLINE) { try { const r = await sbSelect('coordenacoes', 'order=nome'); _cords = r.map(x => ({ id: x.id, nome: x.nome })); DB.set('coordenacoes', _cords); return _cords; } catch (e) { console.error(e) } }
-                      _cords = DB.get('coordenacoes') || []; return _cords;
+                      try {
+                        const snap = await db.collection('coordenacoes').orderBy('nome').get();
+                        _cords = snap.docs.map(d => ({ id: d.id, nome: d.data().nome }));
+                        DB.set('coordenacoes', _cords);
+                        return _cords;
+                      } catch (e) {
+                        console.warn('loadCords offline:', e.message);
+                        _cords = DB.get('coordenacoes') || [];
+                        return _cords;
+                      }
                     }
+
                     async function loadUsers() {
-                      if (SB_ONLINE) { try { const r = await sbSelect('utilizadores', 'order=nome'); _users = r.map(x => ({ id: x.id, nome: x.nome, email: (x.email || '').trim().toLowerCase(), senha: (x.senha || '').trim(), tipo: x.tipo, coordId: x.coord_id })); DB.set('users', _users); return _users; } catch (e) { console.error(e) } }
-                      _users = (DB.get('users') || []).map(x => ({ ...x, email: (x.email || '').trim().toLowerCase(), senha: (x.senha || '').trim() })); return _users;
+                      try {
+                        const snap = await db.collection('utilizadores').orderBy('nome').get();
+                        _users = snap.docs.map(d => {
+                          const x = d.data();
+                          return { id: d.id, nome: x.nome, email: (x.email || '').trim().toLowerCase(), senha: (x.senha || '').trim(), tipo: x.tipo, coordId: x.coord_id || null };
+                        });
+                        DB.set('users', _users);
+                        return _users;
+                      } catch (e) {
+                        console.warn('loadUsers offline:', e.message);
+                        _users = (DB.get('users') || []).map(x => ({ ...x, email: (x.email || '').trim().toLowerCase(), senha: (x.senha || '').trim() }));
+                        return _users;
+                      }
                     }
+
                     async function loadFichas() {
-                      if (SB_ONLINE) { try { const r = await sbSelect('fichas_mobilizacao', 'order=data.desc,created_at.desc'); _fichas = r.map(x => ({ id: x.id, provincia: x.provincia, municipio: x.municipio, comuna: x.comuna, bairro: x.bairro, data: x.data, mobilizador: x.mobilizador, telefone: x.telefone, coordId: x.coord_id, coordNome: x.coord_nome, userId: x.user_id, tableData: x.table_data, totalLocais: x.total_locais, totalPessoas: x.total_pessoas, sim: x.sim, nao: x.nao, motivo: x.motivo })); DB.set('fichas', _fichas); return _fichas; } catch (e) { console.error(e) } }
-                      _fichas = DB.get('fichas') || []; return _fichas;
+                      try {
+                        const snap = await db.collection('fichas_mobilizacao').orderBy('data', 'desc').get();
+                        _fichas = snap.docs.map(d => {
+                          const x = d.data();
+                          return { id: d.id, provincia: x.provincia, municipio: x.municipio, comuna: x.comuna, bairro: x.bairro, data: x.data, mobilizador: x.mobilizador, telefone: x.telefone, coordId: x.coord_id, coordNome: x.coord_nome, userId: x.user_id, tableData: x.table_data, totalLocais: x.total_locais, totalPessoas: x.total_pessoas, sim: x.sim, nao: x.nao, motivo: x.motivo };
+                        });
+                        DB.set('fichas', _fichas);
+                        return _fichas;
+                      } catch (e) {
+                        console.warn('loadFichas offline:', e.message);
+                        _fichas = DB.get('fichas') || [];
+                        return _fichas;
+                      }
                     }
+
                     async function persistFicha(f) {
-                      if (SB_ONLINE) { try { const p = { provincia: f.provincia, municipio: f.municipio, comuna: f.comuna, bairro: f.bairro, data: f.data, mobilizador: f.mobilizador, telefone: f.telefone, coord_id: f.coordId, coord_nome: f.coordNome, user_id: f.userId, table_data: f.tableData, total_locais: f.totalLocais, total_pessoas: f.totalPessoas, sim: f.sim, nao: f.nao, motivo: f.motivo }; const r = await sbInsert('fichas_mobilizacao', p); if (r && r[0]) f.id = r[0].id; await loadFichas(); return true; } catch (e) { console.error(e); return false; } }
-                      const arr = DB.get('fichas') || []; arr.push(f); DB.set('fichas', arr); _fichas = arr; return true;
+                      try {
+                        const payload = { provincia: f.provincia, municipio: f.municipio, comuna: f.comuna, bairro: f.bairro, data: f.data, mobilizador: f.mobilizador, telefone: f.telefone || null, coord_id: f.coordId || null, coord_nome: f.coordNome || null, user_id: f.userId || null, table_data: f.tableData || {}, total_locais: f.totalLocais || 0, total_pessoas: f.totalPessoas || 0, sim: f.sim || 0, nao: f.nao || 0, motivo: f.motivo || null, created_at: firebase.firestore.FieldValue.serverTimestamp() };
+                        const ref = await db.collection('fichas_mobilizacao').add(payload);
+                        f.id = ref.id;
+                        await loadFichas();
+                        return true;
+                      } catch (e) {
+                        console.error('persistFicha:', e);
+                        // Guarda localmente se offline (o Firebase sincronizará depois)
+                        const arr = DB.get('fichas') || [];
+                        f.id = f.id || 'local_' + Date.now();
+                        arr.unshift(f);
+                        DB.set('fichas', arr);
+                        _fichas = arr;
+                        return true;
+                      }
                     }
+
                     async function deleteFichaRemote(id) {
-                      if (SB_ONLINE) { try { await sbDelete('fichas_mobilizacao', id); } catch (e) { console.error(e) } await loadFichas(); return; }
-                      _fichas = (_fichas || []).filter(f => f.id !== id); DB.set('fichas', _fichas);
+                      try {
+                        await db.collection('fichas_mobilizacao').doc(String(id)).delete();
+                        await loadFichas();
+                      } catch (e) {
+                        console.error('deleteFichaRemote:', e);
+                        _fichas = (_fichas || []).filter(f => f.id !== id);
+                        DB.set('fichas', _fichas);
+                      }
                     }
+
                     async function persistCord(nome) {
-                      if (SB_ONLINE) { try { const r = await sbInsert('coordenacoes', { nome }); await loadCords(); return r && r[0] ? r[0].id : Date.now(); } catch (e) { console.error(e) } }
-                      const arr = DB.get('coordenacoes') || []; const id = Date.now(); arr.push({ id, nome }); DB.set('coordenacoes', arr); _cords = arr; return id;
+                      try {
+                        const ref = await db.collection('coordenacoes').add({ nome, created_at: firebase.firestore.FieldValue.serverTimestamp() });
+                        await loadCords();
+                        return ref.id;
+                      } catch (e) {
+                        console.error('persistCord:', e);
+                        const id = 'local_' + Date.now();
+                        const arr = DB.get('coordenacoes') || [];
+                        arr.push({ id, nome });
+                        DB.set('coordenacoes', arr);
+                        _cords = arr;
+                        return id;
+                      }
                     }
+
                     async function deleteCordRemote(id) {
-                      if (SB_ONLINE) { try { await sbDelete('coordenacoes', id); } catch (e) { console.error(e) } await loadCords(); return; }
-                      _cords = _cords.filter(c => c.id !== id); DB.set('coordenacoes', _cords);
+                      try {
+                        await db.collection('coordenacoes').doc(String(id)).delete();
+                        await loadCords();
+                      } catch (e) {
+                        console.error('deleteCordRemote:', e);
+                        _cords = _cords.filter(c => c.id !== id);
+                        DB.set('coordenacoes', _cords);
+                      }
                     }
+
                     async function persistUser(u) {
-                      if (SB_ONLINE) { try { const p = { nome: u.nome, email: u.email, senha: u.senha, tipo: u.tipo, coord_id: u.coordId || null }; const r = await sbInsert('utilizadores', p); await loadUsers(); return r && r[0] ? r[0].id : Date.now(); } catch (e) { if (e.message.includes('23505')) throw new Error('Email já existe'); throw e; } }
-                      const arr = DB.get('users') || []; if (arr.find(x => x.email === u.email)) throw new Error('Email já existe'); const id = Date.now(); arr.push({ ...u, id }); DB.set('users', arr); _users = arr; return id;
+                      // Verificar email duplicado
+                      try {
+                        const snap = await db.collection('utilizadores').where('email', '==', u.email).limit(1).get();
+                        if (!snap.empty) throw new Error('Email já existe');
+                      } catch (e) {
+                        if (e.message === 'Email já existe') throw e;
+                        // offline — verificar localmente
+                        if ((_users || []).find(x => x.email === u.email)) throw new Error('Email já existe');
+                      }
+                      try {
+                        const payload = { nome: u.nome, email: u.email, senha: u.senha, tipo: u.tipo, coord_id: u.coordId || null, created_at: firebase.firestore.FieldValue.serverTimestamp() };
+                        const ref = await db.collection('utilizadores').add(payload);
+                        await loadUsers();
+                        return ref.id;
+                      } catch (e) {
+                        console.error('persistUser:', e);
+                        const id = 'local_' + Date.now();
+                        const arr = DB.get('users') || [];
+                        arr.push({ ...u, id });
+                        DB.set('users', arr);
+                        _users = arr;
+                        return id;
+                      }
                     }
+
                     async function deleteUserRemote(id) {
-                      if (SB_ONLINE) { try { await sbDelete('utilizadores', id); } catch (e) { console.error(e) } await loadUsers(); return; }
-                      _users = _users.filter(u => u.id !== id); DB.set('users', _users);
+                      try {
+                        await db.collection('utilizadores').doc(String(id)).delete();
+                        await loadUsers();
+                      } catch (e) {
+                        console.error('deleteUserRemote:', e);
+                        _users = _users.filter(u => u.id !== id);
+                        DB.set('users', _users);
+                      }
                     }
+
                     async function updateUserField(userId, fields) {
-                      if (SB_ONLINE) {
-                        try {
-                          const headers = { 'apikey': SUPABASE_ANON, 'Authorization': 'Bearer ' + SUPABASE_ANON, 'Content-Type': 'application/json', 'Prefer': '' };
-                          const r = await fetch(`${SUPABASE_URL}/rest/v1/utilizadores?id=eq.${userId}`, { method: 'PATCH', headers, body: JSON.stringify(fields) });
-                          if (!r.ok) throw new Error(await r.text());
-                          const u = _users.find(x => x.id === userId);
-                          if (u) Object.assign(u, fields);
-                          DB.set('users', _users);
-                          return true;
-                      } catch (e) { console.error(e); return false; }
+                      try {
+                        // Mapear campos JS para nomes Firestore
+                        const fsFields = {};
+                        if (fields.nome  !== undefined) fsFields.nome  = fields.nome;
+                        if (fields.senha !== undefined) fsFields.senha = fields.senha;
+                        await db.collection('utilizadores').doc(String(userId)).update(fsFields);
+                        const u = _users.find(x => x.id === userId);
+                        if (u) Object.assign(u, fields);
+                        DB.set('users', _users);
+                        return true;
+                      } catch (e) {
+                        console.error('updateUserField:', e);
+                        // Actualiza localmente se offline
+                        const u = _users.find(x => x.id === userId);
+                        if (u) Object.assign(u, fields);
+                        DB.set('users', _users);
+                        return true;
+                      }
                     }
-                    const arr = DB.get('users') || [];
-                    const idx = arr.findIndex(x => x.id === userId);
-                    if (idx < 0) return false;
-                    Object.assign(arr[idx], fields);
-                    DB.set('users', arr);
-                    _users = arr;
-                    return true;
-                  }
 
                     // AUTH
                     let currentUser = null;
@@ -3823,7 +3964,7 @@ body.dark-mode .chart-btn{background:rgba(17,24,39,.7);border-color:#1f2550;colo
                     const dot = document.getElementById('perf-sb-dot');
                     const lbl = document.getElementById('perf-sb-label');
                     dot.className = 'db-dot ' + (SB_ONLINE ? 'online' : 'offline');
-                    lbl.textContent = SB_ONLINE ? 'Supabase Online' : 'Modo Offline — alterações locais';
+                    lbl.textContent = SB_ONLINE ? 'Firebase Online' : 'Modo Offline — alterações locais';
 
                     document.getElementById('perfilSubtitle').textContent =
                       u.tipo === 'admin' ? 'Administrador — gerir perfil e credenciais de todos os utilizadores' : 'Gerir dados pessoais e senha de acesso';
@@ -4015,19 +4156,19 @@ body.dark-mode .chart-btn{background:rgba(17,24,39,.7);border-color:#1f2550;colo
                       sql += `-- SisMob — Actualização de Utilizadores\n`;
                       sql += `-- Gerado em : ${now}\n`;
                       sql += `-- Por       : ${currentUser.nome} (${currentUser.email})\n`;
-                      sql += `-- Supabase  : ${SB_ONLINE ? 'ONLINE — alterações já aplicadas directamente' : 'OFFLINE — execute este SQL no Supabase Dashboard'}\n`;
+                      sql += `-- Firebase  : ${SB_ONLINE ? 'ONLINE — alterações já aplicadas directamente' : 'OFFLINE — alterações pendentes de sincronização'}\n`;
                       sql += `-- ─────────────────────────────────────────────────────────\n`;
                       sql += `-- Instruções:\n`;
-                      sql += `--   1. Aceda a https://supabase.com/dashboard\n`;
+                      sql += `--   1. Aceda a https://console.firebase.google.com\n`;
                       sql += `--   2. Seleccione o projecto SisMob\n`;
-                      sql += `--   3. Clique em SQL Editor → New Query\n`;
-                      sql += `--   4. Cole este conteúdo e clique em RUN\n`;
+                      sql += `--   3. Este ficheiro serve como auditoria das alterações\n`;
+                      sql += `--   4. O Firebase sincroniza automaticamente quando online\n`;
                       sql += `-- ═══════════════════════════════════════════════════════════\n\n`;
 
                     if (!_pendingUpdates.length) {
                       sql += `-- ℹ️  Nenhuma alteração pendente nesta sessão.\n`;
                       if (SB_ONLINE) {
-                        sql += `-- Todas as alterações foram aplicadas directamente via API Supabase.\n\n`;
+                        sql += `-- Todas as alterações foram aplicadas directamente no Firebase.\n\n`;
                       } else {
                       sql += `-- Não foram feitas alterações ou já foram exportadas anteriormente.\n\n`;
                     }
@@ -4115,9 +4256,9 @@ body.dark-mode .chart-btn{background:rgba(17,24,39,.7);border-color:#1f2550;colo
 
                     // INIT
                     async function main() {
-                      initLocalDB();
                       showLoading('A verificar ligação à base de dados...');
                       await testSB();
+                      await initLocalDB();
                       hideLoading();
                       await restoreSession();
                     }
@@ -4259,50 +4400,39 @@ body.dark-mode .chart-btn{background:rgba(17,24,39,.7);border-color:#1f2550;colo
                       };
                       setPresenceStore(store);
 
-                      // If Supabase online, try to upsert via the presenca table (best-effort)
-                      if (SB_ONLINE) {
-                        try {
-                          const headers = { 'apikey': SUPABASE_ANON, 'Authorization': 'Bearer ' + SUPABASE_ANON, 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates' };
-                          fetch(`${SUPABASE_URL}/rest/v1/presenca`, {
-                            method: 'POST', headers,
-                            body: JSON.stringify({
-                              user_id: currentUser.id,
-                              nome: currentUser.nome,
-                              tipo: currentUser.tipo,
-                              coord_id: currentUser.coordId || null,
-                              last_seen: store[currentUser.id].lastSeen,
-                              is_typing: isTyping,
-                              avatar: store[currentUser.id].avatar
-                            })
-                          }).catch(() => {}); // ignore errors silently
-                        } catch(e) {}
-                      }
+                      // Registar presença no Firebase (best-effort, sem await)
+                      try {
+                        db.collection('presenca').doc(String(currentUser.id)).set({
+                          user_id: currentUser.id,
+                          nome: currentUser.nome,
+                          tipo: currentUser.tipo,
+                          coord_id: currentUser.coordId || null,
+                          last_seen: store[currentUser.id].lastSeen,
+                          is_typing: isTyping,
+                          avatar: store[currentUser.id].avatar || null
+                        }).catch(() => {});
+                      } catch(e) {}
                     }
 
                     // Apenas o ADMIN faz fetch e vê o painel.
                     // Supervisores só fazem broadcast (registam a sua presença) mas nunca lêem nem exibem.
                     async function fetchPresence() {
                       if (!currentUser || currentUser.tipo !== 'admin') return; // supervisores nunca executam isto
-                      // Try Supabase first
-                      if (SB_ONLINE) {
-                        try {
-                          const cutoff = new Date(Date.now() - PRESENCE_TTL * 1000).toISOString();
-                          const r = await sbSelect('presenca', `last_seen=gte.${cutoff}&order=last_seen.desc`);
-                          if (Array.isArray(r)) {
-                            const store = {};
-                            r.forEach(x => {
-                              store[x.user_id] = {
-                                userId: x.user_id, nome: x.nome, tipo: x.tipo,
-                                coordId: x.coord_id, lastSeen: x.last_seen,
-                                isTyping: x.is_typing, avatar: x.avatar || null
-                              };
-                            });
-                            setPresenceStore(store);
-                            renderPresencePanel(store);
-                            return;
-                          }
-                        } catch(e) { /* tabela pode não existir, continua */ }
-                      }
+                      // Ler presenças recentes do Firebase
+                      try {
+                        const cutoff = new Date(Date.now() - PRESENCE_TTL * 1000).toISOString();
+                        const snap = await db.collection('presenca').where('last_seen', '>=', cutoff).orderBy('last_seen', 'desc').get();
+                        if (!snap.empty) {
+                          const store = {};
+                          snap.docs.forEach(d => {
+                            const x = d.data();
+                            store[x.user_id] = { userId: x.user_id, nome: x.nome, tipo: x.tipo, coordId: x.coord_id, lastSeen: x.last_seen, isTyping: x.is_typing, avatar: x.avatar || null };
+                          });
+                          setPresenceStore(store);
+                          renderPresencePanel(store);
+                          return;
+                        }
+                      } catch(e) { /* offline ou índice em falta, continua */ }
                       // Fallback: presença local (mesmo browser)
                       const store = getPresenceStore();
                       renderPresencePanel(store);
