@@ -75,14 +75,24 @@ A funcionalidade de presença online usa uma query com `where` + `orderBy`. O Fi
 4. Copie o objecto `firebaseConfig` que aparece:
 
 ```javascript
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIza...",
-  authDomain: "sismob-xxxx.firebaseapp.com",
-  projectId: "sismob-xxxx",
-  storageBucket: "sismob-xxxx.appspot.com",
-  messagingSenderId: "123456789",
-  appId: "1:123456789:web:abcdef"
+  apiKey: "AIzaSyCmZZ5H5UeeFsZJbbo9o4W3O0S-B142kJw",
+  authDomain: "simob02.firebaseapp.com",
+  databaseURL: "https://simob02-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "simob02",
+  storageBucket: "simob02.firebasestorage.app",
+  messagingSenderId: "590922605903",
+  appId: "1:590922605903:web:aa1b89d2bc9ee08261913a"
 };
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
 ```
 
 ---
