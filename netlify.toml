@@ -1,0 +1,22 @@
+[build]
+  # Diretório raiz do projeto
+  base = "."
+  # Comando de build (não temos, pois é HTML puro)
+  command = ""
+  # Pasta que será publicada
+  publish = "."
+
+[context.production]
+  command = ""
+
+[context.deploy-preview]
+  command = ""
+
+[context.branch-deploy]
+  command = ""
+
+# Regra para servir o HTML como raiz
+[[redirects]]
+  from = "/"
+  to = "/index_firebase.html"
+  status = 200
