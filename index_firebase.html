@@ -17,44 +17,55 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
 :root{
-  /* Primária — Violeta Vibrante */
-  --primary:#6366f1;
-  --primary-dark:#4f46e5;
-  --primary-light:#818cf8;
-  --primary-glow:rgba(99,102,241,.25);
+  /* Cores Principais — Simplificadas */
+  --primary:#2c5f2d;
+  --primary-dark:#1d4620;
+  --primary-light:#3d7f3e;
 
-  /* Secundária — Surf/Verde-água */
-  --surf:#14b8a6;
-  --surf-dark:#0d9488;
-  --surf-light:#5eead4;
+  /* Secundária — Verde */
+  --surf:#22b14c;
+  --surf-dark:#1a8a3a;
+  --surf-light:#5fd888;
 
-  /* Acento — Coral/Rosa */
-  --coral:#f43f5e;
-  --coral-light:rgba(244,63,94,.15);
+  /* Acento — Vermelho */
+  --coral:#e74c3c;
+  --coral-light:rgba(231,76,60,.12);
 
-  /* Destaque — Âmbar */
-  --amber:#f59e0b;
-  --amber-light:rgba(245,158,11,.15);
+  /* Destaque — Amarelo Torrado */
+  --amber:#d4a817;
+  --amber-light:rgba(212,168,23,.15);
+
+  /* Preto */
+  --black:#1a1a1a;
 
   /* Backgrounds */
-  --bg:linear-gradient(160deg,#f8faff 0%,#f0f4ff 50%,#faf5ff 100%);
-  --bg-solid:#f4f6ff;
+  --bg:#fafafa;
+  --bg-solid:#f5f5f5;
   --bg2:#ffffff;
-  --bg3:#f1f5ff;
-  --card:rgba(255,255,255,0.82);
+  --bg3:#f0f0f0;
+  --card:#ffffff;
   --card-solid:#ffffff;
-  --border:rgba(99,102,241,.14);
-  --border-solid:#e0e3f8;
+  --border:#e0e0e0;
+  --border-solid:#d0d0d0;
 
   /* Texto */
-  --text:#1e1b4b;
-  --text2:#4a5175;
-  --text3:#9496b0;
+  --text:#1a1a1a;
+  --text2:#4a4a4a;
+  --text3:#7a7a7a;
 
-  /* Sidebar */
-  --sidebar-bg:linear-gradient(180deg,#1e1b4b 0%,#2d2a5e 50%,#312e81 100%);
-  --sidebar-item:#c4c6e7;
-  --sidebar-active:#ffffff;
+  /* Sidebar — Paleta refinada */
+  --sidebar-bg:#0f1a10;
+  --sidebar-surface:#1a2e1b;
+  --sidebar-border:rgba(255,255,255,.06);
+  --sidebar-text:rgba(255,255,255,.55);
+  --sidebar-text-hover:rgba(255,255,255,.9);
+  --sidebar-item-hover:rgba(255,255,255,.07);
+  --sidebar-active-bg:#22b14c;
+  --sidebar-active-text:#ffffff;
+  --sidebar-active-indicator:#5fd888;
+  --sidebar-section-label:rgba(255,255,255,.22);
+  --sidebar-avatar-bg:#2d6a4f;
+  --sidebar-logo-icon-bg:#1a3d1b;
 
   /* Legado mapeado */
   --accent:var(--primary);
@@ -67,22 +78,21 @@
   --blue-gov:var(--primary-dark);
   --red-gov:var(--coral);
 
-  --radius:14px;
-  --radius-sm:8px;
-  --radius-lg:20px;
-  --transition:all 0.28s cubic-bezier(.4,0,.2,1);
-  --shadow-sm:0 2px 8px rgba(99,102,241,.1);
-  --shadow-md:0 8px 24px rgba(99,102,241,.18);
-  --shadow-lg:0 16px 48px rgba(99,102,241,.22);
-  --shadow-xl:0 24px 64px rgba(99,102,241,.28);
+  --radius:12px;
+  --radius-sm:6px;
+  --radius-lg:16px;
+  --transition:all 0.2s ease;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.1);
+  --shadow-md:0 4px 8px rgba(0,0,0,.12);
+  --shadow-lg:0 8px 16px rgba(0,0,0,.15);
+  --shadow-xl:0 12px 24px rgba(0,0,0,.18);
 }
 
 /* ── RESET & BASE ── */
 *{margin:0;padding:0;box-sizing:border-box}
 body{
   font-family:'Inter',sans-serif;
-  background:var(--bg-solid);
-  background-image:linear-gradient(160deg,#f8faff 0%,#f0f4ff 50%,#faf5ff 100%);
+  background:#f5f5f5;
   color:var(--text);
   min-height:100vh;
   overflow-x:hidden;
@@ -117,79 +127,68 @@ body{
 #loginScreen{
   display:flex;align-items:center;justify-content:center;
   min-height:100vh;position:relative;overflow:hidden;
-  background:linear-gradient(135deg,#1e1b4b 0%,#312e81 40%,#4c1d95 70%,#2d1b69 100%);
+  background:#2c5f2d;
 }
-#loginScreen::before{
-  content:'';position:absolute;inset:0;
-  background:
-    radial-gradient(ellipse 60% 50% at 20% 20%,rgba(99,102,241,.3) 0%,transparent 60%),
-    radial-gradient(ellipse 50% 60% at 80% 80%,rgba(20,184,166,.2) 0%,transparent 60%);
-}
-#loginScreen::after{
-  content:'';position:absolute;inset:0;
-  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-  pointer-events:none;
-}
+#loginScreen::before{content:none}
+#loginScreen::after{content:none}
 .login-card{
-  background:rgba(255,255,255,.1);
-  backdrop-filter:blur(24px);
-  -webkit-backdrop-filter:blur(24px);
-  border:1px solid rgba(255,255,255,.2);
-  border-radius:24px;
-  padding:48px 44px;
-  width:100%;max-width:440px;
+  background:#ffffff;
+  border:1px solid var(--border-solid);
+  border-radius:var(--radius-lg);
+  padding:40px;
+  width:100%;max-width:400px;
   position:relative;z-index:1;
-  box-shadow:0 32px 64px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.2);
+  box-shadow:var(--shadow-lg);
 }
 .login-logo{text-align:center;margin-bottom:36px}
 .login-logo-icon{
-  width:72px;height:72px;border-radius:50%;
-  background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+  width:60px;height:60px;border-radius:50%;
+  background:#008102;
   display:flex;align-items:center;justify-content:center;
   margin:0 auto 16px;
-  box-shadow:0 0 32px rgba(99,102,241,.5),0 8px 24px rgba(0,0,0,.3);
+  box-shadow:var(--shadow-md);
   font-size:30px;
 }
 .login-logo .mark{
-  font-size:32px;font-weight:800;
-  color:#ffffff;letter-spacing:-1px;
+  font-size:28px;font-weight:800;
+  color:#06a509;letter-spacing:-1px;
 }
-.login-logo p{color:rgba(255,255,255,.7);font-size:13px;margin-top:6px;font-weight:400}
+.login-logo p{color:#666;font-size:13px;margin-top:6px;font-weight:400}
 .form-group{margin-bottom:20px}
 .form-group label{
   display:block;font-size:11px;font-weight:600;
-  color:rgba(255,255,255,.8);margin-bottom:8px;
+  color:#333;margin-bottom:8px;
   text-transform:uppercase;letter-spacing:.8px;
 }
 .form-group input{
   width:100%;
-  background:rgba(255,255,255,.12);
-  border:1px solid rgba(255,255,255,.25);
-  border-radius:12px;padding:13px 16px;
-  color:#ffffff;
+  background:#f9f9f9;
+  border:1px solid var(--border-solid);
+  border-radius:var(--radius-sm);padding:12px;
+  color:var(--text);
   font-family:'Inter',sans-serif;font-size:14px;
   transition:var(--transition);
 }
-.form-group input::placeholder{color:rgba(255,255,255,.45)}
+.form-group input::placeholder{color:#999}
 .form-group input:focus{
   outline:none;
-  border-color:rgba(255,255,255,.6);
-  background:rgba(255,255,255,.18);
-  box-shadow:0 0 0 3px rgba(99,102,241,.3);
+  border-color:var(--primary);
+  background:#ffffff;
+  box-shadow:0 0 0 2px rgba(44,95,45,.15);
 }
 .btn-primary{
   width:100%;
-  background:linear-gradient(135deg,var(--primary),var(--primary-dark));
-  border:none;border-radius:12px;
-  padding:15px;color:#ffffff;
-  font-family:'Inter',sans-serif;font-weight:700;font-size:15px;
+  background:var(--primary);
+  border:none;border-radius:var(--radius-sm);
+  padding:12px;color:#ffffff;
+  font-family:'Inter',sans-serif;font-weight:700;font-size:14px;
   cursor:pointer;transition:var(--transition);
-  box-shadow:0 8px 24px rgba(99,102,241,.45);
+  box-shadow:var(--shadow-sm);
   letter-spacing:.3px;
 }
-.btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(99,102,241,.6)}
-.btn-primary:active{transform:scale(.97);box-shadow:0 4px 12px rgba(99,102,241,.4)}
-.login-error{color:#fca5a5;font-size:13px;text-align:center;margin-top:12px;display:none}
+.btn-primary:hover{background:var(--primary-dark);transform:translateY(-1px);box-shadow:var(--shadow-md)}
+.btn-primary:active{transform:scale(.98);background:var(--primary-light)}
+.login-error{color:var(--coral);font-size:13px;text-align:center;margin-top:12px;display:none}
 
 /* ── APP SHELL ── */
 #appShell{display:none;height:100vh;overflow:hidden}
@@ -198,98 +197,102 @@ body{
 /* ── SIDEBAR ── */
 .sidebar{
   width:260px;
-  background:linear-gradient(180deg,#1e1b4b 0%,#2d2a5e 50%,#312e81 100%);
+  background:var(--sidebar-bg);
   display:flex;flex-direction:column;flex-shrink:0;
   overflow-y:auto;
-  box-shadow:4px 0 24px rgba(0,0,0,.25);
+  box-shadow:1px 0 0 var(--sidebar-border),4px 0 20px rgba(0,0,0,.25);
   position:relative;z-index:10;
 }
 .sidebar-header{
-  padding:28px 20px 22px;
-  border-bottom:1px solid rgba(255,255,255,.08);
+  padding:22px 16px 20px;
+  border-bottom:1px solid var(--sidebar-border);
 }
 .sidebar-logo-wrap{display:flex;align-items:center;gap:12px}
 .sidebar-logo-icon{
-  width:40px;height:40px;border-radius:12px;
-  background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+  width:36px;height:36px;border-radius:10px;
+  background:var(--sidebar-logo-icon-bg);
+  border:1px solid rgba(255,255,255,.1);
   display:flex;align-items:center;justify-content:center;
   font-size:18px;
-  box-shadow:0 4px 12px rgba(99,102,241,.4);
+  box-shadow:0 2px 8px rgba(0,0,0,.3);
   flex-shrink:0;
 }
-.sidebar-logo{font-size:20px;font-weight:800;color:#ffffff;letter-spacing:-.5px}
-.sidebar-role{font-size:10px;color:rgba(255,255,255,.45);font-family:'JetBrains Mono',monospace;margin-top:1px}
+.sidebar-logo{font-size:18px;font-weight:800;color:#ffffff;letter-spacing:-.5px}
+.sidebar-role{font-size:10px;color:rgba(255,255,255,.35);font-family:'JetBrains Mono',monospace;margin-top:2px;letter-spacing:.5px}
 .sidebar-user{
-  padding:16px 20px;
-  border-bottom:1px solid rgba(255,255,255,.06);
-  display:flex;align-items:center;gap:12px;
+  padding:12px 16px;
+  border-bottom:1px solid var(--sidebar-border);
+  display:flex;align-items:center;gap:10px;
+  background:rgba(255,255,255,.02);
 }
 .sidebar-avatar{
-  width:36px;height:36px;border-radius:50%;
-  background:linear-gradient(135deg,var(--surf),var(--surf-dark));
+  width:32px;height:32px;border-radius:50%;
+  background:var(--sidebar-avatar-bg);
+  border:1.5px solid rgba(255,255,255,.12);
   display:flex;align-items:center;justify-content:center;
-  font-size:14px;font-weight:700;color:#fff;
+  font-size:11px;font-weight:700;color:rgba(255,255,255,.9);
   flex-shrink:0;
+  letter-spacing:.3px;
 }
-.sidebar-user .uname{font-weight:600;font-size:13px;color:#ffffff}
-.sidebar-user .ucord{font-size:11px;color:var(--surf-light);margin-top:1px}
-nav{flex:1;padding:12px 8px}
+.sidebar-user .uname{font-weight:600;font-size:12px;color:rgba(255,255,255,.88)}
+.sidebar-user .ucord{font-size:10px;color:rgba(255,255,255,.38);margin-top:1px}
+nav{flex:1;padding:10px 8px}
 .nav-section{
-  padding:10px 14px 6px;
-  font-size:10px;font-weight:700;
-  color:rgba(255,255,255,.3);
-  text-transform:uppercase;letter-spacing:1.5px;
+  padding:14px 14px 5px;
+  font-size:9.5px;font-weight:700;
+  color:var(--sidebar-section-label);
+  text-transform:uppercase;letter-spacing:1.8px;
 }
 .nav-item{
   display:flex;align-items:center;gap:10px;
-  padding:11px 14px;cursor:pointer;
+  padding:9px 13px;cursor:pointer;
   transition:var(--transition);
   font-size:13px;font-weight:500;
-  color:rgba(255,255,255,.6);
-  border-radius:10px;margin:2px 0;
+  color:var(--sidebar-text);
+  border-radius:8px;margin:1px 0;
   position:relative;
 }
 .nav-item:hover{
-  background:rgba(255,255,255,.1);
-  color:#ffffff;
-  padding-left:18px;
+  background:var(--sidebar-item-hover);
+  color:var(--sidebar-text-hover);
 }
 .nav-item.active{
-  background:linear-gradient(135deg,rgba(99,102,241,.35),rgba(20,184,166,.2));
-  color:#ffffff;
-  font-weight:700;
-  box-shadow:0 4px 16px rgba(99,102,241,.25);
+  background:rgba(34,177,76,.18);
+  color:#5fd888;
+  font-weight:600;
 }
 .nav-item.active::before{
   content:'';position:absolute;left:0;top:20%;bottom:20%;
   width:3px;
-  background:linear-gradient(180deg,var(--primary-light),var(--surf));
-  border-radius:0 4px 4px 0;
+  background:var(--sidebar-active-indicator);
+  border-radius:0 3px 3px 0;
+  box-shadow:0 0 8px rgba(95,216,136,.5);
 }
-.nav-item svg{width:16px;height:16px;flex-shrink:0;opacity:.85}
-.nav-item.active svg{opacity:1}
-.nav-item:active{transform:scale(.96)}
-.sidebar-footer{padding:14px 8px;border-top:1px solid rgba(255,255,255,.06)}
+.nav-item svg{width:16px;height:16px;flex-shrink:0;opacity:.7}
+.nav-item:hover svg{opacity:.9}
+.nav-item.active svg{opacity:1;color:#5fd888}
+.nav-item:active{transform:scale(.97)}
+.sidebar-footer{padding:12px 8px 16px;border-top:1px solid var(--sidebar-border)}
 .btn-logout{
   width:100%;
-  background:rgba(244,63,94,.1);
-  border:1px solid rgba(244,63,94,.25);
-  border-radius:10px;padding:10px;
-  color:rgba(255,255,255,.6);
-  font-family:'Inter',sans-serif;font-size:13px;
+  background:transparent;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:8px;padding:10px;
+  color:rgba(255,255,255,.38);
+  font-family:'Inter',sans-serif;font-size:12px;font-weight:500;
   cursor:pointer;transition:var(--transition);
+  letter-spacing:.2px;
 }
 .btn-logout:hover{
-  background:rgba(244,63,94,.2);
-  border-color:var(--coral);
-  color:#fff;
+  background:rgba(231,76,60,.12);
+  border-color:rgba(231,76,60,.35);
+  color:rgba(255,100,90,.9);
 }
 
 /* ── MAIN AREA ── */
 .main{
   flex:1;overflow-y:auto;
-  background:#f4f6ff;
-  background-image:linear-gradient(160deg,#f8faff 0%,#f0f4ff 55%,#faf5ff 100%);
+  background:#f5f5f5;
 }
 
 /* ── PAGES ── */
@@ -300,11 +303,11 @@ nav{flex:1;padding:12px 8px}
 .page.active{display:block}
 @keyframes pageEnter{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-@keyframes slideInRight{from{opacity:0;transform:translateX(-16px)}to{opacity:1;transform:none}}
+@keyframes slideInRight{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:none}}
 @keyframes slideInLeft{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
-@keyframes slideInDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
-@keyframes fadeInScale{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+@keyframes slideInDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+@keyframes fadeInScale{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+@keyframes pulse{0%,100%{opacity:.8}50%{opacity:1}}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes shimmer{0%{background-position:-200px 0}100%{background-position:200px 0}}
 
@@ -312,46 +315,35 @@ nav{flex:1;padding:12px 8px}
 .page-title{
   font-size:26px;font-weight:800;
   letter-spacing:-.6px;
-  background:linear-gradient(135deg,var(--primary),var(--primary-dark));
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  color:var(--primary);
 }
 .page-subtitle{color:var(--text2);font-size:13px;margin-top:5px;font-weight:400}
 
 /* ── STAT CARDS ── */
-.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px;margin-bottom:28px}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:28px}
 .stat-card{
-  background:rgba(255,255,255,.82);
-  backdrop-filter:blur(20px);
+  background:#ffffff;
   border:1px solid var(--border-solid);
   border-radius:var(--radius);
-  padding:22px;position:relative;overflow:hidden;
+  padding:20px;position:relative;overflow:hidden;
   transition:var(--transition);
   box-shadow:var(--shadow-sm);
 }
 .stat-card:hover{
-  transform:translateY(-4px);
-  box-shadow:var(--shadow-lg);
-  border-color:rgba(99,102,241,.3);
+  transform:translateY(-2px);
+  box-shadow:var(--shadow-md);
 }
 .stat-card::before{
   content:'';position:absolute;
   top:0;left:0;right:0;height:3px;
 }
-.stat-card.green::before{background:linear-gradient(90deg,var(--surf),var(--surf-light))}
-.stat-card.blue::before{background:linear-gradient(90deg,var(--primary),var(--primary-light))}
-.stat-card.amber::before{background:linear-gradient(90deg,var(--amber),#fcd34d)}
-.stat-card.purple::before{background:linear-gradient(90deg,var(--coral),#fb7185)}
-.stat-card::after{
-  content:'';position:absolute;
-  top:-20px;right:-20px;width:90px;height:90px;
-  border-radius:50%;opacity:.08;
-}
-.stat-card.green::after{background:var(--surf)}
-.stat-card.blue::after{background:var(--primary)}
-.stat-card.amber::after{background:var(--amber)}
-.stat-card.purple::after{background:var(--coral)}
+.stat-card.green::before{background:var(--surf)}
+.stat-card.blue::before{background:var(--primary)}
+.stat-card.amber::before{background:var(--amber)}
+.stat-card.purple::before{background:var(--coral)}
+.stat-card::after{content:none}
 .stat-value{
-  font-size:34px;font-weight:800;font-family:'JetBrains Mono',monospace;
+  font-size:32px;font-weight:800;font-family:'JetBrains Mono',monospace;
   line-height:1;letter-spacing:-.5px;
 }
 .stat-card.green .stat-value{color:var(--surf-dark)}
@@ -363,8 +355,7 @@ nav{flex:1;padding:12px 8px}
 
 /* ── CARDS ── */
 .card{
-  background:rgba(255,255,255,.82);
-  backdrop-filter:blur(20px);
+  background:#ffffff;
   border:1px solid var(--border-solid);
   border-radius:var(--radius);
   padding:24px;margin-bottom:20px;
@@ -372,7 +363,7 @@ nav{flex:1;padding:12px 8px}
   box-shadow:var(--shadow-sm);
 }
 .card:hover{
-  border-color:rgba(99,102,241,.25);
+  border-color:var(--primary);
   box-shadow:var(--shadow-md);
 }
 .card-title{
@@ -402,66 +393,60 @@ nav{flex:1;padding:12px 8px}
 .btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important}
 
 .btn-accent{
-  background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+  background:var(--primary);
   color:#ffffff;
-  box-shadow:0 4px 14px var(--primary-glow);
+  box-shadow:var(--shadow-sm);
 }
 .btn-accent:hover{
-  transform:translateY(-2px);
-  box-shadow:0 8px 24px rgba(99,102,241,.45);
-  background:linear-gradient(135deg,#7577f5,var(--primary));
+  transform:translateY(-1px);
+  box-shadow:var(--shadow-md);
+  background:var(--primary-dark);
 }
 .btn-accent:active{
-  background:linear-gradient(135deg,#f43f5e,#e91e63)!important;
-  box-shadow:0 0 0 4px rgba(244,63,94,.3),0 6px 20px rgba(244,63,94,.4)!important;
+  background:var(--amber)!important;
+  box-shadow:0 0 0 3px rgba(212,168,23,.3)!important;
   transform:scale(.96)!important;
 }
-.btn-save-pulse:active{animation:savePulse .45s ease!important}
-@keyframes savePulse{
-  0%{box-shadow:0 0 0 0 rgba(244,63,94,.7)}
-  50%{box-shadow:0 0 0 14px rgba(244,63,94,0);background:linear-gradient(135deg,#f43f5e,#e91e63)}
-  100%{box-shadow:0 0 0 0 rgba(244,63,94,0)}
-}
+.btn-save-pulse:active{animation:none!important}
+@keyframes savePulse{0%{box-shadow:0 0 0 0 rgba(212,168,23,.5)}100%{box-shadow:0 0 0 8px rgba(212,168,23,0)}}
 
 .btn-outline{
-  background:rgba(255,255,255,.7);
-  backdrop-filter:blur(8px);
+  background:#ffffff;
   border:1.5px solid var(--border-solid);
   color:var(--text2);
 }
-.btn-outline:hover{border-color:var(--primary);color:var(--primary);background:rgba(99,102,241,.07)}
+.btn-outline:hover{border-color:var(--primary);color:var(--primary);background:#f9f9f9}
 .btn-outline:active,
 .btn-clear-pulse:active{
-  background:rgba(245,158,11,.15)!important;
+  background:rgba(212,168,23,.15)!important;
   border-color:var(--amber)!important;
   color:var(--amber)!important;
-  box-shadow:0 0 0 3px rgba(245,158,11,.2)!important;
   transform:scale(.96)!important;
 }
 
 .btn-danger{
-  background:rgba(244,63,94,.1);
-  border:1.5px solid rgba(244,63,94,.3);
+  background:rgba(231,76,60,.1);
+  border:1.5px solid rgba(231,76,60,.3);
   color:var(--coral);
 }
-.btn-danger:hover{background:rgba(244,63,94,.2);border-color:var(--coral)}
-.btn-danger:active{background:rgba(244,63,94,.35)!important;color:#fff!important;transform:scale(.95)!important}
+.btn-danger:hover{background:rgba(231,76,60,.2);border-color:var(--coral)}
+.btn-danger:active{background:rgba(231,76,60,.35)!important;color:#fff!important;transform:scale(.95)!important}
 
 .btn-green{
-  background:rgba(20,184,166,.1);
-  border:1.5px solid rgba(20,184,166,.3);
+  background:rgba(34,177,76,.1);
+  border:1.5px solid rgba(34,177,76,.3);
   color:var(--surf-dark);
 }
-.btn-green:hover{background:rgba(20,184,166,.2);border-color:var(--surf)}
-.btn-green:active{background:rgba(20,184,166,.35)!important;color:#fff!important;transform:scale(.95)!important}
+.btn-green:hover{background:rgba(34,177,76,.2);border-color:var(--surf)}
+.btn-green:active{background:rgba(34,177,76,.35)!important;color:#fff!important;transform:scale(.95)!important}
 
 .btn-blue{
-  background:rgba(99,102,241,.1);
-  border:1.5px solid rgba(99,102,241,.3);
+  background:rgba(44,95,45,.1);
+  border:1.5px solid rgba(44,95,45,.3);
   color:var(--primary);
 }
-.btn-blue:hover{background:rgba(99,102,241,.2);border-color:var(--primary)}
-.btn-blue:active{background:rgba(99,102,241,.4)!important;color:#fff!important;transform:scale(.95)!important}
+.btn-blue:hover{background:rgba(44,95,45,.2);border-color:var(--primary)}
+.btn-blue:active{background:rgba(44,95,45,.4)!important;color:#fff!important;transform:scale(.95)!important}
 
 /* ── FORMS ── */
 .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
@@ -472,10 +457,10 @@ nav{flex:1;padding:12px 8px}
   text-transform:uppercase;letter-spacing:.7px;
 }
 .form-field input,.form-field select,.form-field textarea{
-  background:rgba(255,255,255,.85);
-  border:1.5px solid var(--border-solid);
+  background:#ffffff;
+  border:1px solid var(--border-solid);
   border-radius:var(--radius-sm);
-  padding:10px 14px;
+  padding:10px 12px;
   color:var(--text);
   font-family:'Inter',sans-serif;font-size:13px;
   transition:var(--transition);
@@ -484,8 +469,7 @@ nav{flex:1;padding:12px 8px}
 .form-field input:focus,.form-field select:focus,.form-field textarea:focus{
   outline:none;
   border-color:var(--primary);
-  box-shadow:0 0 0 3px var(--primary-glow);
-  transform:translateY(-1px);
+  box-shadow:0 0 0 2px rgba(44,95,45,.15);
   background:#ffffff;
 }
 .form-field input[type=number]{font-family:'JetBrains Mono',monospace}
@@ -603,10 +587,9 @@ tbody td{padding:11px 14px;color:var(--text2)}
 /* ── CHARTS ── */
 .charts-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
 .chart-card{
-  background:rgba(255,255,255,.82);
-  backdrop-filter:blur(20px);
+  background:#ffffff;
   border:1px solid var(--border-solid);
-  border-radius:var(--radius);padding:24px;
+  border-radius:var(--radius);padding:20px;
   box-shadow:var(--shadow-sm);
   transition:var(--transition);
 }
@@ -628,9 +611,9 @@ tbody td{padding:11px 14px;color:var(--text2)}
   white-space:nowrap;
 }
 .tab.active{
-  background:linear-gradient(135deg,var(--primary),var(--primary-dark))!important;
+  background:var(--primary)!important;
   color:#ffffff!important;
-  box-shadow:0 4px 14px rgba(99,102,241,.45)!important;
+  box-shadow:var(--shadow-sm)!important;
 }
 .tab:hover:not(.active){color:var(--primary);background:rgba(99,102,241,.1)}
 .tab:active:not(.active){transform:scale(.96)}
@@ -799,12 +782,12 @@ tbody td{padding:11px 14px;color:var(--text2)}
 /* ── MOBILE HEADER ── */
 .mobile-header{
   display:none;
-  background:linear-gradient(135deg,#1e1b4b,#312e81);
+  background:#2c5f2d;
   border-bottom:1px solid rgba(255,255,255,.1);
-  padding:14px 20px;
+  padding:12px 16px;
   align-items:center;justify-content:space-between;
   position:sticky;top:0;z-index:100;
-  box-shadow:0 4px 16px rgba(0,0,0,.2);
+  box-shadow:0 2px 8px rgba(0,0,0,.1);
 }
 .hamburger{background:none;border:none;color:#ffffff;cursor:pointer;font-size:20px}
 .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:90}
@@ -812,21 +795,20 @@ tbody td{padding:11px 14px;color:var(--text2)}
 /* ── TOAST ── */
 .toast{
   position:fixed;bottom:24px;right:24px;
-  background:rgba(255,255,255,.95);
-  backdrop-filter:blur(20px);
+  background:#ffffff;
   border:1px solid var(--border-solid);
-  border-radius:12px;padding:14px 20px;
+  border-radius:10px;padding:14px 20px;
   font-size:13px;z-index:1000;
   transform:translateX(120%);
   transition:var(--transition);
   max-width:320px;
-  box-shadow:var(--shadow-xl);
+  box-shadow:var(--shadow-md);
   color:var(--text);
 }
-.toast.show{transform:none;animation:slideInLeft .4s cubic-bezier(.4,0,.2,1)}
-.toast.success{border-color:var(--surf);color:var(--surf-dark);background:rgba(20,184,166,.06)}
-.toast.error{border-color:var(--coral);color:var(--coral);background:rgba(244,63,94,.06)}
-.toast.info{border-color:var(--primary);color:var(--primary);background:rgba(99,102,241,.06)}
+.toast.show{transform:none}
+.toast.success{border-color:var(--surf);color:var(--surf-dark);background:rgba(34,177,76,.05)}
+.toast.error{border-color:var(--coral);color:var(--coral);background:rgba(231,76,60,.05)}
+.toast.info{border-color:var(--primary);color:var(--primary);background:rgba(44,95,45,.05)}
 
 /* ── LOADING ── */
 .loading-overlay{
@@ -852,24 +834,24 @@ tbody td{padding:11px 14px;color:var(--text2)}
   display:none;position:fixed;
   bottom:24px;right:24px;z-index:90;
   width:56px;height:56px;border-radius:50%;
-  background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+  background:var(--primary);
   border:none;color:#fff;font-size:28px;
   cursor:pointer;align-items:center;justify-content:center;
-  box-shadow:0 8px 24px rgba(99,102,241,.5);
+  box-shadow:var(--shadow-lg);
   transition:var(--transition);
 }
-.fab:hover{transform:scale(1.08);box-shadow:0 12px 32px rgba(99,102,241,.6)}
+.fab:hover{transform:scale(1.05);box-shadow:var(--shadow-xl)}
 .fab:active{transform:scale(.93)}
 
 /* ── OFFLINE BANNER ── */
 .offline-banner{
   display:none;position:fixed;
   top:0;left:0;right:0;z-index:300;
-  background:linear-gradient(135deg,var(--amber),#f97316);
-  color:#fff;padding:12px 24px;
+  background:var(--amber);
+  color:#000;padding:10px 20px;
   text-align:center;font-size:13px;font-weight:600;
   gap:8px;align-items:center;justify-content:center;
-  box-shadow:0 4px 16px rgba(245,158,11,.4);
+  box-shadow:var(--shadow-sm);
 }
 .offline-banner.show{display:flex}
 
@@ -877,30 +859,28 @@ tbody td{padding:11px 14px;color:var(--text2)}
 .theme-toggle{
   position:fixed;top:12px;right:200px;z-index:200;
   width:40px;height:40px;border-radius:50%;
-  background:rgba(255,255,255,.9);
-  backdrop-filter:blur(12px);
+  background:#ffffff;
   border:1px solid var(--border-solid);
   cursor:pointer;display:flex;align-items:center;justify-content:center;
   font-size:18px;
   box-shadow:var(--shadow-sm);
   transition:var(--transition);
 }
-.theme-toggle:hover{transform:scale(1.1);box-shadow:var(--shadow-md)}
+.theme-toggle:hover{transform:scale(1.08);box-shadow:var(--shadow-md)}
 
 /* ── SEARCH ── */
 .search-global{
   position:fixed;inset:0;z-index:300;
-  background:rgba(30,27,75,.7);
-  backdrop-filter:blur(8px);
+  background:rgba(0,0,0,.4);
   display:none;align-items:flex-start;
   justify-content:center;padding-top:100px;
 }
-.search-global.show{display:flex;animation:fadeIn .2s ease}
+.search-global.show{display:flex}
 .search-box{
-  background:rgba(255,255,255,.98);
+  background:#ffffff;
   border:1px solid var(--border-solid);
-  border-radius:16px;width:100%;max-width:600px;
-  box-shadow:var(--shadow-xl);
+  border-radius:12px;width:100%;max-width:600px;
+  box-shadow:var(--shadow-lg);
   overflow:hidden;
 }
 .search-input-wrapper{
@@ -939,14 +919,13 @@ tbody td{padding:11px 14px;color:var(--text2)}
 
 /* ── INSIGHTS ── */
 .insight-card{
-  background:linear-gradient(135deg,rgba(255,255,255,.9),rgba(240,244,255,.8));
-  border:1px solid rgba(99,102,241,.15);
+  background:#ffffff;
+  border:1px solid var(--border-solid);
   border-left:4px solid var(--primary);
   border-radius:var(--radius);
-  padding:18px 20px;margin-bottom:14px;
-  display:flex;align-items:flex-start;gap:14px;
+  padding:16px;margin-bottom:12px;
+  display:flex;align-items:flex-start;gap:12px;
   box-shadow:var(--shadow-sm);
-  animation:slideInRight .4s ease;
 }
 .insight-card.warning{border-left-color:var(--amber)}
 .insight-card.success{border-left-color:var(--surf)}
@@ -970,14 +949,14 @@ tbody td{padding:11px 14px;color:var(--text2)}
 .ranking-item:hover{background:rgba(99,102,241,.09);transform:translateX(4px)}
 .ranking-position{
   width:32px;height:32px;border-radius:50%;
-  background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+  background:var(--primary);
   color:#fff;font-weight:800;font-size:13px;
   display:flex;align-items:center;justify-content:center;
-  flex-shrink:0;box-shadow:0 4px 10px var(--primary-glow);
+  flex-shrink:0;box-shadow:var(--shadow-sm);
 }
-.ranking-position.gold{background:linear-gradient(135deg,var(--amber),#f97316)}
-.ranking-position.silver{background:linear-gradient(135deg,#94a3b8,#64748b)}
-.ranking-position.bronze{background:linear-gradient(135deg,#cd7f32,#a0522d)}
+.ranking-position.gold{background:var(--amber)}
+.ranking-position.silver{background:#888888}
+.ranking-position.bronze{background:#997755}
 .ranking-name{font-weight:600;font-size:13px;flex:1;color:var(--text)}
 .ranking-cord{font-size:11px;color:var(--text3);margin-top:1px}
 .ranking-value{
@@ -1011,32 +990,23 @@ tbody td{padding:11px 14px;color:var(--text2)}
 /* ── NOTIFICATION CENTER ── */
 .notification-center{
   position:fixed;top:50px;right:16px;
-  width:360px;background:rgba(255,255,255,.98);
-  backdrop-filter:blur(24px);
+  width:360px;background:#ffffff;
   border:1px solid var(--border-solid);
-  border-radius:16px;
-  box-shadow:var(--shadow-xl);
+  border-radius:12px;
+  box-shadow:var(--shadow-lg);
   z-index:150;display:none;
   flex-direction:column;max-height:480px;
 }
-.notification-center.show{display:flex;animation:slideInDown .3s ease}
-.notification-header{
-  padding:16px 20px;
-  border-bottom:1px solid var(--border-solid);
-  display:flex;justify-content:space-between;align-items:center;
-}
-.notification-title{font-size:15px;font-weight:700;color:var(--text)}
-.notification-list{flex:1;overflow-y:auto;padding:12px}
+.notification-center.show{display:flex}
 .notification-item{
-  padding:14px;border-radius:10px;
+  padding:12px;border-radius:8px;
   margin-bottom:8px;
-  background:rgba(99,102,241,.04);
+  background:rgba(44,95,45,.04);
   border-left:3px solid var(--primary);
   cursor:pointer;transition:var(--transition);
-  animation:slideInRight .3s ease;
 }
-.notification-item:hover{transform:translateX(-3px);box-shadow:var(--shadow-sm)}
-.notification-item.unread{background:rgba(99,102,241,.08);font-weight:600}
+.notification-item:hover{transform:translateX(-2px);box-shadow:var(--shadow-sm)}
+.notification-item.unread{background:rgba(44,95,45,.08);font-weight:600}
 .notification-item.success{border-left-color:var(--surf)}
 .notification-item.warning{border-left-color:var(--amber)}
 .notification-item.error{border-left-color:var(--coral)}
@@ -1113,49 +1083,47 @@ tbody td{padding:11px 14px;color:var(--text2)}
 
 /* ── DARK MODE ── */
 body.dark-mode{
-  --bg-solid:#0d0b1e;
-  --bg2:#111827;
-  --bg3:#1a1f35;
-  --card:rgba(17,24,39,.85);
-  --card-solid:#111827;
-  --border:rgba(99,102,241,.2);
-  --border-solid:#1f2550;
-  --text:#e8eaf6;
-  --text2:#9499c4;
-  --text3:#5c6195;
+  --bg-solid:#1a1a1a;
+  --bg2:#242424;
+  --bg3:#2a2a2a;
+  --card:#1e1e1e;
+  --card-solid:#242424;
+  --border:#333333;
+  --border-solid:#3a3a3a;
+  --text:#e8e8e8;
+  --text2:#b8b8b8;
+  --text3:#888888;
 }
-body.dark-mode .main{background:#0d0b1e;background-image:linear-gradient(160deg,#0f0d24 0%,#0d0b1e 50%,#120d22 100%)}
-body.dark-mode .card,body.dark-mode .stat-card,body.dark-mode .chart-card,body.dark-mode .sbox{background:rgba(17,24,39,.82);border-color:#1f2550}
-body.dark-mode .form-field input,body.dark-mode .form-field select,body.dark-mode .form-field textarea{background:rgba(17,24,39,.9);border-color:#1f2550;color:#e8eaf6}
-body.dark-mode .btn-outline{background:rgba(17,24,39,.7);border-color:#1f2550;color:#9499c4}
-body.dark-mode thead th{background:rgba(99,102,241,.08);color:var(--primary-light)}
-body.dark-mode tbody tr:nth-child(even){background:rgba(99,102,241,.04)}
-body.dark-mode tbody tr:hover{background:rgba(99,102,241,.1)}
-body.dark-mode .tabs{background:rgba(99,102,241,.1);border-color:rgba(99,102,241,.2)}
-body.dark-mode .search-box,body.dark-mode .notification-center,body.dark-mode .export-menu{background:rgba(17,24,39,.98);border-color:#1f2550}
-body.dark-mode .shortcut-key{background:rgba(99,102,241,.15);border-color:rgba(99,102,241,.3)}
-body.dark-mode .login-card{background:rgba(17,24,39,.5);border-color:rgba(99,102,241,.25)}
-body.dark-mode .toast{background:rgba(17,24,39,.96);border-color:#1f2550;color:#e8eaf6}
-body.dark-mode .db-status{background:rgba(17,24,39,.9);border-color:#1f2550;color:#9499c4}
-body.dark-mode .theme-toggle{background:rgba(17,24,39,.9);border-color:#1f2550}
-body.dark-mode .mobile-header{background:linear-gradient(135deg,#0d0b1e,#1e1b4b)}
-body.dark-mode #page-dashboard{background:#0d0b1e;background-image:linear-gradient(160deg,#0f0d24 0%,#0d0b1e 55%,#120d22 100%)}
-body.dark-mode .ficha-table td.loc-cell{background:rgba(99,102,241,.07)}
-body.dark-mode .ranking-item{background:rgba(99,102,241,.07);border-color:rgba(99,102,241,.12)}
-body.dark-mode .metric-card{background:rgba(17,24,39,.7);border-color:#1f2550}
-body.dark-mode .sbox{background:rgba(17,24,39,.7)}
-body.dark-mode .insight-card{background:rgba(17,24,39,.8);border-color:rgba(99,102,241,.2)}
-body.dark-mode .shortcuts-panel{background:rgba(17,24,39,.98);border-color:#1f2550}
-body.dark-mode .shortcut-row{border-color:#1f2550}
-body.dark-mode .notification-item{background:rgba(99,102,241,.08)}
-body.dark-mode .chart-btn{background:rgba(17,24,39,.7);border-color:#1f2550;color:#9499c4}
+body.dark-mode .main{background:#1a1a1a}
+body.dark-mode .card,body.dark-mode .stat-card,body.dark-mode .chart-card,body.dark-mode .sbox{background:#242424;border-color:#3a3a3a;color:#e8e8e8}
+body.dark-mode .form-field input,body.dark-mode .form-field select,body.dark-mode .form-field textarea{background:#2a2a2a;border-color:#3a3a3a;color:#e8e8e8}
+body.dark-mode .btn-outline{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
+body.dark-mode thead th{background:#2a2a2a;color:var(--primary-light);border-color:#3a3a3a}
+body.dark-mode tbody tr:nth-child(even){background:rgba(44,95,45,.08)}
+body.dark-mode tbody tr:hover{background:rgba(44,95,45,.12)}
+body.dark-mode tbody tr,body.dark-mode tbody td{border-color:#3a3a3a}
+body.dark-mode .tabs{background:#2a2a2a;border-color:#3a3a3a}
+body.dark-mode .search-box,body.dark-mode .notification-center,body.dark-mode .export-menu{background:#242424;border-color:#3a3a3a}
+body.dark-mode .shortcut-key{background:rgba(44,95,45,.2);border-color:rgba(44,95,45,.4)}
+body.dark-mode .login-card{background:#242424;border-color:#3a3a3a}
+body.dark-mode .toast{background:#242424;border-color:#3a3a3a;color:#e8e8e8}
+body.dark-mode .db-status{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
+body.dark-mode .theme-toggle{background:#2a2a2a;border-color:#3a3a3a}
+body.dark-mode .mobile-header{background:#2c5f2d}
+body.dark-mode #page-dashboard{background:#1a1a1a}
+body.dark-mode .ficha-table td.loc-cell{background:rgba(44,95,45,.08)}
+body.dark-mode .ranking-item{background:rgba(44,95,45,.08);border-color:rgba(44,95,45,.15)}
+body.dark-mode .metric-card{background:#2a2a2a;border-color:#3a3a3a}
+body.dark-mode .sbox{background:#2a2a2a}
+body.dark-mode .insight-card{background:#2a2a2a;border-color:#3a3a3a}
+body.dark-mode .shortcuts-panel{background:#242424;border-color:#3a3a3a}
+body.dark-mode .shortcut-row{border-color:#3a3a3a}
+body.dark-mode .notification-item{background:rgba(44,95,45,.1)}
+body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
 
 /* ── DASHBOARD TEXTURE ── */
 #page-dashboard{
-  background:#f4f6ff;
-  background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E"),
-    linear-gradient(160deg,#f8faff 0%,#f0f4ff 55%,#faf5ff 100%);
+  background:#f5f5f5;
   padding:32px;
 }
 
@@ -1444,6 +1412,12 @@ body.dark-mode .chart-btn{background:rgba(17,24,39,.7);border-color:#1f2550;colo
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
                 <polyline points="9 22 9 12 15 12 15 22" />
               </svg>Coordenações
+              </div>
+              <div class="nav-item" onclick="showPage('rondas')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 6v6l4 2"/>
+              </svg>Histórico de Rondas
               </div>
               </div>
               </nav>
@@ -1953,14 +1927,22 @@ body.dark-mode .chart-btn{background:rgba(17,24,39,.7);border-color:#1f2550;colo
         <!-- UTILIZADORES -->
         <div class="page" id="page-utilizadores">
           <div class="page-header">
-            <div class="page-title">Utilizadores</div>
-            <div class="page-subtitle">Gestão de acessos</div>
+            <div class="page-title">Gestão de Utilizadores</div>
+            <div class="page-subtitle">Acessos, Rondas e Desempenho dos Supervisores</div>
           </div>
+
+          <!-- PAINEL DE GESTÃO RÁPIDA (só admin) -->
+          <div class="stats-grid" id="adminUserStats" style="margin-bottom:20px">
+            <div class="stat-card green"><div class="stat-icon">👥</div><div class="stat-value" id="stat-sup-total">0</div><div class="stat-label">Total Supervisores</div></div>
+            <div class="stat-card blue"><div class="stat-icon">✅</div><div class="stat-value" id="stat-sup-activos">0</div><div class="stat-label">Supervisores Activos</div></div>
+            <div class="stat-card amber"><div class="stat-icon">🚫</div><div class="stat-value" id="stat-sup-inativos">0</div><div class="stat-label">Supervisores Inactivos</div></div>
+            <div class="stat-card purple"><div class="stat-icon">📋</div><div class="stat-value" id="stat-sup-lançaram">0</div><div class="stat-label">Lançaram Fichas</div></div>
+          </div>
+
           <div class="card">
             <div class="card-title"><span class="dot"></span>Adicionar Utilizador</div>
             <div class="form-grid">
-              <div class="form-field"><label>Nome</label><input type="text" id="u-nome" placeholder="Nome completo">
-              </div>
+              <div class="form-field"><label>Nome</label><input type="text" id="u-nome" placeholder="Nome completo"></div>
               <div class="form-field"><label>Email</label><input type="email" id="u-email" placeholder="email@exemplo.com"></div>
               <div class="form-field"><label>Senha</label><input type="password" id="u-senha" placeholder="Senha"></div>
               <div class="form-field"><label>Tipo</label><select id="u-tipo" onchange="toggleCordField()">
@@ -1968,27 +1950,99 @@ body.dark-mode .chart-btn{background:rgba(17,24,39,.7);border-color:#1f2550;colo
                   <option value="admin">Administrador</option>
                 </select></div>
               <div class="form-field" id="u-cordField"><label>Coordenação</label><select id="u-coord"></select></div>
+              <div class="form-field" id="u-rondaField"><label>Ronda</label>
+                <select id="u-ronda" style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-family:'Inter',sans-serif;font-size:13px">
+                  <option value="1">1ª Ronda</option>
+                  <option value="2">2ª Ronda</option>
+                  <option value="3">3ª Ronda</option>
+                </select>
               </div>
-              <button class="btn btn-accent" style="margin-top:16px" onclick="addUser()">Adicionar</button>
               </div>
-              <div class="card" style="padding:0">
-                <div class="table-wrap">
-                  <table>
+              <button class="btn btn-accent" style="margin-top:16px" onclick="addUser()">➕ Adicionar Supervisor</button>
+              </div>
+
+          <!-- TABS PARA FILTRAR SUPERVISORES POR RONDA -->
+          <div style="margin-bottom:16px">
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px">
+              <span style="font-size:12px;font-weight:600;color:var(--text2)">Filtrar por Ronda:</span>
+              <button class="btn btn-accent btn-sm" id="filtRondaAll" onclick="filterUsersByRonda('all')">Todas</button>
+              <button class="btn btn-outline btn-sm" id="filtRonda1" onclick="filterUsersByRonda('1')">🔵 1ª Ronda</button>
+              <button class="btn btn-outline btn-sm" id="filtRonda2" onclick="filterUsersByRonda('2')">🟢 2ª Ronda</button>
+              <button class="btn btn-outline btn-sm" id="filtRonda3" onclick="filterUsersByRonda('3')">🟡 3ª Ronda</button>
+              <button class="btn btn-outline btn-sm" id="filtRondaAtivo" onclick="filterUsersByRonda('activo')">✅ Activos</button>
+              <button class="btn btn-outline btn-sm" id="filtRondaInativo" onclick="filterUsersByRonda('inactivo')">🚫 Inactivos</button>
+            </div>
+          </div>
+
+          <div class="card" style="padding:0">
+            <div class="table-wrap">
+              <table>
                 <thead>
                   <tr>
                     <th>#</th>
                     <th>Nome</th>
                     <th>Email</th>
                     <th>Tipo</th>
+                    <th>Ronda</th>
                     <th>Coordenação</th>
+                    <th>Fichas Lançadas</th>
+                    <th>Estado</th>
                     <th>Ações</th>
                   </tr>
                 </thead>
                 <tbody id="userTableBody"></tbody>
-                </table>
-                </div>
-                </div>
-                </div>
+              </table>
+            </div>
+          </div>
+
+          <!-- DESEMPENHO POR SUPERVISOR -->
+          <div class="card" style="margin-top:20px">
+            <div class="card-title"><span class="dot"></span>📊 Desempenho de Lançamento por Supervisor</div>
+            <p style="font-size:12px;color:var(--text2);margin-bottom:16px">Acompanhe quem lançou ou não dados nesta campanha.</p>
+            <div class="form-grid" style="margin-bottom:16px">
+              <div class="form-field"><label>Filtrar por Ronda</label>
+                <select id="desemp-ronda" onchange="renderDesempenho()" style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-family:'Inter',sans-serif;font-size:13px">
+                  <option value="">Todas as Rondas</option>
+                  <option value="1">1ª Ronda</option>
+                  <option value="2">2ª Ronda</option>
+                  <option value="3">3ª Ronda</option>
+                </select>
+              </div>
+            </div>
+            <div id="desempenhoContainer"></div>
+          </div>
+        </div>
+
+        <!-- HISTÓRICO DE RONDAS -->
+        <div class="page" id="page-rondas">
+          <div class="page-header">
+            <div class="page-title">Histórico de Rondas</div>
+            <div class="page-subtitle">Supervisores por ronda e resumo de desempenho</div>
+          </div>
+          <div class="card">
+            <div class="card-title"><span class="dot"></span>Filtrar Histórico</div>
+            <div class="form-grid">
+              <div class="form-field">
+                <label>Ronda</label>
+                <select id="hist-ronda" onchange="renderHistoricoRondas()" style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-family:'Inter',sans-serif;font-size:13px">
+                  <option value="">Todas as Rondas</option>
+                  <option value="1">1ª Ronda</option>
+                  <option value="2">2ª Ronda</option>
+                  <option value="3">3ª Ronda</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label>Estado</label>
+                <select id="hist-estado" onchange="renderHistoricoRondas()" style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-family:'Inter',sans-serif;font-size:13px">
+                  <option value="">Todos</option>
+                  <option value="activo">Activos</option>
+                  <option value="inactivo">Inactivos</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div id="rondasHistoricoContainer"></div>
+        </div>
 
         <!-- COORDENAÇÕES -->
         <div class="page" id="page-coordenacoes">
@@ -2149,7 +2203,7 @@ body.dark-mode .chart-btn{background:rgba(17,24,39,.7);border-color:#1f2550;colo
             <div class="card">
               <div class="card-title"><span class="dot"></span>Supervisores Registados</div>
               <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Clique em <b style="color:var(--accent)">✎
-                  Editar</b> para alterar o nome ou repor a senha de qualquer supervisor.</p>
+                  Editar</b> para alterar o nome ou repor a senha. Use <b style="color:var(--coral)">🚫 Inactivar</b> para bloquear o acesso ao sistema.</p>
               <div class="table-wrap" style="margin-bottom:4px">
                 <table>
                   <thead>
@@ -2158,6 +2212,8 @@ body.dark-mode .chart-btn{background:rgba(17,24,39,.7);border-color:#1f2550;colo
                       <th>Nome</th>
                       <th>Email</th>
                       <th>Coordenação</th>
+                      <th>Ronda</th>
+                      <th>Estado</th>
                       <th>Ações</th>
                     </tr>
                   </thead>
@@ -2184,6 +2240,16 @@ body.dark-mode .chart-btn{background:rgba(17,24,39,.7);border-color:#1f2550;colo
                     <select id="sup-edit-cord"
                       style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-family:'Inter',sans-serif;font-size:13px"></select>
                     </div>
+                  <div class="form-field">
+                    <label>Ronda</label>
+                    <select id="sup-edit-ronda"
+                      style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-family:'Inter',sans-serif;font-size:13px">
+                      <option value="">— Sem ronda —</option>
+                      <option value="1">1ª Ronda</option>
+                      <option value="2">2ª Ronda</option>
+                      <option value="3">3ª Ronda</option>
+                    </select>
+                  </div>
                     <div class="form-field">
                     <label>Nova Senha <span style="color:var(--text3);font-weight:400;font-size:10px">(deixe vazio para
                         não alterar)</span></label>
@@ -2399,13 +2465,13 @@ body.dark-mode .chart-btn{background:rgba(17,24,39,.7);border-color:#1f2550;colo
                         const snap = await db.collection('utilizadores').orderBy('nome').get();
                         _users = snap.docs.map(d => {
                           const x = d.data();
-                          return { id: d.id, nome: x.nome, email: (x.email || '').trim().toLowerCase(), senha: (x.senha || '').trim(), tipo: x.tipo, coordId: x.coord_id || null };
+                          return { id: d.id, nome: x.nome, email: (x.email || '').trim().toLowerCase(), senha: (x.senha || '').trim(), tipo: x.tipo, coordId: x.coord_id || null, ronda: x.ronda || null, activo: x.activo !== false };
                         });
                         DB.set('users', _users);
                         return _users;
                       } catch (e) {
                         console.warn('loadUsers offline:', e.message);
-                        _users = (DB.get('users') || []).map(x => ({ ...x, email: (x.email || '').trim().toLowerCase(), senha: (x.senha || '').trim() }));
+                        _users = (DB.get('users') || []).map(x => ({ ...x, email: (x.email || '').trim().toLowerCase(), senha: (x.senha || '').trim(), ronda: x.ronda || null, activo: x.activo !== false }));
                         return _users;
                       }
                     }
@@ -2494,7 +2560,7 @@ body.dark-mode .chart-btn{background:rgba(17,24,39,.7);border-color:#1f2550;colo
                         if ((_users || []).find(x => x.email === u.email)) throw new Error('Email já existe');
                       }
                       try {
-                        const payload = { nome: u.nome, email: u.email, senha: u.senha, tipo: u.tipo, coord_id: u.coordId || null, created_at: firebase.firestore.FieldValue.serverTimestamp() };
+                        const payload = { nome: u.nome, email: u.email, senha: u.senha, tipo: u.tipo, coord_id: u.coordId || null, ronda: u.ronda || null, activo: u.activo !== false, created_at: firebase.firestore.FieldValue.serverTimestamp() };
                         const ref = await db.collection('utilizadores').add(payload);
                         await loadUsers();
                         return ref.id;
@@ -2526,6 +2592,9 @@ body.dark-mode .chart-btn{background:rgba(17,24,39,.7);border-color:#1f2550;colo
                         const fsFields = {};
                         if (fields.nome  !== undefined) fsFields.nome  = fields.nome;
                         if (fields.senha !== undefined) fsFields.senha = fields.senha;
+                        if (fields.coord_id !== undefined) fsFields.coord_id = fields.coord_id;
+                        if (fields.ronda !== undefined) fsFields.ronda = fields.ronda;
+                        if (fields.activo !== undefined) fsFields.activo = fields.activo;
                         await db.collection('utilizadores').doc(String(userId)).update(fsFields);
                         const u = _users.find(x => x.id === userId);
                         if (u) Object.assign(u, fields);
@@ -2576,6 +2645,11 @@ body.dark-mode .chart-btn{background:rgba(17,24,39,.7);border-color:#1f2550;colo
             if (!u) {
               document.getElementById('loginErr').style.display = 'block';
               document.getElementById('loginErr').textContent = 'Email ou senha incorretos. Modo offline: use admin@sismob.ao / admin123';
+              return;
+            }
+            if (u.tipo === 'supervisor' && u.activo === false) {
+              document.getElementById('loginErr').style.display = 'block';
+              document.getElementById('loginErr').textContent = 'A sua conta foi inactivada. Contacte o administrador.';
               return;
             }
             document.getElementById('loginErr').style.display = 'none';
@@ -2822,6 +2896,7 @@ body.dark-mode .chart-btn{background:rgba(17,24,39,.7);border-color:#1f2550;colo
                     if (id === 'graficos') renderGraficos();
                     if (id === 'utilizadores') renderUsers();
                     if (id === 'coordenacoes') renderCords();
+                    if (id === 'rondas') renderHistoricoRondas();
                     if (id === 'perfil') renderPerfil();
                   }
 
@@ -3783,47 +3858,98 @@ body.dark-mode .chart-btn{background:rgba(17,24,39,.7);border-color:#1f2550;colo
                     }
 
                     // UTILIZADORES
+                    let _rondaFilter = 'all';
+
+                    function filterUsersByRonda(val) {
+                      _rondaFilter = val;
+                      document.querySelectorAll('[id^="filtRonda"]').forEach(b => b.classList.replace('btn-accent','btn-outline'));
+                      const btn = document.getElementById('filtRonda' + (val === 'all' ? 'All' : val === 'activo' ? 'Ativo' : val === 'inactivo' ? 'Inativo' : val));
+                      if (btn) btn.classList.replace('btn-outline','btn-accent');
+                      renderUsers();
+                    }
+
                     function renderUsers() {
-                      const tbody = document.getElementById('userTableBody'); tbody.innerHTML = '';
-                      _users.forEach((u, i) => {
+                      const tbody = document.getElementById('userTableBody'); if (!tbody) return;
+                      tbody.innerHTML = '';
+                      let filtered = _users;
+                      if (_rondaFilter === 'activo') filtered = _users.filter(u => u.tipo !== 'admin' && u.activo !== false);
+                      else if (_rondaFilter === 'inactivo') filtered = _users.filter(u => u.tipo !== 'admin' && u.activo === false);
+                      else if (_rondaFilter !== 'all') filtered = _users.filter(u => String(u.ronda) === String(_rondaFilter) || u.tipo === 'admin');
+
+                      // Stats
+                      const sups = _users.filter(u => u.tipo === 'supervisor');
+                      const activos = sups.filter(u => u.activo !== false).length;
+                      const inativos = sups.filter(u => u.activo === false).length;
+                      const lancaram = sups.filter(u => _fichas.some(f => f.userId === u.id || f.coordId === u.coordId)).length;
+                      const statTotal = document.getElementById('stat-sup-total'); if (statTotal) statTotal.textContent = sups.length;
+                      const statAct = document.getElementById('stat-sup-activos'); if (statAct) statAct.textContent = activos;
+                      const statInact = document.getElementById('stat-sup-inativos'); if (statInact) statInact.textContent = inativos;
+                      const statLanc = document.getElementById('stat-sup-lançaram'); if (statLanc) statLanc.textContent = lancaram;
+
+                      const rondaLabel = r => r === '1' || r === 1 ? '<span style="background:rgba(14,165,233,.15);color:#0369a1;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700">🔵 1ª Ronda</span>'
+                        : r === '2' || r === 2 ? '<span style="background:rgba(34,197,94,.15);color:#15803d;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700">🟢 2ª Ronda</span>'
+                        : r === '3' || r === 3 ? '<span style="background:rgba(212,168,23,.15);color:#92400e;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700">🟡 3ª Ronda</span>'
+                        : '<span style="color:var(--text3);font-size:11px">—</span>';
+
+                      filtered.forEach((u, i) => {
                         const cord = _cords.find(c => c.id === u.coordId);
                         const protegido = u.tipo === 'admin';
-                        tbody.innerHTML += `<tr>
-      <td>${i + 1}</td>
+                        const fichasCount = _fichas.filter(f => f.userId === u.id).length;
+                        const isActivo = u.activo !== false;
+                        const estadoBadge = protegido ? '' : isActivo
+                          ? '<span style="background:rgba(34,197,94,.15);color:#15803d;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700">✅ Activo</span>'
+                          : '<span style="background:rgba(231,76,60,.15);color:var(--coral);padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700">🚫 Inactivo</span>';
+                        const acoes = protegido
+                          ? '<span style="color:var(--text3);font-size:12px">Admin protegido</span>'
+                          : `<div style="display:flex;gap:6px;flex-wrap:wrap">
+                              <button class="btn btn-outline btn-sm" onclick="openInativarModal(${JSON.stringify(u.id).replace(/"/g,"'")})" title="${isActivo ? 'Inactivar' : 'Activar'}">${isActivo ? '🚫 Inactivar' : '✅ Activar'}</button>
+                              <button class="btn btn-danger btn-sm" onclick="deleteUser(${JSON.stringify(u.id).replace(/"/g,"'")})">🗑</button>
+                             </div>`;
+                        tbody.innerHTML += `<tr style="${!isActivo && !protegido ? 'opacity:.6;background:rgba(231,76,60,.03)' : ''}">
+      <td style="font-family:'JetBrains Mono',monospace;color:var(--text3)">${i + 1}</td>
       <td style="font-weight:600">${u.nome}</td>
-      <td>${u.email}</td>
+      <td style="color:var(--text3);font-size:12px">${u.email}</td>
       <td><span class="badge ${u.tipo === 'admin' ? 'badge-admin' : 'badge-sup'}">${u.tipo}</span></td>
-      <td>${cord ? cord.nome : '—'}</td>
-      <td>${protegido
-                        ? '<span style="color:var(--text3);font-size:12px">Admin protegido</span>'
-                        : `<button class="btn btn-danger btn-sm" onclick="deleteUser(${u.id})">🗑 Apagar</button>`
-          }</td>
+      <td>${protegido ? '<span style="color:var(--text3)">—</span>' : rondaLabel(u.ronda)}</td>
+      <td>${cord ? `<span class="badge badge-sup">${cord.nome}</span>` : '—'}</td>
+      <td style="font-family:'JetBrains Mono',monospace;text-align:center">${protegido ? '—' : fichasCount}</td>
+      <td>${estadoBadge}</td>
+      <td>${acoes}</td>
     </tr>`;
-                    });
-                    if (!_users.length) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text3)">Nenhum utilizador</td></tr>';
-                    const sel = document.getElementById('u-coord'); sel.innerHTML = '';
-                    _cords.forEach(c => sel.innerHTML += `<option value="${c.id}">${c.nome}</option>`);
-                  }
-                    function toggleCordField() { document.getElementById('u-cordField').style.display = document.getElementById('u-tipo').value === 'admin' ? 'none' : 'flex'; }
+                      });
+                      if (!filtered.length) tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:32px;color:var(--text3)">Nenhum utilizador encontrado</td></tr>';
+
+                      const sel = document.getElementById('u-coord'); if (sel) { sel.innerHTML = ''; _cords.forEach(c => sel.innerHTML += `<option value="${c.id}">${c.nome}</option>`); }
+                      renderDesempenho();
+                    }
+
+                    function toggleCordField() {
+                      const isAdmin = document.getElementById('u-tipo').value === 'admin';
+                      document.getElementById('u-cordField').style.display = isAdmin ? 'none' : 'flex';
+                      document.getElementById('u-rondaField').style.display = isAdmin ? 'none' : 'flex';
+                    }
+
                     async function addUser() {
                       const nome = document.getElementById('u-nome').value.trim();
                       const email = document.getElementById('u-email').value.trim().toLowerCase();
                       const senha = document.getElementById('u-senha').value;
                       const tipo = document.getElementById('u-tipo').value;
                       const coordId = tipo === 'admin' ? null : parseInt(document.getElementById('u-coord').value);
+                      const ronda = tipo === 'admin' ? null : document.getElementById('u-ronda').value;
                       if (!nome || !email || !senha) { showToast('Preencha todos os campos', 'error'); return; }
                       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showToast('Email inválido', 'error'); return; }
                       if (senha.length < 4) { showToast('A senha deve ter pelo menos 4 caracteres', 'error'); return; }
                       if (tipo === 'supervisor' && !coordId) { showToast('Seleccione uma coordenação para o supervisor', 'error'); return; }
                       showLoading('A adicionar...');
                     try {
-                      await persistUser({ nome, email, senha, tipo, coordId });
+                      await persistUser({ nome, email, senha, tipo, coordId, ronda, activo: true });
                       ['u-nome', 'u-email', 'u-senha'].forEach(id => document.getElementById(id).value = '');
                       renderUsers();
                       showToast('Utilizador adicionado!', 'success');
                     } catch (e) { showToast(e.message, 'error'); }
                     hideLoading();
                   }
+
                     async function deleteUser(id) {
                       const u = _users.find(x => x.id === id);
                       if (!u) return;
@@ -3835,6 +3961,119 @@ body.dark-mode .chart-btn{background:rgba(17,24,39,.7);border-color:#1f2550;colo
                       renderUsers();
                     showToast('Utilizador apagado', 'success');
                   }
+
+                    function openInativarModal(id) {
+                      const u = _users.find(x => x.id === id);
+                      if (!u) return;
+                      const isActivo = u.activo !== false;
+                      const msg = isActivo
+                        ? `Inactivar o supervisor "${u.nome}"?\n\nEle não conseguirá entrar no sistema.`
+                        : `Reactivar o supervisor "${u.nome}"?\n\nEle voltará a ter acesso ao sistema.`;
+                      if (!confirm(msg)) return;
+                      toggleUserActivo(id, !isActivo);
+                    }
+
+                    async function toggleUserActivo(id, novoEstado) {
+                      showLoading(novoEstado ? 'A activar supervisor...' : 'A inactivar supervisor...');
+                      const ok = await updateUserField(id, { activo: novoEstado });
+                      hideLoading();
+                      if (ok) {
+                        showToast(novoEstado ? 'Supervisor activado ✓' : 'Supervisor inactivado ✓', 'success');
+                        renderUsers();
+                        renderSupTable();
+                      }
+                    }
+
+                    function renderDesempenho() {
+                      const cont = document.getElementById('desempenhoContainer'); if (!cont) return;
+                      const rondaFilt = document.getElementById('desemp-ronda')?.value || '';
+                      let sups = _users.filter(u => u.tipo === 'supervisor');
+                      if (rondaFilt) sups = sups.filter(u => String(u.ronda) === rondaFilt);
+                      if (!sups.length) { cont.innerHTML = '<p style="color:var(--text3);font-size:13px;padding:16px 0">Sem supervisores para o filtro seleccionado.</p>'; return; }
+                      const rondaLabel = r => r === '1' || r === 1 ? '🔵 1ª' : r === '2' || r === 2 ? '🟢 2ª' : r === '3' || r === 3 ? '🟡 3ª' : '—';
+                      let html = '<div class="table-wrap"><table><thead><tr><th>#</th><th>Supervisor</th><th>Ronda</th><th>Estado</th><th>Fichas Lançadas</th><th>Pessoas Alcançadas</th><th>Último Lançamento</th><th>Avaliação</th></tr></thead><tbody>';
+                      sups.sort((a,b) => {
+                        const fa = _fichas.filter(f => f.userId === a.id).length;
+                        const fb = _fichas.filter(f => f.userId === b.id).length;
+                        return fb - fa;
+                      }).forEach((u, i) => {
+                        const fichasSup = _fichas.filter(f => f.userId === u.id);
+                        const totalPessoas = fichasSup.reduce((s,f) => s+(f.totalPessoas||0), 0);
+                        const isActivo = u.activo !== false;
+                        const lancou = fichasSup.length > 0;
+                        const ultimoLanc = fichasSup.length ? fichasSup.sort((a,b) => (b.data||'').localeCompare(a.data||''))[0].data : null;
+                        const avaliacao = fichasSup.length === 0 ? '<span style="color:var(--coral);font-weight:600">⚠️ Não lançou</span>' : fichasSup.length < 3 ? '<span style="color:var(--amber);font-weight:600">🟡 Poucos</span>' : '<span style="color:var(--surf-dark);font-weight:600">✅ Activo</span>';
+                        html += `<tr style="${!isActivo ? 'opacity:.55' : ''}">
+          <td>${i+1}</td>
+          <td style="font-weight:600">${u.nome}</td>
+          <td>${rondaLabel(u.ronda)}</td>
+          <td>${isActivo ? '<span style="color:var(--surf-dark);font-size:12px">✅ Activo</span>' : '<span style="color:var(--coral);font-size:12px">🚫 Inactivo</span>'}</td>
+          <td style="font-family:\'JetBrains Mono\',monospace;font-weight:700;color:${lancou ? 'var(--primary)' : 'var(--coral)'}">${fichasSup.length}</td>
+          <td style="font-family:\'JetBrains Mono\',monospace">${totalPessoas.toLocaleString()}</td>
+          <td style="font-size:12px;color:var(--text2)">${ultimoLanc || '<span style="color:var(--coral)">—</span>'}</td>
+          <td>${avaliacao}</td>
+        </tr>`;
+                      });
+                      html += '</tbody></table></div>';
+                      cont.innerHTML = html;
+                    }
+
+                    function renderHistoricoRondas() {
+                      const cont = document.getElementById('rondasHistoricoContainer'); if (!cont) return;
+                      const rondaFilt = document.getElementById('hist-ronda')?.value || '';
+                      const estadoFilt = document.getElementById('hist-estado')?.value || '';
+                      const rondas = rondaFilt ? [rondaFilt] : ['1','2','3'];
+                      const rondaNome = r => r === '1' ? '1ª Ronda' : r === '2' ? '2ª Ronda' : '3ª Ronda';
+                      const rondaColor = r => r === '1' ? '#0369a1' : r === '2' ? '#15803d' : '#92400e';
+                      const rondaBg = r => r === '1' ? 'rgba(14,165,233,.08)' : r === '2' ? 'rgba(34,197,94,.08)' : 'rgba(212,168,23,.08)';
+                      let html = '';
+                      rondas.forEach(r => {
+                        let sups = _users.filter(u => u.tipo === 'supervisor' && String(u.ronda) === String(r));
+                        if (estadoFilt === 'activo') sups = sups.filter(u => u.activo !== false);
+                        if (estadoFilt === 'inactivo') sups = sups.filter(u => u.activo === false);
+                        const fichasRonda = _fichas.filter(f => sups.some(s => s.id === f.userId));
+                        const totalPessoas = fichasRonda.reduce((s,f) => s+(f.totalPessoas||0),0);
+                        const lancaram = sups.filter(u => _fichas.some(f => f.userId === u.id)).length;
+                        html += `<div class="card" style="border-color:${rondaColor(r)};background:${rondaBg(r)};margin-bottom:16px">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+            <div class="card-title" style="margin:0;color:${rondaColor(r)};font-size:17px"><span class="dot" style="background:${rondaColor(r)}"></span>${rondaNome(r)}</div>
+            <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:12px">
+              <span>👥 <b>${sups.length}</b> supervisores</span>
+              <span>✅ <b>${sups.filter(u=>u.activo!==false).length}</b> activos</span>
+              <span>🚫 <b>${sups.filter(u=>u.activo===false).length}</b> inactivos</span>
+              <span>📋 <b>${fichasRonda.length}</b> fichas</span>
+              <span>👤 <b>${totalPessoas.toLocaleString()}</b> pessoas</span>
+              <span>🔔 <b>${lancaram}</b> lançaram</span>
+            </div>
+          </div>`;
+                        if (!sups.length) {
+                          html += `<p style="color:var(--text3);font-size:13px;text-align:center;padding:16px">Nenhum supervisor nesta ronda${estadoFilt ? ' com este estado' : ''}.</p>`;
+                        } else {
+                          html += `<div class="table-wrap"><table><thead><tr><th>#</th><th>Nome</th><th>Email</th><th>Coordenação</th><th>Estado</th><th>Fichas</th><th>Pessoas</th><th>Último Lançamento</th></tr></thead><tbody>`;
+                          sups.forEach((u, i) => {
+                            const cord = _cords.find(c => c.id === u.coordId);
+                            const fichasSup = _fichas.filter(f => f.userId === u.id);
+                            const tp = fichasSup.reduce((s,f) => s+(f.totalPessoas||0),0);
+                            const ultimo = fichasSup.length ? fichasSup.sort((a,b)=>(b.data||'').localeCompare(a.data||''))[0].data : null;
+                            const isActivo = u.activo !== false;
+                            html += `<tr style="${!isActivo ? 'opacity:.6' : ''}">
+              <td>${i+1}</td>
+              <td style="font-weight:600">${u.nome}</td>
+              <td style="font-size:12px;color:var(--text3)">${u.email}</td>
+              <td>${cord ? `<span class="badge badge-sup">${cord.nome}</span>` : '—'}</td>
+              <td>${isActivo ? '<span style="color:var(--surf-dark);font-size:12px;font-weight:600">✅ Activo</span>' : '<span style="color:var(--coral);font-size:12px;font-weight:600">🚫 Inactivo</span>'}</td>
+              <td style="font-family:\'JetBrains Mono\',monospace;font-weight:700">${fichasSup.length}</td>
+              <td style="font-family:\'JetBrains Mono\',monospace">${tp.toLocaleString()}</td>
+              <td style="font-size:12px">${ultimo || '<span style="color:var(--coral)">—</span>'}</td>
+            </tr>`;
+                          });
+                          html += '</tbody></table></div>';
+                        }
+                        html += '</div>';
+                      });
+                      if (!html) cont.innerHTML = '<div class="card" style="text-align:center;padding:32px;color:var(--text3)">Nenhum dado encontrado.</div>';
+                      else cont.innerHTML = html;
+                    }
 
                     // COORDENAÇÕES
                     function renderCords() {
@@ -3995,17 +4234,24 @@ body.dark-mode .chart-btn{background:rgba(17,24,39,.7);border-color:#1f2550;colo
                       const sups = _users.filter(x => x.tipo === 'supervisor');
                       tbody.innerHTML = '';
                       if (!sups.length) {
-                        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text3)">Nenhum supervisor registado</td></tr>';
+                        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text3)">Nenhum supervisor registado</td></tr>';
                         return;
                       }
                     sups.forEach((s, i) => {
                       const cord = _cords.find(c => c.id === s.coordId);
-                      tbody.innerHTML += `<tr>
+                      const isActivo = s.activo !== false;
+                      const rondaLabel = s.ronda === '1' || s.ronda === 1 ? '🔵 1ª' : s.ronda === '2' || s.ronda === 2 ? '🟢 2ª' : s.ronda === '3' || s.ronda === 3 ? '🟡 3ª' : '—';
+                      tbody.innerHTML += `<tr style="${!isActivo ? 'opacity:.6;background:rgba(231,76,60,.03)' : ''}">
       <td style="font-family:'JetBrains Mono',monospace;color:var(--text3)">${i + 1}</td>
       <td style="font-weight:600">${s.nome}</td>
       <td style="color:var(--text3);font-size:12px">${s.email}</td>
       <td><span class="badge badge-sup">${cord ? cord.nome : '—'}</span></td>
-      <td><button class="btn btn-outline btn-sm" onclick="openSupEdit(${s.id})">✎ Editar</button></td>
+      <td style="font-size:12px">${rondaLabel}</td>
+      <td>${isActivo ? '<span style="color:var(--surf-dark);font-size:12px;font-weight:600">✅ Activo</span>' : '<span style="color:var(--coral);font-size:12px;font-weight:600">🚫 Inactivo</span>'}</td>
+      <td style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn btn-outline btn-sm" onclick="openSupEdit(${JSON.stringify(s.id).replace(/"/g,"'")})">✎ Editar</button>
+        <button class="btn ${isActivo ? 'btn-danger' : 'btn-green'} btn-sm" onclick="openInativarModal(${JSON.stringify(s.id).replace(/"/g,"'")})">${isActivo ? '🚫 Inactivar' : '✅ Activar'}</button>
+      </td>
     </tr>`;
                   });
                   }
@@ -4025,6 +4271,8 @@ body.dark-mode .chart-btn{background:rgba(17,24,39,.7);border-color:#1f2550;colo
                         if (c.id === s.coordId) opt.selected = true;
                         cordSel.appendChild(opt);
                       });
+                      const rondaSel = document.getElementById('sup-edit-ronda');
+                      if (rondaSel) rondaSel.value = s.ronda ? String(s.ronda) : '';
                     document.getElementById('sup-edit-senha').value = '';
                     document.getElementById('sup-edit-conf').value = '';
                     document.getElementById('supEditPanel').style.display = 'block';
@@ -4045,6 +4293,8 @@ body.dark-mode .chart-btn{background:rgba(17,24,39,.7);border-color:#1f2550;colo
                       const conf = document.getElementById('sup-edit-conf').value;
                       const coordIdRaw = document.getElementById('sup-edit-cord').value;
                       const coordId = coordIdRaw ? parseInt(coordIdRaw) : null;
+                      const rondaRaw = document.getElementById('sup-edit-ronda')?.value || null;
+                      const ronda = rondaRaw || null;
                       if (!nome) { showToast('O nome não pode estar vazio', 'error'); return; }
                       if (senha && senha.length < 4) { showToast('A senha deve ter pelo menos 4 caracteres', 'error'); return; }
                       if (senha && senha !== conf) { showToast('As senhas não coincidem', 'error'); return; }
@@ -4054,10 +4304,12 @@ body.dark-mode .chart-btn{background:rgba(17,24,39,.7);border-color:#1f2550;colo
                       if (nome !== sup.nome) fields.nome = nome;
                       if (senha) fields.senha = senha;
                       if (coordId !== sup.coordId) fields.coord_id = coordId;
+                      if (String(ronda) !== String(sup.ronda)) fields.ronda = ronda;
                       if (!Object.keys(fields).length) { showToast('Nenhuma alteração para guardar', 'info'); return; }
                       showLoading('A guardar alterações...');
                     const ok = await updateUserField(id, fields);
                     if (ok && coordId !== sup.coordId) sup.coordId = coordId;
+                    if (ok && String(ronda) !== String(sup.ronda)) sup.ronda = ronda;
                     hideLoading();
                     if (ok) {
                       if (fields.nome) {
