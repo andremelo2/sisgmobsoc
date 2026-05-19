@@ -981,17 +981,8 @@ tbody td{padding:11px 14px;color:var(--text2)}
 }
 
 /* ── MOBILE HEADER ── */
-.mobile-header{
-  display:none;
-  background:var(--sidebar-bg);
-  border-bottom:1px solid var(--sidebar-border);
-  position:fixed;top:44px;left:0;right:0;z-index:90;
-  padding:12px 16px;
-  align-items:center;justify-content:space-between;
-  position:sticky;top:0;z-index:100;
-  box-shadow:0 2px 8px rgba(0,0,0,.1);
-}
-.hamburger{background:none;border:none;color:#ffffff;cursor:pointer;font-size:20px}
+.mobile-header{display:none}
+.hamburger{display:none}
 .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:90}
 
 /* ── TOAST ── */
@@ -1563,9 +1554,8 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
   .sidebar.open{left:0}
   .sidebar-spacer{display:none}
   .sidebar-overlay.open{display:block}
-  .mobile-header{display:flex}
   .layout{flex-direction:column}
-  .main{height:calc(100vh - 100px);overflow-y:auto;margin-top:100px}
+  .main{height:100vh;overflow-y:auto;margin-top:0}
   #fichasTopbar{left:0 !important}
   .page{padding:16px;animation:pageEnter .3s ease}
   .stats-grid{grid-template-columns:1fr 1fr;gap:12px}
@@ -1845,12 +1835,6 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
   <!-- APP -->
   <div id="appShell">
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
-    <div class="mobile-header">
-      <button class="hamburger" onclick="toggleSidebar()">☰</button>
-      <span
-        style="font-weight:800;font-size:15px;color:#ffffff">🏥 SisMob</span>
-      <button class="btn btn-accent btn-sm" onclick="showPage('ficha');closeSidebar()">+ Ficha</button>
-      </div>
       <div class="layout">
         <div class="sidebar-spacer" id="sidebarSpacer"></div>
         <aside class="sidebar" id="sidebar">
@@ -7259,15 +7243,10 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                       const main = document.querySelector('.main');
                       const topbar = document.getElementById('fichasTopbar');
                       const notifCenter = document.getElementById('notificationCenter');
-                      const mobileHeader = document.querySelector('.mobile-header');
                       if (!main || !topbar) return;
                       if (topbar.classList.contains('show')) {
-                        // Adicionar padding-top para compensar a topbar fixa
                         main.style.paddingTop = '48px';
-                        // Notification center below topbar
                         if (notifCenter) notifCenter.style.top = '52px';
-                        // Mobile header below topbar
-                        if (mobileHeader) mobileHeader.style.top = '44px';
                       } else {
                         main.style.paddingTop = '0';
                       }
