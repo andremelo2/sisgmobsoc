@@ -2294,27 +2294,146 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
         <div class="page" id="page-consolidado">
           <div class="page-header">
             <div class="page-title">Consolidado</div>
-            <div class="page-subtitle">Agrupamento por localização geográfica</div>
+            <div class="page-subtitle">Agrupamento por localização geográfica e recursos humanos</div>
           </div>
-          <div class="card" style="padding:0">
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Província</th>
-                    <th>Município</th>
-                    <th>Comuna</th>
-                    <th>Bairro</th>
-                    <th>Fichas</th>
-                    <th>Locais Visitados</th>
-                    <th>Pessoas Alcançadas</th>
-                  </tr>
-                </thead>
-                <tbody id="consolidadoBody"></tbody>
+
+          <!-- ABAS -->
+          <div class="tabs" id="consolidadoTabs">
+            <div class="tab active" onclick="switchConsolidadoTab(this,'cons-geo')">🗺️ Geográfico</div>
+            <div class="tab" id="cons-rh-tab" style="display:none" onclick="switchConsolidadoTab(this,'cons-rh')">👥 Recursos Humanos</div>
+          </div>
+
+          <!-- ABA: GEOGRÁFICO -->
+          <div id="cons-geo">
+            <!-- FILTROS -->
+            <div class="card">
+              <div class="card-title"><span class="dot"></span>Filtros</div>
+              <div class="form-grid">
+                <div class="form-field">
+                  <label>Coordenação</label>
+                  <select id="consFiltCord" onchange="renderConsolidado()" style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-family:'Inter',sans-serif;font-size:13px">
+                    <option value="">Todas</option>
+                  </select>
+                </div>
+                <div class="form-field">
+                  <label>Ronda</label>
+                  <select id="consFiltRonda" onchange="renderConsolidado()" style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-family:'Inter',sans-serif;font-size:13px">
+                    <option value="">Todas as Rondas</option>
+                    <option value="1">1ª Ronda</option>
+                    <option value="2">2ª Ronda</option>
+                    <option value="3">3ª Ronda</option>
+                  </select>
+                </div>
+                <div class="form-field">
+                  <label>Data Início</label>
+                  <input type="date" id="consFiltDtI" oninput="renderConsolidado()">
+                </div>
+                <div class="form-field">
+                  <label>Data Fim</label>
+                  <input type="date" id="consFiltDtF" oninput="renderConsolidado()">
+                </div>
+                <div class="form-field" style="padding-top:20px">
+                  <button class="btn btn-outline" onclick="clearConsFilters()">↺ Limpar Filtros</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- KPIs -->
+            <div class="stats-grid" id="consKpis" style="margin-bottom:20px"></div>
+
+            <!-- EXPORTAÇÃO -->
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">
+              <button class="btn btn-green" onclick="exportConsolidadoExcel()">📊 Exportar Excel</button>
+              <button class="btn btn-accent" onclick="exportConsolidadoPDF()">📄 Exportar PDF</button>
+            </div>
+
+            <!-- TABELA -->
+            <div class="card" style="padding:0">
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Província</th>
+                      <th>Município</th>
+                      <th>Comuna</th>
+                      <th>Bairro</th>
+                      <th>Coordenação</th>
+                      <th>Fichas</th>
+                      <th>Locais Visitados</th>
+                      <th>Pessoas Alcançadas</th>
+                      <th>✅ Aceitaram</th>
+                      <th>❌ Recusaram</th>
+                      <th>Taxa Aceitação</th>
+                    </tr>
+                  </thead>
+                  <tbody id="consolidadoBody"></tbody>
+                  <tfoot id="consolidadoFoot"></tfoot>
                 </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- ABA: RECURSOS HUMANOS (só admin) -->
+          <div id="cons-rh" style="display:none">
+
+            <!-- KPIs RH -->
+            <div class="stats-grid" style="margin-bottom:24px" id="rhKpis"></div>
+
+            <!-- TABELA SUPERVISORES -->
+            <div class="card">
+              <div class="card-title"><span class="dot"></span>👤 Supervisores por Coordenação</div>
+              <div class="card" style="padding:0;margin-top:12px">
+                <div class="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Nome do Supervisor</th>
+                        <th>Email</th>
+                        <th>Coordenação</th>
+                        <th>Coordenador</th>
+                        <th>Ronda Activa</th>
+                        <th>Mobilizadores</th>
+                        <th>Fichas Lançadas</th>
+                        <th>Estado</th>
+                      </tr>
+                    </thead>
+                    <tbody id="rhSupBody"></tbody>
+                  </table>
                 </div>
+              </div>
+            </div>
+
+            <!-- TABELA MOBILIZADORES -->
+            <div class="card" style="margin-top:20px">
+              <div class="card-title"><span class="dot"></span>🙋 Mobilizadores por Coordenação</div>
+              <div style="margin-bottom:12px;display:flex;gap:10px;flex-wrap:wrap">
+                <input type="text" id="rhMobSearch" placeholder="🔍 Pesquisar mobilizador..." oninput="renderRH()" style="flex:1;min-width:180px;max-width:300px">
+                <select id="rhMobFiltCord" onchange="renderRH()" style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-family:'Inter',sans-serif;font-size:13px;color:var(--text)">
+                  <option value="">Todas as Coordenações</option>
+                </select>
+              </div>
+              <div class="card" style="padding:0;margin-top:0">
+                <div class="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Nome do Mobilizador</th>
+                        <th>Supervisor</th>
+                        <th>Coordenação</th>
+                        <th>Fichas Lançadas</th>
+                        <th>Estado</th>
+                      </tr>
+                    </thead>
+                    <tbody id="rhMobBody"></tbody>
+                  </table>
                 </div>
-                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
 
         <!-- RELATÓRIOS -->
         <div class="page" id="page-relatorios">
@@ -4700,15 +4819,264 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                     }
 
                     // CONSOLIDADO
-                    function renderConsolidado() {
-                      const fichas = getVisibleFichas(); const map = {};
-                      fichas.forEach(f => { const k = `${f.provincia}|${f.municipio}|${f.comuna || '—'}|${f.bairro || '—'}`; if (!map[k]) map[k] = { provincia: f.provincia, municipio: f.municipio, comuna: f.comuna || '—', bairro: f.bairro || '—', fichas: 0, locais: 0, pessoas: 0 }; map[k].fichas++; map[k].locais += f.totalLocais || 0; map[k].pessoas += f.totalPessoas || 0; });
-                      const tbody = document.getElementById('consolidadoBody'); tbody.innerHTML = '';
-                      Object.values(map).sort((a, b) => b.pessoas - a.pessoas).forEach(r => {
-                        tbody.innerHTML += `<tr><td>${r.provincia}</td><td>${r.municipio}</td><td>${r.comuna}</td><td>${r.bairro}</td><td style="font-family:'JetBrains Mono',monospace">${r.fichas}</td><td style="font-family:'JetBrains Mono',monospace">${r.locais}</td><td style="font-family:'JetBrains Mono',monospace;color:var(--accent)">${r.pessoas.toLocaleString()}</td></tr>`;
+                    // ── Consolidado: gestão de abas ──
+                    function switchConsolidadoTab(el, id) {
+                      document.querySelectorAll('#consolidadoTabs .tab').forEach(t => t.classList.remove('active'));
+                      el.classList.add('active');
+                      ['cons-geo','cons-rh'].forEach(s => {
+                        const el2 = document.getElementById(s);
+                        if (el2) el2.style.display = s === id ? 'block' : 'none';
                       });
-                    if (!Object.keys(map).length) tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--text3)">Sem dados</td></tr>';
-                  }
+                      if (id === 'cons-rh') renderRH();
+                    }
+
+                    // ── Popular filtro de coordenações no Consolidado ──
+                    function populateConsFiltCord() {
+                      const sel = document.getElementById('consFiltCord');
+                      if (!sel) return;
+                      const cur = sel.value;
+                      sel.innerHTML = '<option value="">Todas</option>';
+                      _cords.forEach(c => {
+                        const o = document.createElement('option');
+                        o.value = c.id; o.textContent = c.nome;
+                        sel.appendChild(o);
+                      });
+                      sel.value = cur;
+                    }
+
+                    function clearConsFilters() {
+                      ['consFiltCord','consFiltRonda','consFiltDtI','consFiltDtF'].forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) el.value = '';
+                      });
+                      renderConsolidado();
+                    }
+
+                    function renderConsolidado() {
+                      populateConsFiltCord();
+
+                      // mostrar aba RH só para admin
+                      const rhTab = document.getElementById('cons-rh-tab');
+                      if (rhTab) rhTab.style.display = currentUser && currentUser.tipo === 'admin' ? 'block' : 'none';
+
+                      let fichas = getVisibleFichas();
+
+                      // aplicar filtros
+                      const filtCord  = document.getElementById('consFiltCord')?.value  || '';
+                      const filtRonda = document.getElementById('consFiltRonda')?.value || '';
+                      const filtDtI   = document.getElementById('consFiltDtI')?.value   || '';
+                      const filtDtF   = document.getElementById('consFiltDtF')?.value   || '';
+
+                      if (filtCord)  fichas = fichas.filter(f => f.coordId === filtCord || f.coordNome === (_cords.find(c=>c.id===filtCord)||{}).nome);
+                      if (filtRonda) fichas = fichas.filter(f => String(f.ronda) === filtRonda);
+                      if (filtDtI)   fichas = fichas.filter(f => f.data >= filtDtI);
+                      if (filtDtF)   fichas = fichas.filter(f => f.data <= filtDtF);
+
+                      // agrupar por bairro
+                      const map = {};
+                      fichas.forEach(f => {
+                        const k = `${f.provincia}|${f.municipio}|${f.comuna||'—'}|${f.bairro||'—'}`;
+                        if (!map[k]) map[k] = {
+                          provincia: f.provincia, municipio: f.municipio,
+                          comuna: f.comuna||'—', bairro: f.bairro||'—',
+                          coordNome: f.coordNome||'—',
+                          fichas:0, locais:0, pessoas:0, sim:0, nao:0
+                        };
+                        map[k].fichas++;
+                        map[k].locais  += f.totalLocais  || 0;
+                        map[k].pessoas += f.totalPessoas || 0;
+                        map[k].sim     += f.sim || 0;
+                        map[k].nao     += f.nao || 0;
+                      });
+
+                      const rows = Object.values(map).sort((a,b) => b.pessoas - a.pessoas);
+
+                      // KPIs
+                      const totBairros = rows.length;
+                      const totFichas  = rows.reduce((s,r)=>s+r.fichas,0);
+                      const totLocais  = rows.reduce((s,r)=>s+r.locais,0);
+                      const totPessoas = rows.reduce((s,r)=>s+r.pessoas,0);
+                      const kpisEl = document.getElementById('consKpis');
+                      if (kpisEl) kpisEl.innerHTML = `
+                        <div class="stat-card blue"><div class="stat-icon">🏘️</div><div class="stat-value">${totBairros}</div><div class="stat-label">Bairros Cobertos</div></div>
+                        <div class="stat-card amber"><div class="stat-icon">📋</div><div class="stat-value">${totFichas}</div><div class="stat-label">Fichas Registadas</div></div>
+                        <div class="stat-card green"><div class="stat-icon">📍</div><div class="stat-value">${totLocais.toLocaleString()}</div><div class="stat-label">Locais Visitados</div></div>
+                        <div class="stat-card purple"><div class="stat-icon">👥</div><div class="stat-value">${totPessoas.toLocaleString()}</div><div class="stat-label">Pessoas Alcançadas</div></div>`;
+
+                      // Tabela
+                      const tbody = document.getElementById('consolidadoBody');
+                      const tfoot = document.getElementById('consolidadoFoot');
+                      tbody.innerHTML = '';
+                      if (!rows.length) {
+                        tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:32px;color:var(--text3)">Sem dados para os filtros seleccionados</td></tr>';
+                        if (tfoot) tfoot.innerHTML = '';
+                        return;
+                      }
+                      rows.forEach(r => {
+                        const taxa = (r.sim + r.nao) > 0 ? Math.round(r.sim / (r.sim + r.nao) * 100) : 0;
+                        const corTaxa = taxa >= 70 ? 'var(--surf)' : taxa >= 40 ? 'var(--amber)' : 'var(--coral)';
+                        tbody.innerHTML += `<tr>
+                          <td>${r.provincia}</td><td>${r.municipio}</td><td>${r.comuna}</td>
+                          <td><strong>${r.bairro}</strong></td>
+                          <td style="font-size:12px;color:var(--text2)">${r.coordNome}</td>
+                          <td style="font-family:'JetBrains Mono',monospace;text-align:center">${r.fichas}</td>
+                          <td style="font-family:'JetBrains Mono',monospace;text-align:center">${r.locais.toLocaleString()}</td>
+                          <td style="font-family:'JetBrains Mono',monospace;text-align:center;color:var(--primary);font-weight:700">${r.pessoas.toLocaleString()}</td>
+                          <td style="font-family:'JetBrains Mono',monospace;text-align:center;color:var(--surf)">${r.sim.toLocaleString()}</td>
+                          <td style="font-family:'JetBrains Mono',monospace;text-align:center;color:var(--coral)">${r.nao.toLocaleString()}</td>
+                          <td style="text-align:center"><span style="font-weight:700;color:${corTaxa}">${taxa}%</span></td>
+                        </tr>`;
+                      });
+
+                      // Rodapé com totais
+                      const totSim = rows.reduce((s,r)=>s+r.sim,0);
+                      const totNao = rows.reduce((s,r)=>s+r.nao,0);
+                      const taxaGeral = (totSim+totNao)>0 ? Math.round(totSim/(totSim+totNao)*100) : 0;
+                      if (tfoot) tfoot.innerHTML = `<tr style="background:var(--bg3);font-weight:700;font-size:13px">
+                        <td colspan="5" style="padding:12px 16px;color:var(--text2)">TOTAIS GERAIS</td>
+                        <td style="text-align:center;font-family:'JetBrains Mono',monospace">${totFichas}</td>
+                        <td style="text-align:center;font-family:'JetBrains Mono',monospace">${totLocais.toLocaleString()}</td>
+                        <td style="text-align:center;font-family:'JetBrains Mono',monospace;color:var(--primary)">${totPessoas.toLocaleString()}</td>
+                        <td style="text-align:center;font-family:'JetBrains Mono',monospace;color:var(--surf)">${totSim.toLocaleString()}</td>
+                        <td style="text-align:center;font-family:'JetBrains Mono',monospace;color:var(--coral)">${totNao.toLocaleString()}</td>
+                        <td style="text-align:center;color:${taxaGeral>=70?'var(--surf)':taxaGeral>=40?'var(--amber)':'var(--coral)'}">${taxaGeral}%</td>
+                      </tr>`;
+                    }
+
+                    // ── Exportar Consolidado ──
+                    function exportConsolidadoExcel() {
+                      const rows = [];
+                      document.querySelectorAll('#consolidadoBody tr').forEach(tr => {
+                        const cells = tr.querySelectorAll('td');
+                        if (cells.length < 7) return;
+                        rows.push({
+                          'Província': cells[0].textContent, 'Município': cells[1].textContent,
+                          'Comuna': cells[2].textContent, 'Bairro': cells[3].textContent,
+                          'Coordenação': cells[4].textContent, 'Fichas': cells[5].textContent,
+                          'Locais Visitados': cells[6].textContent, 'Pessoas Alcançadas': cells[7].textContent,
+                          'Aceitaram (SIM)': cells[8].textContent, 'Recusaram (NÃO)': cells[9].textContent,
+                          'Taxa Aceitação': cells[10].textContent
+                        });
+                      });
+                      if (!rows.length) { showToast('Sem dados para exportar', 'error'); return; }
+                      const wb = XLSX.utils.book_new();
+                      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), 'Consolidado');
+                      XLSX.writeFile(wb, `SisMob_Consolidado_${new Date().toISOString().split('T')[0]}.xlsx`);
+                      showToast('Excel exportado ✓', 'success');
+                    }
+
+                    function exportConsolidadoPDF() {
+                      window.print();
+                    }
+
+                    // ── Recursos Humanos (só admin) ──
+                    function renderRH() {
+                      if (!currentUser || currentUser.tipo !== 'admin') return;
+
+                      // popular filtro de coordenações no RH
+                      const rhCordSel = document.getElementById('rhMobFiltCord');
+                      if (rhCordSel) {
+                        const cur = rhCordSel.value;
+                        rhCordSel.innerHTML = '<option value="">Todas as Coordenações</option>';
+                        _cords.forEach(c => {
+                          const o = document.createElement('option');
+                          o.value = c.id; o.textContent = c.nome;
+                          rhCordSel.appendChild(o);
+                        });
+                        rhCordSel.value = cur;
+                      }
+
+                      const supervisores = _users.filter(u => u.tipo === 'supervisor');
+                      const mobilizadores = _mobilizadores;
+                      const totalPessoal = supervisores.length + mobilizadores.length;
+                      const totalActivos = supervisores.filter(u => u.activo !== false).length +
+                                          mobilizadores.filter(m => m.activo !== false).length;
+
+                      // KPIs RH
+                      const rhKpisEl = document.getElementById('rhKpis');
+                      if (rhKpisEl) rhKpisEl.innerHTML = `
+                        <div class="stat-card blue">
+                          <div class="stat-icon">🧑‍🤝‍🧑</div>
+                          <div class="stat-value">${totalPessoal}</div>
+                          <div class="stat-label">Total Geral de Pessoal</div>
+                        </div>
+                        <div class="stat-card green">
+                          <div class="stat-icon">✅</div>
+                          <div class="stat-value">${totalActivos}</div>
+                          <div class="stat-label">Pessoal Activo</div>
+                        </div>
+                        <div class="stat-card amber">
+                          <div class="stat-icon">👤</div>
+                          <div class="stat-value">${supervisores.length}</div>
+                          <div class="stat-label">Total de Supervisores</div>
+                        </div>
+                        <div class="stat-card purple">
+                          <div class="stat-icon">🙋</div>
+                          <div class="stat-value">${mobilizadores.length}</div>
+                          <div class="stat-label">Total de Mobilizadores</div>
+                        </div>`;
+
+                      // Tabela Supervisores
+                      const supBody = document.getElementById('rhSupBody');
+                      if (supBody) {
+                        supBody.innerHTML = '';
+                        if (!supervisores.length) {
+                          supBody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:24px;color:var(--text3)">Sem supervisores</td></tr>';
+                        } else {
+                          supervisores.sort((a,b)=>(a.nome||'').localeCompare(b.nome||'')).forEach((s,i) => {
+                            const cord = _cords.find(c => c.id === s.coordId);
+                            const mobsDoSup = _mobilizadores.filter(m => String(m.supervisorId) === String(s.id));
+                            const fichasDoSup = _fichas.filter(f => String(f.userId) === String(s.id));
+                            const activo = s.activo !== false;
+                            supBody.innerHTML += `<tr>
+                              <td style="color:var(--text3);font-size:12px">${i+1}</td>
+                              <td><strong>${s.nome||'—'}</strong></td>
+                              <td style="font-size:12px;color:var(--text2)">${s.email||'—'}</td>
+                              <td>${cord ? cord.nome : '—'}</td>
+                              <td style="font-size:12px">${cord && cord.coordenador ? cord.coordenador : '—'}</td>
+                              <td style="text-align:center">${s.ronda ? s.ronda + 'ª' : '—'}</td>
+                              <td style="text-align:center;font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--primary)">${mobsDoSup.length}</td>
+                              <td style="text-align:center;font-family:'JetBrains Mono',monospace">${fichasDoSup.length}</td>
+                              <td style="text-align:center"><span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:${activo?'rgba(46,134,193,.12)':'rgba(192,57,43,.1)'};color:${activo?'var(--surf)':'var(--coral)'}">${activo?'✅ Activo':'🚫 Inactivo'}</span></td>
+                            </tr>`;
+                          });
+                        }
+                      }
+
+                      // Tabela Mobilizadores
+                      const mobBody = document.getElementById('rhMobBody');
+                      if (mobBody) {
+                        const search = (document.getElementById('rhMobSearch')?.value||'').toLowerCase();
+                        const filtCord = document.getElementById('rhMobFiltCord')?.value || '';
+                        let lista = [...mobilizadores];
+                        if (search) lista = lista.filter(m => (m.nome||'').toLowerCase().includes(search));
+                        if (filtCord) lista = lista.filter(m => {
+                          const sup = _users.find(u => String(u.id) === String(m.supervisorId));
+                          return sup && String(sup.coordId) === filtCord;
+                        });
+                        lista.sort((a,b)=>(a.nome||'').localeCompare(b.nome||''));
+
+                        mobBody.innerHTML = '';
+                        if (!lista.length) {
+                          mobBody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text3)">Sem mobilizadores</td></tr>';
+                        } else {
+                          lista.forEach((m,i) => {
+                            const sup = _users.find(u => String(u.id) === String(m.supervisorId));
+                            const cord = sup ? _cords.find(c => c.id === sup.coordId) : null;
+                            const fichasDoMob = _fichas.filter(f => (f.mobilizador||'').toLowerCase().trim() === (m.nome||'').toLowerCase().trim());
+                            const activo = m.activo !== false;
+                            mobBody.innerHTML += `<tr>
+                              <td style="color:var(--text3);font-size:12px">${i+1}</td>
+                              <td><strong>${m.nome||'—'}</strong></td>
+                              <td style="font-size:12px;color:var(--text2)">${sup ? sup.nome : '—'}</td>
+                              <td style="font-size:12px">${cord ? cord.nome : '—'}</td>
+                              <td style="text-align:center;font-family:'JetBrains Mono',monospace">${fichasDoMob.length}</td>
+                              <td style="text-align:center"><span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:${activo?'rgba(46,134,193,.12)':'rgba(192,57,43,.1)'};color:${activo?'var(--surf)':'var(--coral)'}">${activo?'✅ Activo':'🚫 Inactivo'}</span></td>
+                            </tr>`;
+                          });
+                        }
+                      }
+                    }
 
                     // RELATÓRIOS
                     function switchRelTab(el, id) {
