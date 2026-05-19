@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="pt">atua
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +9,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 /* ═══════════════════════════════════════════════════════════
    SISMOB — DESIGN SYSTEM MODERNO
@@ -106,18 +108,16 @@ body{
 
 /* ── DB STATUS ── */
 .db-status{
-  position:fixed;top:14px;right:18px;z-index:200;
   display:flex;align-items:center;gap:6px;
-  background:rgba(255,255,255,.9);
-  backdrop-filter:blur(16px);
-  border:1px solid var(--border-solid);
-  border-radius:20px;padding:6px 14px;
+  background:rgba(0,0,0,.15);
+  border:1px solid rgba(255,255,255,.25);
+  border-radius:20px;padding:4px 12px;
   font-size:11px;font-family:'JetBrains Mono',monospace;
-  box-shadow:var(--shadow-sm);
   transition:var(--transition);
-  color:var(--text2);
+  color:rgba(0,0,0,.75);
+  white-space:nowrap;flex-shrink:0;
 }
-.db-status:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+.db-status:hover{background:rgba(0,0,0,.22)}
 .db-dot{width:8px;height:8px;border-radius:50%;background:var(--text3);transition:var(--transition)}
 .db-dot.online{background:var(--surf);box-shadow:0 0 8px var(--surf);animation:pulse 2s infinite}
 .db-dot.offline{background:var(--amber);box-shadow:0 0 8px var(--amber)}
@@ -127,10 +127,22 @@ body{
 #loginScreen{
   display:flex;align-items:center;justify-content:center;
   min-height:100vh;position:relative;overflow:hidden;
-  background:#2c5f2d;
+  background:radial-gradient(ellipse at 30% 20%, #3d7f3e 0%, #2c5f2d 40%, #1a3d1b 100%);
 }
-#loginScreen::before{content:none}
-#loginScreen::after{content:none}
+#loginScreen::before{
+  content:'';position:absolute;inset:0;
+  background:
+    radial-gradient(circle at 70% 80%, rgba(34,177,76,0.18) 0%, transparent 55%),
+    radial-gradient(circle at 10% 90%, rgba(44,95,45,0.35) 0%, transparent 45%);
+  pointer-events:none;
+}
+#loginScreen::after{
+  content:'';position:absolute;inset:0;
+  background-image:radial-gradient(circle, rgba(255,255,255,0.055) 1px, transparent 1px);
+  background-size:32px 32px;
+  pointer-events:none;
+  opacity:0.7;
+}
 .login-card{
   background:#ffffff;
   border:1px solid var(--border-solid);
@@ -140,13 +152,12 @@ body{
   position:relative;z-index:1;
   box-shadow:var(--shadow-lg);
 }
-.login-logo{text-align:center;margin-bottom:36px}
+.login-logo{text-align:center;margin-bottom:32px}
 .login-logo-icon{
-  width:60px;height:60px;border-radius:50%;
-  background:#008102;
+  width:96px;height:96px;border-radius:50%;
+  background:transparent;
   display:flex;align-items:center;justify-content:center;
-  margin:0 auto 16px;
-  box-shadow:var(--shadow-md);
+  margin:0 auto 18px;
   font-size:30px;
 }
 .login-logo .mark{
@@ -202,10 +213,42 @@ body{
   overflow-y:auto;
   box-shadow:1px 0 0 var(--sidebar-border),4px 0 20px rgba(0,0,0,.25);
   position:relative;z-index:10;
+  transition:transform 0.3s ease, margin-left 0.3s ease;
+  transform:translateX(0);
+}
+.sidebar.sidebar-hidden{
+  transform:translateX(-100%);
+  position:absolute;
+  margin-left:-260px;
+  box-shadow:none;
 }
 .sidebar-header{
   padding:22px 16px 20px;
   border-bottom:1px solid var(--sidebar-border);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.sidebar-toggle-btn{
+  display:none;
+  background:transparent;
+  border:none;
+  color:rgba(255,255,255,.6);
+  cursor:pointer;
+  font-size:20px;
+  padding:4px;
+  border-radius:6px;
+  transition:var(--transition);
+  flex-shrink:0;
+}
+.sidebar-toggle-btn:hover{
+  background:rgba(255,255,255,.1);
+  color:rgba(255,255,255,.9);
+}
+@media (max-width: 768px) {
+  .sidebar-toggle-btn{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
 }
 .sidebar-logo-wrap{display:flex;align-items:center;gap:12px}
 .sidebar-logo-icon{
@@ -297,7 +340,7 @@ nav{flex:1;padding:10px 8px}
 
 /* ── PAGES ── */
 .page{
-  display:none;padding:32px;
+  display:none;padding:48px 32px 32px 32px;
   animation:pageEnter .4s cubic-bezier(.4,0,.2,1) forwards;
 }
 .page.active{display:block}
@@ -592,9 +635,44 @@ tbody td{padding:11px 14px;color:var(--text2)}
   border-radius:var(--radius);padding:20px;
   box-shadow:var(--shadow-sm);
   transition:var(--transition);
+  position:relative;
 }
 .chart-card:hover{box-shadow:var(--shadow-md)}
-.chart-title{font-size:14px;font-weight:700;margin-bottom:16px;color:var(--text2)}
+.chart-title{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  font-size:14px;font-weight:700;margin-bottom:16px;color:var(--text2);
+}
+.chart-export-btns{
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+}
+.chart-export-btn{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  padding:4px 10px;
+  font-size:11px;
+  font-weight:600;
+  border:1px solid var(--border-solid);
+  background:#f9f9f9;
+  border-radius:6px;
+  cursor:pointer;
+  transition:var(--transition);
+  color:var(--text2);
+}
+.chart-export-btn:hover{
+  background:var(--primary);
+  color:#ffffff;
+  border-color:var(--primary);
+  transform:translateY(-1px);
+  box-shadow:var(--shadow-sm);
+}
+.chart-export-btn:active{
+  transform:scale(0.95);
+}
 
 /* ── TABS ── */
 .tabs{
@@ -758,6 +836,89 @@ tbody td{padding:11px 14px;color:var(--text2)}
 .avatar-upload-hint{font-size:11px;color:var(--text3);text-align:center}
 /* sidebar avatar with photo */
 .sidebar-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+/* ── MOBILIZADORES AUTOCOMPLETE ── */
+.mob-autocomplete-wrap{position:relative}
+.mob-autocomplete-dropdown{
+  position:absolute;top:100%;left:0;right:0;z-index:50;
+  background:#fff;
+  border:1px solid var(--primary);
+  border-top:none;
+  border-radius:0 0 var(--radius-sm) var(--radius-sm);
+  max-height:200px;overflow-y:auto;
+  box-shadow:var(--shadow-md);
+  display:none;
+}
+.mob-autocomplete-dropdown.show{display:block}
+.mob-ac-item{
+  padding:10px 14px;cursor:pointer;font-size:13px;
+  color:var(--text);transition:var(--transition);
+  display:flex;align-items:center;gap:10px;
+  border-bottom:1px solid var(--border);
+}
+.mob-ac-item:last-child{border-bottom:none}
+.mob-ac-item:hover,.mob-ac-item.selected{background:rgba(44,95,45,.08);color:var(--primary)}
+.mob-ac-item .mob-ac-avatar{
+  width:28px;height:28px;border-radius:50%;
+  background:rgba(44,95,45,.15);
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;color:var(--primary);flex-shrink:0;
+}
+.mob-ac-item .mob-ac-name b{color:var(--primary)}
+.mob-ac-empty{padding:12px 14px;font-size:12px;color:var(--text3);text-align:center}
+
+/* ── MOBILIZADORES MANAGEMENT PAGE ── */
+.mob-list-item{
+  display:flex;align-items:center;gap:12px;
+  padding:12px 16px;
+  border-bottom:1px solid var(--border);
+  transition:var(--transition);
+}
+.mob-list-item:last-child{border-bottom:none}
+.mob-list-item:hover{background:rgba(44,95,45,.04)}
+.mob-list-avatar{
+  width:36px;height:36px;border-radius:50%;
+  background:rgba(44,95,45,.15);
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:700;color:var(--primary);flex-shrink:0;
+}
+.mob-list-avatar.inactivo{background:rgba(0,0,0,.07);color:var(--text3)}
+.mob-badge-activo{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:11px;font-weight:600;
+  background:rgba(34,177,76,.12);color:var(--surf-dark);
+  padding:3px 10px;border-radius:20px;
+}
+.mob-badge-inactivo{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:11px;font-weight:600;
+  background:rgba(0,0,0,.07);color:var(--text3);
+  padding:3px 10px;border-radius:20px;
+}
+.mob-toggle{
+  width:40px;height:22px;border-radius:11px;
+  position:relative;cursor:pointer;flex-shrink:0;
+  transition:background .25s;border:none;padding:0;
+}
+.mob-toggle.on{background:var(--surf)}
+.mob-toggle.off{background:var(--border-solid)}
+.mob-toggle::after{
+  content:'';position:absolute;
+  width:16px;height:16px;border-radius:50%;
+  background:#fff;top:3px;
+  transition:left .2s;
+  box-shadow:0 1px 3px rgba(0,0,0,.2);
+}
+.mob-toggle.on::after{left:20px}
+.mob-toggle.off::after{left:4px}
+.mob-filter-tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.mob-filter-tab{
+  padding:6px 16px;border-radius:20px;font-size:12px;font-weight:600;
+  cursor:pointer;transition:var(--transition);
+  border:1px solid var(--border-solid);
+  color:var(--text2);background:transparent;
+}
+.mob-filter-tab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+
 /* ── PRINT ── */
 .print-area{display:none}
 @media print{
@@ -782,8 +943,9 @@ tbody td{padding:11px 14px;color:var(--text2)}
 /* ── MOBILE HEADER ── */
 .mobile-header{
   display:none;
-  background:#2c5f2d;
-  border-bottom:1px solid rgba(255,255,255,.1);
+  background:var(--sidebar-bg);
+  border-bottom:1px solid var(--sidebar-border);
+  position:fixed;top:44px;left:0;right:0;z-index:90;
   padding:12px 16px;
   align-items:center;justify-content:space-between;
   position:sticky;top:0;z-index:100;
@@ -855,18 +1017,16 @@ tbody td{padding:11px 14px;color:var(--text2)}
 }
 .offline-banner.show{display:flex}
 
-/* ── THEME TOGGLE ── */
+/* ── THEME TOGGLE (agora dentro da topbar) ── */
 .theme-toggle{
-  position:fixed;top:12px;right:200px;z-index:200;
-  width:40px;height:40px;border-radius:50%;
-  background:#ffffff;
-  border:1px solid var(--border-solid);
+  width:32px;height:32px;border-radius:50%;
+  background:rgba(0,0,0,.15);
+  border:1px solid rgba(255,255,255,.25);
   cursor:pointer;display:flex;align-items:center;justify-content:center;
-  font-size:18px;
-  box-shadow:var(--shadow-sm);
+  font-size:16px;flex-shrink:0;
   transition:var(--transition);
 }
-.theme-toggle:hover{transform:scale(1.08);box-shadow:var(--shadow-md)}
+.theme-toggle:hover{background:rgba(0,0,0,.28);transform:scale(1.08)}
 
 /* ── SEARCH ── */
 .search-global{
@@ -908,6 +1068,7 @@ tbody td{padding:11px 14px;color:var(--text2)}
   padding:6px 14px;font-size:11px;color:var(--text2);
   pointer-events:none;z-index:100;white-space:nowrap;
   box-shadow:var(--shadow-sm);
+  display:none !important;
 }
 .search-shortcut kbd{
   background:rgba(99,102,241,.1);
@@ -989,7 +1150,7 @@ tbody td{padding:11px 14px;color:var(--text2)}
 
 /* ── NOTIFICATION CENTER ── */
 .notification-center{
-  position:fixed;top:50px;right:16px;
+  position:fixed;top:52px;right:16px;
   width:360px;background:#ffffff;
   border:1px solid var(--border-solid);
   border-radius:12px;
@@ -1107,8 +1268,8 @@ body.dark-mode .search-box,body.dark-mode .notification-center,body.dark-mode .e
 body.dark-mode .shortcut-key{background:rgba(44,95,45,.2);border-color:rgba(44,95,45,.4)}
 body.dark-mode .login-card{background:#242424;border-color:#3a3a3a}
 body.dark-mode .toast{background:#242424;border-color:#3a3a3a;color:#e8e8e8}
-body.dark-mode .db-status{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
-body.dark-mode .theme-toggle{background:#2a2a2a;border-color:#3a3a3a}
+/* db-status agora integrado na topbar amarela */
+/* theme-toggle agora integrado na topbar */
 body.dark-mode .mobile-header{background:#2c5f2d}
 body.dark-mode #page-dashboard{background:#1a1a1a}
 body.dark-mode .ficha-table td.loc-cell{background:rgba(44,95,45,.08)}
@@ -1124,8 +1285,222 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
 /* ── DASHBOARD TEXTURE ── */
 #page-dashboard{
   background:#f5f5f5;
-  padding:32px;
+  padding:48px 32px 32px 32px;
 }
+
+/* ── TOPBAR FIXA DE FICHAS + RONDA ── */
+#fichasTopbar{
+  position:fixed;top:0;left:0;right:0;z-index:180;
+  display:none;
+  background:var(--amber);
+  color:#1a1a1a;
+  padding:0 16px;
+  height:48px;
+  align-items:center;
+  gap:10px;
+  font-size:13px;font-weight:700;
+  box-shadow:0 2px 8px rgba(212,168,23,.35);
+  flex-wrap:nowrap;
+  overflow:hidden;
+  transform:translateY(0);
+  transition:transform 0.3s cubic-bezier(.4,0,.2,1), opacity 0.3s ease;
+  opacity:1;
+}
+#fichasTopbar.show{display:flex}
+#fichasTopbar.topbar-hidden{transform:translateY(-100%);opacity:0;pointer-events:none}
+.topbar-sidebar-toggle{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(0,0,0,.12);
+  border:none;
+  border-radius:6px;
+  padding:6px 8px;
+  cursor:pointer;
+  color:#1a1a1a;
+  transition:var(--transition);
+  flex-shrink:0;
+  margin-right:8px;
+}
+.topbar-sidebar-toggle:hover{
+  background:rgba(0,0,0,.2);
+  transform:scale(1.05);
+}
+.topbar-sidebar-toggle:active{
+  transform:scale(0.95);
+}
+.topbar-fichas-count{
+  display:flex;align-items:center;gap:7px;
+  background:rgba(0,0,0,.12);
+  border-radius:20px;padding:3px 12px;
+  font-family:'JetBrains Mono',monospace;
+  white-space:nowrap;
+}
+.topbar-fichas-count .tf-num{font-size:15px;font-weight:800}
+.topbar-ronda{
+  display:flex;align-items:center;gap:7px;
+  background:rgba(0,0,0,.12);
+  border-radius:20px;padding:3px 14px;
+  white-space:nowrap;font-size:12px;
+}
+.topbar-ronda .tr-badge{
+  font-weight:800;font-size:13px;
+  background:rgba(255,255,255,.25);
+  border-radius:10px;padding:1px 8px;
+}
+.topbar-spacer{flex:1}
+.topbar-alert-btn{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(231,76,60,.25);border:1.5px solid rgba(231,76,60,.5);
+  border-radius:20px;padding:3px 12px;cursor:pointer;
+  font-size:11px;font-weight:700;color:#7f0000;
+  white-space:nowrap;transition:var(--transition);
+}
+.topbar-alert-btn:hover{background:rgba(231,76,60,.4)}
+
+/* ── MOB PROFILE MODAL ── */
+.mob-profile-overlay{
+  position:fixed;inset:0;z-index:500;
+  background:rgba(0,0,0,.5);
+  display:none;align-items:center;justify-content:center;
+  backdrop-filter:blur(4px);
+}
+.mob-profile-overlay.show{display:flex}
+.mob-profile-modal{
+  background:#fff;border-radius:20px;
+  padding:32px;max-width:600px;width:95%;
+  max-height:88vh;overflow-y:auto;
+  box-shadow:0 24px 48px rgba(0,0,0,.22);
+  animation:fadeInScale .25s ease;
+  position:relative;
+}
+.mob-profile-header{
+  display:flex;align-items:center;gap:14px;margin-bottom:20px;
+}
+.mob-profile-avatar{
+  width:56px;height:56px;border-radius:50%;
+  background:linear-gradient(135deg,var(--primary),var(--surf));
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;font-weight:700;color:#fff;flex-shrink:0;
+  box-shadow:var(--shadow-md);
+}
+.mob-profile-name{font-size:20px;font-weight:800;color:var(--primary);letter-spacing:-.3px}
+.mob-profile-meta{font-size:12px;color:var(--text3);margin-top:3px}
+.mob-stats-row{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));
+  gap:10px;margin-bottom:18px;
+}
+.mob-stat-box{
+  background:var(--bg3);border:1px solid var(--border);
+  border-radius:12px;padding:12px;text-align:center;
+}
+.mob-stat-box .msv{font-size:22px;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--primary)}
+.mob-stat-box .msl{font-size:10px;color:var(--text3);margin-top:3px;font-weight:500}
+.mob-hist-table{width:100%;border-collapse:collapse;font-size:12px}
+.mob-hist-table th{padding:8px 10px;text-align:left;background:rgba(44,95,45,.08);color:var(--primary);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.mob-hist-table td{padding:8px 10px;border-bottom:1px solid var(--border)}
+.mob-hist-table tr:last-child td{border-bottom:none}
+.mob-hist-table tr:hover td{background:rgba(44,95,45,.04)}
+
+/* ── MOB LIST ITEM ENHANCED ── */
+.mob-list-item-alert{
+  background:rgba(212,168,23,.06);
+  border-left:3px solid var(--amber);
+}
+.mob-alert-badge{
+  font-size:10px;font-weight:700;
+  background:var(--amber);color:#7a4a00;
+  padding:2px 7px;border-radius:8px;
+  display:inline-flex;align-items:center;gap:3px;
+}
+
+/* ── NOTIFICATIONS ENHANCED ── */
+.notif-center-header{
+  padding:16px 20px;
+  border-bottom:1px solid var(--border-solid);
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;background:#fff;z-index:1;
+  border-radius:12px 12px 0 0;
+}
+.notif-center-title{font-size:14px;font-weight:800;color:var(--primary)}
+.notif-center-actions{display:flex;gap:8px;align-items:center}
+.notif-mark-all{
+  font-size:11px;color:var(--primary);cursor:pointer;font-weight:600;
+  background:rgba(44,95,45,.08);border-radius:8px;padding:3px 8px;border:none;
+}
+.notif-mark-all:hover{background:rgba(44,95,45,.15)}
+.notif-tabs{
+  display:flex;border-bottom:1px solid var(--border-solid);
+}
+.notif-tab{
+  flex:1;padding:8px;text-align:center;font-size:11px;font-weight:600;
+  color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;
+  transition:var(--transition);
+}
+.notif-tab.active{color:var(--primary);border-bottom-color:var(--primary)}
+.notif-tab:hover:not(.active){color:var(--text2)}
+.notif-scroll{max-height:360px;overflow-y:auto;padding:8px}
+.notif-item{
+  padding:11px 13px;border-radius:10px;margin-bottom:6px;
+  cursor:pointer;transition:var(--transition);
+  border-left:3px solid transparent;
+  background:var(--bg3);
+}
+.notif-item:hover{transform:translateX(-2px);box-shadow:var(--shadow-sm)}
+.notif-item.unread{background:rgba(44,95,45,.06);border-left-color:var(--primary)}
+.notif-item.type-success{border-left-color:var(--surf)}
+.notif-item.type-warning{border-left-color:var(--amber);background:rgba(212,168,23,.06)}
+.notif-item.type-error{border-left-color:var(--coral);background:rgba(231,76,60,.04)}
+.notif-item .ni-text{font-size:12px;color:var(--text);font-weight:500;line-height:1.4}
+.notif-item .ni-time{font-size:10px;color:var(--text3);margin-top:4px}
+.notif-item .ni-icon{font-size:16px;margin-right:6px}
+.notif-badge{
+  position:absolute;top:-6px;right:-6px;
+  background:var(--coral);color:#fff;
+  border-radius:50%;min-width:20px;height:20px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:700;animation:pulse 2s infinite;
+  padding:0 4px;
+}
+.notif-bell-wrap{
+  width:32px;height:32px;border-radius:50%;
+  background:rgba(0,0,0,.15);
+  border:1px solid rgba(255,255,255,.25);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:16px;flex-shrink:0;position:relative;
+  transition:var(--transition);
+}
+.notif-bell-wrap:hover{background:rgba(0,0,0,.28);transform:scale(1.08)}
+
+/* ── RANKING MOB PAGE ── */
+.mob-ranking-section{margin-bottom:20px}
+.mob-ranking-cord-title{
+  font-size:12px;font-weight:700;color:var(--text2);
+  text-transform:uppercase;letter-spacing:.8px;
+  margin-bottom:8px;padding:6px 12px;
+  background:rgba(44,95,45,.07);border-radius:8px;
+  display:flex;align-items:center;gap:8px;
+}
+.mob-ranking-item{
+  display:flex;align-items:center;gap:12px;
+  padding:10px 14px;border-radius:10px;margin-bottom:6px;
+  background:var(--bg3);border:1px solid var(--border);
+  transition:var(--transition);cursor:pointer;
+}
+.mob-ranking-item:hover{background:rgba(44,95,45,.06);transform:translateX(3px)}
+.mob-rank-pos{
+  width:28px;height:28px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:800;color:#fff;flex-shrink:0;
+  background:var(--primary);
+}
+.mob-rank-pos.gold{background:var(--amber)}
+.mob-rank-pos.silver{background:#888}
+.mob-rank-pos.bronze{background:#997755}
+.mob-rank-name{flex:1;font-size:13px;font-weight:600;color:var(--text)}
+.mob-rank-val{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:800;color:var(--primary)}
+.mob-rank-sub{font-size:10px;color:var(--text3);margin-top:1px}
+
 
 /* ── FIXED BUTTONS ── */
 .fixed-buttons{
@@ -1145,7 +1520,7 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
   .sidebar-overlay.open{display:block}
   .mobile-header{display:flex}
   .layout{flex-direction:column}
-  .main{height:calc(100vh - 56px);overflow-y:auto}
+  .main{height:calc(100vh - 100px);overflow-y:auto;margin-top:100px}
   .page{padding:16px;animation:pageEnter .3s ease}
   .stats-grid{grid-template-columns:1fr 1fr;gap:12px}
   .stats-grid .stat-card{padding:16px}
@@ -1153,7 +1528,7 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
   .form-grid{grid-template-columns:1fr;gap:12px}
   .form-field input,.form-field select{font-size:14px;padding:12px 14px}
   .charts-grid{grid-template-columns:1fr}
-  .db-status{top:8px;right:8px;font-size:10px;padding:4px 10px}
+  .db-status{font-size:10px;padding:3px 8px}
   .page-header{margin-bottom:20px}
   .page-title{font-size:20px}
   .page-subtitle{font-size:12px}
@@ -1186,7 +1561,7 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
   .metric-card{padding:14px}
   .fab{display:flex}
   .offline-banner{top:60px;font-size:12px;padding:10px 20px}
-  .theme-toggle{top:8px;right:140px;width:38px;height:38px}
+  .theme-toggle{width:30px;height:30px;font-size:15px}
   .search-shortcut{display:none!important}
   .notification-center{width:92%;right:4%}
   .search-box{width:96%}
@@ -1220,19 +1595,24 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
     Pressione <kbd>Ctrl</kbd> + <kbd>K</kbd> para buscar
   </div>
   
-  <!-- TOGGLE TEMA -->
-  <button class="theme-toggle" id="themeToggle" title="Alternar tema">
-    <span id="themeIcon">🌙</span>
-  </button>
-  
-  <!-- NOTIFICAÇÕES -->
+  <!-- NOTIFICAÇÕES (CENTRO MELHORADO) -->
   <div class="notification-center" id="notificationCenter">
-    <div class="notification-header">
-      <span class="notification-title">Notificações</span>
-      <button onclick="closeNotifications()"
-        style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:20px">×</button>
+    <div class="notif-center-header">
+      <span class="notif-center-title">🔔 Notificações</span>
+      <div class="notif-center-actions">
+        <button class="notif-mark-all" onclick="markAllNotificationsRead()">✓ Ler todas</button>
+        <button onclick="closeNotifications()" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:20px;padding:0 4px">×</button>
+      </div>
     </div>
-    <div class="notification-list" id="notificationList"></div>
+    <div class="notif-tabs">
+      <div class="notif-tab active" id="ntab-all" onclick="switchNotifTab('all')">Todas</div>
+      <div class="notif-tab" id="ntab-alert" onclick="switchNotifTab('alert')">⚠️ Alertas</div>
+      <div class="notif-tab" id="ntab-info" onclick="switchNotifTab('info')">ℹ️ Info</div>
+    </div>
+    <div class="notif-scroll" id="notificationList"></div>
+    <div style="padding:10px 14px;border-top:1px solid var(--border-solid);text-align:center">
+      <button onclick="clearAllNotifications()" style="background:none;border:none;color:var(--coral);font-size:11px;cursor:pointer;font-weight:600">🗑 Limpar histórico</button>
+    </div>
   </div>
   
   <!-- ATALHOS DE TECLADO -->
@@ -1267,14 +1647,76 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
     </div>
   </div>
 
+  <!-- BARRA FIXA TOPO: CONTAGEM DE FICHAS + RONDA + CONTROLES -->
+  <div id="fichasTopbar">
+    <!-- Toggle Sidebar -->
+    <button class="topbar-sidebar-toggle" id="topbarToggleBtn" onclick="toggleSidebar()" title="Mostrar/Esconder menu (Ctrl+B)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+        <rect x="3" y="3" width="7" height="18"/>
+        <line x1="14" y1="9" x2="21" y2="9"/>
+        <line x1="14" y1="15" x2="21" y2="15"/>
+      </svg>
+    </button>
+    <!-- Fichas count -->
+    <div class="topbar-fichas-count">
+      📋 <span class="tf-num" id="topbarFichasNum">0</span> fichas
+    </div>
+    <!-- Ronda activa -->
+    <div class="topbar-ronda" id="topbarRondaInfo" style="display:none">
+      🔄 <span class="tr-badge" id="topbarRondaBadge">—</span>
+    </div>
+    <!-- Alert mobilizadores -->
+    <div class="topbar-alert-btn" id="topbarAlertBtn" style="display:none" onclick="openMobAlertModal()">
+      ⚠️ <span id="topbarAlertCount">0</span> sem ficha ontem
+    </div>
+    <div class="topbar-spacer"></div>
+    <!-- DB Status -->
+    <div class="db-status" id="dbStatus">
+      <div class="db-dot" id="dbDot"></div>
+      <span id="dbLabel">A ligar...</span>
+    </div>
+    <!-- Sino notificações -->
+    <button class="notif-bell-wrap" id="notifBellBtn" onclick="toggleNotifications()" title="Notificações" style="display:none">
+      <span>🔔</span>
+      <div class="notif-badge" id="notifBadge" style="display:none">0</div>
+    </button>
+    <!-- Tema -->
+    <button class="theme-toggle" id="themeToggle" title="Alternar tema">
+      <span id="themeIcon">🌙</span>
+    </button>
+  </div>
+
+  <!-- MODAL ALERTA MOBILIZADORES SEM FICHA ONTEM -->
+  <div class="mob-profile-overlay" id="mobAlertOverlay" onclick="if(event.target===this)closeMobAlertModal()">
+    <div class="mob-profile-modal" style="max-width:500px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <div style="font-size:18px;font-weight:800;color:var(--amber)">⚠️ Mobilizadores Sem Ficha Ontem</div>
+        <button onclick="closeMobAlertModal()" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--text3)">×</button>
+      </div>
+      <div id="mobAlertList" style="max-height:400px;overflow-y:auto"></div>
+    </div>
+  </div>
+
+  <!-- PERFIL DO MOBILIZADOR (MODAL) -->
+  <div class="mob-profile-overlay" id="mobProfileOverlay" onclick="if(event.target===this)closeMobProfile()">
+    <div class="mob-profile-modal">
+      <button onclick="closeMobProfile()" style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:22px;cursor:pointer;color:var(--text3)">×</button>
+      <div class="mob-profile-header">
+        <div class="mob-profile-avatar" id="mpAvatar">M</div>
+        <div>
+          <div class="mob-profile-name" id="mpName">—</div>
+          <div class="mob-profile-meta" id="mpMeta">—</div>
+        </div>
+      </div>
+      <div class="mob-stats-row" id="mpStats"></div>
+      <div style="font-size:13px;font-weight:700;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px">📋 Histórico de Fichas</div>
+      <div id="mpHistTable"></div>
+    </div>
+  </div>
+
   <div class="offline-banner" id="offlineBanner">
     <span>📡</span>
     <span>Modo Offline - Dados serão sincronizados quando voltar online</span>
-  </div>
-
-  <div class="db-status" id="dbStatus">
-    <div class="db-dot" id="dbDot"></div>
-    <span id="dbLabel">A ligar...</span>
   </div>
 
   <div class="loading-overlay" id="loadingOverlay">
@@ -1290,7 +1732,44 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
   <div id="loginScreen">
     <div class="login-card">
       <div class="login-logo">
-        <div class="login-logo-icon">🏥</div>
+        <div class="login-logo-icon" style="background:transparent;box-shadow:none;width:96px;height:96px;">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="96" height="96">
+            <defs>
+              <radialGradient id="bgGrad" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#3d9e3e"/>
+                <stop offset="100%" stop-color="#1a5c1b"/>
+              </radialGradient>
+              <radialGradient id="glowGrad" cx="50%" cy="40%" r="60%">
+                <stop offset="0%" stop-color="#ffffff" stop-opacity="0.18"/>
+                <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+              </radialGradient>
+              <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+                <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#0a3a0b" flood-opacity="0.45"/>
+              </filter>
+            </defs>
+            <!-- Círculo base com gradiente -->
+            <circle cx="100" cy="100" r="92" fill="url(#bgGrad)" filter="url(#softShadow)"/>
+            <!-- Brilho interno -->
+            <circle cx="100" cy="100" r="92" fill="url(#glowGrad)"/>
+            <!-- Anel externo decorativo -->
+            <circle cx="100" cy="100" r="88" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+            <!-- Pessoas centrais (3 figuras humanas estilizadas) -->
+            <!-- Figura esquerda -->
+            <circle cx="66" cy="74" r="11" fill="rgba(255,255,255,0.88)"/>
+            <path d="M50 118 Q50 96 66 96 Q82 96 82 118 L82 122 Q66 128 50 122 Z" fill="rgba(255,255,255,0.88)"/>
+            <!-- Figura direita -->
+            <circle cx="134" cy="74" r="11" fill="rgba(255,255,255,0.88)"/>
+            <path d="M118 118 Q118 96 134 96 Q150 96 150 118 L150 122 Q134 128 118 122 Z" fill="rgba(255,255,255,0.88)"/>
+            <!-- Figura central (destaque) -->
+            <circle cx="100" cy="68" r="14" fill="#ffffff"/>
+            <path d="M80 116 Q80 90 100 90 Q120 90 120 116 L120 122 Q100 130 80 122 Z" fill="#ffffff"/>
+            <!-- Arco de conexão (mobilização / rede) -->
+            <path d="M52 82 Q100 50 148 82" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="4 4"/>
+            <!-- Pulso / ondas abaixo das figuras -->
+            <path d="M62 142 Q75 134 88 142 Q100 150 112 142 Q125 134 138 142" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M70 154 Q82 146 94 154 Q106 162 118 154 Q130 146 130 154" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
         <div class="mark">SisMob</div>
         <p>Sistema de Mobilização de Saúde</p>
       </div>
@@ -1376,6 +1855,14 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
               <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
               <circle cx="12" cy="10" r="3" />
             </svg>Mapa de Mobilização
+            </div>
+            <div class="nav-item" id="navMobilizadores" onclick="showPage('mobilizadores')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <line x1="19" y1="8" x2="19" y2="14"/>
+              <line x1="22" y1="11" x2="16" y2="11"/>
+            </svg>Mobilizadores
             </div>
             <div id="adminNav">
               <div class="nav-section">Administração</div>
@@ -1522,6 +2009,12 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
             <div id="rankingContainer"></div>
           </div>
 
+          <!-- GESTÃO DE SUPERVISORES (só admin) -->
+          <div class="card" id="dashSupPanel" style="display:none">
+            <div class="card-title"><span class="dot"></span>👥 Supervisores — Estado de Hoje</div>
+            <div id="dashSupContent"></div>
+          </div>
+
           <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:24px">
             <button class="btn btn-accent" onclick="showPage('ficha')">+ Nova Ficha de Mobilização</button>
             <button class="btn btn-outline" onclick="showPage('listFichas')">Ver Todas as Fichas</button>
@@ -1531,11 +2024,23 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
           <!-- GRÁFICOS -->
           <div class="charts-grid">
             <div class="chart-card">
-              <div class="chart-title">Pessoas por Local</div>
+              <div class="chart-title">
+                <span>Pessoas por Local</span>
+                <div class="chart-export-btns">
+                  <button class="chart-export-btn" onclick="exportChartPDF('chartBar', 'Pessoas por Local')" title="Exportar para PDF">📄 PDF</button>
+                  <button class="chart-export-btn" onclick="exportChartExcel('chartBar', 'Pessoas por Local')" title="Exportar para Excel">📊 Excel</button>
+                </div>
+              </div>
               <canvas id="chartBar" height="200"></canvas>
             </div>
             <div class="chart-card">
-              <div class="chart-title">Aceitação da Vacina</div>
+              <div class="chart-title">
+                <span>Aceitação da Vacina</span>
+                <div class="chart-export-btns">
+                  <button class="chart-export-btn" onclick="exportChartPDF('chartDonut', 'Aceitação da Vacina')" title="Exportar para PDF">📄 PDF</button>
+                  <button class="chart-export-btn" onclick="exportChartExcel('chartDonut', 'Aceitação da Vacina')" title="Exportar para Excel">📊 Excel</button>
+                </div>
+              </div>
               <canvas id="chartDonut" height="200"></canvas>
             </div>
           </div>
@@ -1565,7 +2070,7 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
         <div class="page" id="page-ficha">
           <div class="page-header">
             <div class="page-title">Ficha de Mobilização</div>
-            <div class="page-subtitle">Registo de actividade do mobilizador</div>
+            <div class="page-subtitle" id="fichaSubtitle">Registo de actividade do mobilizador</div>
           </div>
           <div class="card">
             <div class="card-title"><span class="dot"></span>Dados Gerais</div>
@@ -1579,8 +2084,15 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
               <div class="form-field"><label>Bairro</label><input type="text" id="f-bairro" placeholder="Ex: Bairro 15 de Março">
               </div>
               <div class="form-field"><label>Data</label><input type="date" id="f-data"></div>
-              <div class="form-field"><label>Nome do Mobilizador</label><input type="text" id="f-mobilizador"
-                  placeholder="Nome completo"></div>
+              <div class="form-field"><label>Nome do Mobilizador</label>
+                <div class="mob-autocomplete-wrap">
+                  <input type="text" id="f-mobilizador" placeholder="Nome completo" autocomplete="off"
+                    oninput="onMobilizadorInput(this.value)" onkeydown="mobAcKeydown(event)"
+                    onfocus="showMobAcDropdown()" onblur="setTimeout(()=>hideMobAcDropdown(),200)">
+                  <div class="mob-autocomplete-dropdown" id="mobAcDropdown"></div>
+                </div>
+                <div id="mobDuplicaAviso" style="display:none;font-size:11px;color:var(--amber);margin-top:4px;font-weight:600"></div>
+              </div>
               <div class="form-field" id="f-coordenacao-wrap">
                 <label>Coordenação</label>
               </div>
@@ -1663,7 +2175,49 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
             <div class="page-title">Fichas Registadas</div>
             <div class="page-subtitle">Histórico de mobilizações</div>
           </div>
-          <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap">
+          <div class="card" style="margin-bottom:16px">
+            <div class="card-title"><span class="dot"></span>Filtros</div>
+            <div class="form-grid">
+              <div class="form-field">
+                <label>Mobilizador</label>
+                <input type="text" id="filtListMob" placeholder="Nome do mobilizador" oninput="applyListFichasFilters()">
+              </div>
+              <div class="form-field" id="filtListCordWrap">
+                <label>Coordenação</label>
+                <select id="filtListCord" onchange="applyListFichasFilters()">
+                  <option value="">Todas</option>
+                </select>
+              </div>
+              <div class="form-field" id="filtListSupWrap" style="display:none">
+                <label>Supervisor</label>
+                <select id="filtListSup" onchange="applyListFichasFilters()">
+                  <option value="">Todos</option>
+                </select>
+              </div>
+              <div class="form-field" id="filtListRondaWrap">
+                <label>Ronda</label>
+                <select id="filtListRonda" onchange="applyListFichasFilters()">
+                  <option value="">Todas</option>
+                  <option value="1">1ª Ronda</option>
+                  <option value="2">2ª Ronda</option>
+                  <option value="3">3ª Ronda</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label>Data início</label>
+                <input type="date" id="filtListDtI" oninput="applyListFichasFilters()">
+              </div>
+              <div class="form-field">
+                <label>Data fim</label>
+                <input type="date" id="filtListDtF" oninput="applyListFichasFilters()">
+              </div>
+              <div class="form-field" style="justify-content:flex-end;padding-top:20px">
+                <button class="btn btn-outline" onclick="clearListFichasFilters()">↺ Limpar Filtros</button>
+              </div>
+            </div>
+            <div id="filtListCount" style="margin-top:10px;font-size:12px;color:var(--text3)"></div>
+          </div>
+          <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap">
             <button class="btn btn-green" onclick="exportExcel()">⬇ Exportar Excel</button>
             <button class="btn btn-outline" onclick="loadFichas().then(renderListFichas)">↺ Actualizar</button>
           </div>
@@ -1676,7 +2230,7 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                     <th>Data</th>
                     <th>Mobilizador</th>
                     <th>Coordenação</th>
-                    <th>Município</th>
+                    <th>Ronda</th>
                     <th>Bairro</th>
                     <th>Locais</th>
                     <th>Pessoas</th>
@@ -1732,6 +2286,7 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
           
           <div class="tabs">
             <div class="tab active" onclick="switchRelTab(this,'rel-locais')">📋 Por Locais</div>
+            <div class="tab" onclick="switchRelTab(this,'rel-supervisor')">👤 Por Supervisor</div>
             <div class="tab" onclick="switchRelTab(this,'rel-coordenacao')">🏠 Por Coordenação</div>
             <div class="tab" onclick="switchRelTab(this,'rel-dia')">📅 Por Dia</div>
             <div class="tab" onclick="switchRelTab(this,'rel-export')">📤 Exportar</div>
@@ -1744,6 +2299,12 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
               <div class="form-grid">
                 <div class="form-field"><label>Coordenação</label><select id="relFiltCord" onchange="applyRelGeral()">
                     <option value="">Todas</option>
+                  </select></div>
+                <div class="form-field"><label>Ronda</label><select id="relFiltRonda" onchange="applyRelGeral()">
+                    <option value="">Todas</option>
+                    <option value="1">1ª Ronda</option>
+                    <option value="2">2ª Ronda</option>
+                    <option value="3">3ª Ronda</option>
                   </select></div>
                 <div class="form-field"><label>Data início</label><input type="date" id="relFiltDtI" oninput="applyRelGeral()"></div>
                 <div class="form-field"><label>Data fim</label><input type="date" id="relFiltDtF" oninput="applyRelGeral()"></div>
@@ -1792,6 +2353,92 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                   </div>
                   </div>
                   </div>
+
+          <!-- POR SUPERVISOR -->
+          <div id="rel-supervisor" style="display:none">
+            <div class="card">
+              <div class="card-title"><span class="dot"></span>Filtros</div>
+              <div class="form-grid">
+                <div class="form-field" id="relSupFiltSupWrap">
+                  <label>Supervisor / Mobilizador</label>
+                  <select id="relSupFiltSup" onchange="applyRelSupervisor()">
+                    <option value="">Todos</option>
+                  </select>
+                </div>
+                <div class="form-field">
+                  <label>Ronda</label>
+                  <select id="relSupFiltRonda" onchange="applyRelSupervisor()">
+                    <option value="">Todas</option>
+                    <option value="1">1ª Ronda</option>
+                    <option value="2">2ª Ronda</option>
+                    <option value="3">3ª Ronda</option>
+                  </select>
+                </div>
+                <div class="form-field">
+                  <label>Data início</label>
+                  <input type="date" id="relSupFiltDtI" oninput="applyRelSupervisor()">
+                </div>
+                <div class="form-field">
+                  <label>Data fim</label>
+                  <input type="date" id="relSupFiltDtF" oninput="applyRelSupervisor()">
+                </div>
+                <div class="form-field" style="justify-content:flex-end;padding-top:20px">
+                  <button class="btn btn-outline" onclick="clearRelSupFiltros()">↺ Limpar</button>
+                </div>
+              </div>
+              <div id="relSupFiltInfo" style="margin-top:8px;font-size:12px;color:var(--text3)"></div>
+            </div>
+            <div class="stats-grid" id="relSupStats" style="margin-bottom:16px"></div>
+            <!-- Tabela agrupada por mobilizador -->
+            <div class="card" style="padding:0">
+              <div class="card-title" style="padding:16px 20px 0"><span class="dot"></span>Resumo por Mobilizador</div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Mobilizador</th>
+                      <th>Coordenação</th>
+                      <th>Ronda</th>
+                      <th>Dias Trabalhados</th>
+                      <th>Fichas</th>
+                      <th>Locais</th>
+                      <th>Pessoas</th>
+                      <th>Sim</th>
+                      <th>Não</th>
+                      <th>% Aceit.</th>
+                    </tr>
+                  </thead>
+                  <tbody id="relSupBody"></tbody>
+                </table>
+              </div>
+            </div>
+            <!-- Detalhe por dia (aparece ao clicar numa linha) -->
+            <div id="relSupDetalhe" style="display:none">
+              <div class="card" style="padding:0;margin-top:0">
+                <div class="card-title" style="padding:16px 20px 0"><span class="dot"></span>
+                  <span id="relSupDetalheTitle">Detalhe por Dia</span>
+                </div>
+                <div class="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Data</th>
+                        <th>Bairro</th>
+                        <th>Coordenação</th>
+                        <th>Locais</th>
+                        <th>Pessoas</th>
+                        <th>Sim</th>
+                        <th>Não</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody id="relSupDetalheBody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
 
           <!-- POR COORDENAÇÃO -->
           <div id="rel-coordenacao" style="display:none">
@@ -1913,13 +2560,34 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
           </div>
           <div class="charts-grid">
             <div class="chart-card">
-              <div class="chart-title">Pessoas por Local de Mobilização</div><canvas id="chartBar2" height="240"></canvas>
+              <div class="chart-title">
+                <span>Pessoas por Local de Mobilização</span>
+                <div class="chart-export-btns">
+                  <button class="chart-export-btn" onclick="exportChartPDF('chartBar2', 'Pessoas por Local de Mobilização')" title="Exportar para PDF">📄 PDF</button>
+                  <button class="chart-export-btn" onclick="exportChartExcel('chartBar2', 'Pessoas por Local de Mobilização')" title="Exportar para Excel">📊 Excel</button>
+                </div>
+              </div>
+              <canvas id="chartBar2" height="240"></canvas>
             </div>
             <div class="chart-card">
-              <div class="chart-title">Evolução Diária de Pessoas Alcançadas</div><canvas id="chartLine" height="240"></canvas>
+              <div class="chart-title">
+                <span>Evolução Diária de Pessoas Alcançadas</span>
+                <div class="chart-export-btns">
+                  <button class="chart-export-btn" onclick="exportChartPDF('chartLine', 'Evolução Diária de Pessoas Alcançadas')" title="Exportar para PDF">📄 PDF</button>
+                  <button class="chart-export-btn" onclick="exportChartExcel('chartLine', 'Evolução Diária de Pessoas Alcançadas')" title="Exportar para Excel">📊 Excel</button>
+                </div>
+              </div>
+              <canvas id="chartLine" height="240"></canvas>
             </div>
             <div class="chart-card">
-              <div class="chart-title">Aceitação: Sim vs Não</div><canvas id="chartDonut2" height="240"></canvas>
+              <div class="chart-title">
+                <span>Aceitação: Sim vs Não</span>
+                <div class="chart-export-btns">
+                  <button class="chart-export-btn" onclick="exportChartPDF('chartDonut2', 'Aceitação: Sim vs Não')" title="Exportar para PDF">📄 PDF</button>
+                  <button class="chart-export-btn" onclick="exportChartExcel('chartDonut2', 'Aceitação: Sim vs Não')" title="Exportar para Excel">📊 Excel</button>
+                </div>
+              </div>
+              <canvas id="chartDonut2" height="240"></canvas>
             </div>
             </div>
             </div>
@@ -1945,6 +2613,7 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
               <div class="form-field"><label>Nome</label><input type="text" id="u-nome" placeholder="Nome completo"></div>
               <div class="form-field"><label>Email</label><input type="email" id="u-email" placeholder="email@exemplo.com"></div>
               <div class="form-field"><label>Senha</label><input type="password" id="u-senha" placeholder="Senha"></div>
+              <div class="form-field" id="u-contactoField"><label>Contacto (Telefone)</label><input type="tel" id="u-contacto" placeholder="Ex: 923 456 789"></div>
               <div class="form-field"><label>Tipo</label><select id="u-tipo" onchange="toggleCordField()">
                   <option value="supervisor">Supervisor</option>
                   <option value="admin">Administrador</option>
@@ -1982,6 +2651,7 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                     <th>#</th>
                     <th>Nome</th>
                     <th>Email</th>
+                    <th>Contacto</th>
                     <th>Tipo</th>
                     <th>Ronda</th>
                     <th>Coordenação</th>
@@ -2041,6 +2711,38 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
               </div>
             </div>
           </div>
+
+          <!-- Painel de datas das rondas (só admin) -->
+          <div class="card" id="rondasDatasPanel" style="display:none">
+            <div class="card-title"><span class="dot"></span>📅 Datas das Rondas</div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px">
+              <div id="ronda-datas-1" style="background:rgba(14,165,233,.06);border:1px solid rgba(14,165,233,.2);border-radius:10px;padding:14px">
+                <div style="font-weight:700;color:#0369a1;margin-bottom:10px">🔵 1ª Ronda</div>
+                <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+                  <div><label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px">Início</label><input type="date" id="ronda-ini-1" onchange="saveRondaDatas()" style="border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:12px;background:var(--bg2);color:var(--text)"></div>
+                  <div><label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px">Fim</label><input type="date" id="ronda-fim-1" onchange="saveRondaDatas()" style="border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:12px;background:var(--bg2);color:var(--text)"></div>
+                  <div id="ronda-estado-1" style="font-size:11px;font-weight:700;margin-top:12px"></div>
+                </div>
+              </div>
+              <div id="ronda-datas-2" style="background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.2);border-radius:10px;padding:14px">
+                <div style="font-weight:700;color:#15803d;margin-bottom:10px">🟢 2ª Ronda</div>
+                <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+                  <div><label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px">Início</label><input type="date" id="ronda-ini-2" onchange="saveRondaDatas()" style="border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:12px;background:var(--bg2);color:var(--text)"></div>
+                  <div><label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px">Fim</label><input type="date" id="ronda-fim-2" onchange="saveRondaDatas()" style="border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:12px;background:var(--bg2);color:var(--text)"></div>
+                  <div id="ronda-estado-2" style="font-size:11px;font-weight:700;margin-top:12px"></div>
+                </div>
+              </div>
+              <div id="ronda-datas-3" style="background:rgba(212,168,23,.06);border:1px solid rgba(212,168,23,.2);border-radius:10px;padding:14px">
+                <div style="font-weight:700;color:#92400e;margin-bottom:10px">🟡 3ª Ronda</div>
+                <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+                  <div><label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px">Início</label><input type="date" id="ronda-ini-3" onchange="saveRondaDatas()" style="border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:12px;background:var(--bg2);color:var(--text)"></div>
+                  <div><label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px">Fim</label><input type="date" id="ronda-fim-3" onchange="saveRondaDatas()" style="border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:12px;background:var(--bg2);color:var(--text)"></div>
+                  <div id="ronda-estado-3" style="font-size:11px;font-weight:700;margin-top:12px"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div id="rondasHistoricoContainer"></div>
         </div>
 
@@ -2055,6 +2757,8 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
             <div class="form-grid">
               <div class="form-field"><label>Nome da Coordenação</label><input type="text" id="cord-nome"
                   placeholder="Ex: Coordenação Norte"></div>
+              <div class="form-field"><label>Nome do Coordenador</label><input type="text" id="cord-coordenador"
+                  placeholder="Ex: Dr. João Silva — responsável da coordenação"></div>
               </div>
               <button class="btn btn-accent" style="margin-top:16px" onclick="addCord()">Adicionar</button>
               </div>
@@ -2065,6 +2769,7 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                   <tr>
                     <th>#</th>
                     <th>Nome</th>
+                    <th>Coordenador</th>
                     <th>Supervisores Associados</th>
                     <th>Ações</th>
                   </tr>
@@ -2074,6 +2779,105 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                 </div>
                 </div>
                 </div>
+
+        <!-- MOBILIZADORES -->
+        <div class="page" id="page-mobilizadores">
+          <div class="page-header">
+            <div class="page-title" id="mobPageTitle">Mobilizadores</div>
+            <div class="page-subtitle" id="mobPageSubtitle">Cadastre e gira os mobilizadores da sua equipa</div>
+          </div>
+
+          <!-- ALERTAS SEM FICHA ONTEM -->
+          <div id="mobAlertaOntem" style="display:none;margin-bottom:16px"></div>
+
+          <!-- RANKING DE MOBILIZADORES POR COORDENAÇÃO -->
+          <div class="card" id="mobRankingCard" style="display:none">
+            <div class="card-title"><span class="dot"></span>🏆 Ranking de Mobilizadores por Coordenação</div>
+            <div id="mobRankingContainer"></div>
+          </div>
+
+          <!-- CADASTRAR MOBILIZADOR -->
+          <div class="card">
+            <div class="card-title"><span class="dot"></span>➕ Cadastrar Novo Mobilizador</div>
+            <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
+              <div class="form-field" style="flex:1;min-width:200px;margin-bottom:0">
+                <label>Nome completo do mobilizador</label>
+                <input type="text" id="mob-novo-nome" placeholder="Ex: João Manuel da Silva"
+                  autocomplete="off" oninput="onMobNovoInput(this.value)"
+                  onkeydown="if(event.key==='Enter')addMobilizador()"
+                  style="width:100%">
+              </div>
+              <button class="btn btn-accent" style="flex-shrink:0;padding:10px 22px" onclick="addMobilizador()">
+                ➕ Adicionar
+              </button>
+            </div>
+            <!-- Campos adicionais só para admin -->
+            <div id="mob-admin-fields" style="display:none;margin-top:14px">
+              <div class="form-grid">
+                <div class="form-field">
+                  <label>📍 Coordenação</label>
+                  <select id="mob-novo-coord" onchange="populateMobSupSelect()" style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-family:'Inter',sans-serif;font-size:13px">
+                    <option value="">— Seleccionar Coordenação —</option>
+                  </select>
+                </div>
+                <div class="form-field">
+                  <label>👤 Supervisor</label>
+                  <select id="mob-novo-sup" style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-family:'Inter',sans-serif;font-size:13px">
+                    <option value="">— Seleccionar Supervisor —</option>
+                  </select>
+                </div>
+              </div>
+              <div style="font-size:11px;color:var(--text3);margin-top:4px">ℹ️ Seleccione a coordenação e o supervisor ao qual este mobilizador pertence.</div>
+            </div>
+            <div id="mob-novo-aviso" style="display:none;font-size:11px;color:var(--coral);margin-top:6px;font-weight:600"></div>
+          </div>
+
+          <!-- FILTROS + LISTA -->
+          <div class="card" style="padding:0">
+            <div style="padding:18px 20px 0">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+                <div class="card-title" style="margin:0"><span class="dot"></span>Lista de Mobilizadores</div>
+                <div style="display:flex;gap:6px">
+                  <button class="mob-filter-tab active" id="mobFiltTodos" onclick="filterMobilizadores('todos')">Todos</button>
+                  <button class="mob-filter-tab" id="mobFiltActivos" onclick="filterMobilizadores('activos')">✅ Activos</button>
+                  <button class="mob-filter-tab" id="mobFiltInactivos" onclick="filterMobilizadores('inactivos')">🚫 Inactivos</button>
+                </div>
+              </div>
+              <div style="margin-bottom:14px">
+                <input type="text" id="mobSearchInput" placeholder="🔍 Pesquisar mobilizador..."
+                  oninput="renderMobilizadoresList()" style="width:100%;max-width:320px">
+              </div>
+            </div>
+            <div id="mobListContainer" style="min-height:80px">
+              <div style="padding:32px;text-align:center;color:var(--text3);font-size:13px">A carregar...</div>
+            </div>
+          </div>
+
+          <!-- NOTA ADMIN: gerir todos os mobilizadores -->
+          <div id="mobAdminPanel" style="display:none">
+            <div class="card" style="border-color:rgba(44,95,45,.3);background:rgba(44,95,45,.03)">
+              <div class="card-title"><span class="dot"></span>🛡️ Gestão Global de Mobilizadores (Administrador)</div>
+              <p style="font-size:13px;color:var(--text2);margin-bottom:16px">
+                Visualize e gira mobilizadores de todos os supervisores. Use o toggle para activar/inactivar.
+                Um mobilizador inactivado deixa de aparecer no autocomplete do supervisor, mas os dados históricos são preservados.
+              </p>
+              <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap">
+                <button class="mob-filter-tab active" id="mobAdmFiltTodos" onclick="filterMobilizadoresAdmin('todos')">Todos</button>
+                <button class="mob-filter-tab" id="mobAdmFiltActivos" onclick="filterMobilizadoresAdmin('activos')">✅ Activos</button>
+                <button class="mob-filter-tab" id="mobAdmFiltInactivos" onclick="filterMobilizadoresAdmin('inactivos')">🚫 Inactivos</button>
+              </div>
+              <div style="margin-bottom:14px;display:flex;gap:10px;flex-wrap:wrap">
+                <input type="text" id="mobAdmSearchInput" placeholder="🔍 Pesquisar..." oninput="renderMobilizadoresAdmin()" style="flex:1;min-width:180px;max-width:280px">
+                <select id="mobAdmFiltSup" onchange="renderMobilizadoresAdmin()" style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-family:'Inter',sans-serif;font-size:13px;color:var(--text)">
+                  <option value="">Todos os supervisores</option>
+                </select>
+              </div>
+              <div id="mobAdminListContainer" style="min-height:80px">
+                <div style="padding:32px;text-align:center;color:var(--text3);font-size:13px">A carregar...</div>
+              </div>
+            </div>
+          </div>
+        </div>
 
         <!-- PERFIL & SENHAS -->
         <div class="page" id="page-perfil">
@@ -2450,7 +3254,7 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                     async function loadCords() {
                       try {
                         const snap = await db.collection('coordenacoes').orderBy('nome').get();
-                        _cords = snap.docs.map(d => ({ id: d.id, nome: d.data().nome }));
+                        _cords = snap.docs.map(d => ({ id: d.id, nome: d.data().nome, coordenador: d.data().coordenador || '' }));
                         DB.set('coordenacoes', _cords);
                         return _cords;
                       } catch (e) {
@@ -2465,13 +3269,13 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                         const snap = await db.collection('utilizadores').orderBy('nome').get();
                         _users = snap.docs.map(d => {
                           const x = d.data();
-                          return { id: d.id, nome: x.nome, email: (x.email || '').trim().toLowerCase(), senha: (x.senha || '').trim(), tipo: x.tipo, coordId: x.coord_id || null, ronda: x.ronda || null, activo: x.activo !== false };
+                          return { id: d.id, nome: x.nome, email: (x.email || '').trim().toLowerCase(), senha: (x.senha || '').trim(), tipo: x.tipo, coordId: x.coord_id || null, ronda: x.ronda || null, contacto: x.contacto || null, activo: x.activo !== false };
                         });
                         DB.set('users', _users);
                         return _users;
                       } catch (e) {
                         console.warn('loadUsers offline:', e.message);
-                        _users = (DB.get('users') || []).map(x => ({ ...x, email: (x.email || '').trim().toLowerCase(), senha: (x.senha || '').trim(), ronda: x.ronda || null, activo: x.activo !== false }));
+                        _users = (DB.get('users') || []).map(x => ({ ...x, email: (x.email || '').trim().toLowerCase(), senha: (x.senha || '').trim(), ronda: x.ronda || null, contacto: x.contacto || null, activo: x.activo !== false }));
                         return _users;
                       }
                     }
@@ -2522,16 +3326,44 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                       }
                     }
 
-                    async function persistCord(nome) {
+                    async function updateFichaRemote(id, fichaAtualizada) {
                       try {
-                        const ref = await db.collection('coordenacoes').add({ nome, created_at: firebase.firestore.FieldValue.serverTimestamp() });
+                        const payload = {
+                          provincia: fichaAtualizada.provincia, municipio: fichaAtualizada.municipio,
+                          comuna: fichaAtualizada.comuna, bairro: fichaAtualizada.bairro,
+                          data: fichaAtualizada.data, mobilizador: fichaAtualizada.mobilizador,
+                          coord_id: fichaAtualizada.coordId || null, coord_nome: fichaAtualizada.coordNome || null,
+                          user_id: fichaAtualizada.userId || null, ronda: fichaAtualizada.ronda || null,
+                          table_data: fichaAtualizada.tableData || {},
+                          total_locais: fichaAtualizada.totalLocais || 0,
+                          total_pessoas: fichaAtualizada.totalPessoas || 0,
+                          sim: fichaAtualizada.sim || 0, nao: fichaAtualizada.nao || 0,
+                          motivo: fichaAtualizada.motivo || null
+                        };
+                        await db.collection('fichas_mobilizacao').doc(String(id)).update(payload);
+                        return true;
+                      } catch (e) {
+                        console.error('updateFichaRemote Firebase, usando local:', e);
+                        // fallback local
+                        try {
+                          const arr = DB.get('fichas') || [];
+                          const idx = arr.findIndex(f => f.id === id);
+                          if (idx >= 0) { arr[idx] = fichaAtualizada; DB.set('fichas', arr); _fichas = arr; }
+                          return true;
+                        } catch (e2) { console.error('updateFichaRemote local:', e2); return false; }
+                      }
+                    }
+
+                    async function persistCord(nome, coordenador) {
+                      try {
+                        const ref = await db.collection('coordenacoes').add({ nome, coordenador: coordenador || '', created_at: firebase.firestore.FieldValue.serverTimestamp() });
                         await loadCords();
                         return ref.id;
                       } catch (e) {
                         console.error('persistCord:', e);
                         const id = 'local_' + Date.now();
                         const arr = DB.get('coordenacoes') || [];
-                        arr.push({ id, nome });
+                        arr.push({ id, nome, coordenador: coordenador || '' });
                         DB.set('coordenacoes', arr);
                         _cords = arr;
                         return id;
@@ -2560,7 +3392,7 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                         if ((_users || []).find(x => x.email === u.email)) throw new Error('Email já existe');
                       }
                       try {
-                        const payload = { nome: u.nome, email: u.email, senha: u.senha, tipo: u.tipo, coord_id: u.coordId || null, ronda: u.ronda || null, activo: u.activo !== false, created_at: firebase.firestore.FieldValue.serverTimestamp() };
+                        const payload = { nome: u.nome, email: u.email, senha: u.senha, tipo: u.tipo, coord_id: u.coordId || null, ronda: u.ronda || null, contacto: u.contacto || null, activo: u.activo !== false, created_at: firebase.firestore.FieldValue.serverTimestamp() };
                         const ref = await db.collection('utilizadores').add(payload);
                         await loadUsers();
                         return ref.id;
@@ -2660,6 +3492,8 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                     function doLogout() {
                       stopPresence();
                       currentUser = null; DB.set('session', null);
+                      const topbar = document.getElementById('fichasTopbar');
+                      if (topbar) topbar.classList.remove('show');
                       document.getElementById('appShell').style.display = 'none';
                       document.getElementById('loginScreen').style.display = 'flex';
                     }
@@ -2679,14 +3513,25 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                     const av = document.getElementById('sidebarAvatar');
                     if(av) av.textContent = (currentUser.nome||'?')[0].toUpperCase();
                     document.getElementById('sidebarRole').textContent = currentUser.tipo === 'admin' ? 'ADMINISTRADOR' : 'SUPERVISOR';
-                    document.getElementById('sidebarCord').textContent = cord ? cord.nome : (currentUser.tipo === 'admin' ? 'Acesso Global' : '—');
+                    // Show coord name + coordenador name for supervisor
+                    if (currentUser.tipo === 'supervisor' && cord) {
+                      const coordenadorInfo = cord.coordenador ? ` · ${cord.coordenador}` : '';
+                      document.getElementById('sidebarCord').textContent = cord.nome + coordenadorInfo;
+                    } else {
+                      document.getElementById('sidebarCord').textContent = currentUser.tipo === 'admin' ? 'Acesso Global' : '—';
+                    }
                     document.getElementById('adminNav').style.display = currentUser.tipo === 'admin' ? 'block' : 'none';
                     buildFichaTable(); setTodayDate(); updateCoordField();
                     await loadFichas();
+                    await loadMobilizadores();
                     // Apply saved avatar
                     applyAvatar(currentUser.id, currentUser.nome);
                     // Presença: todos registam, só admin vê o painel
                     startPresence();
+                    updateTopbar();
+                    adjustForTopbar();
+                    loadNotificationsStore();
+                    setTimeout(checkAndFireNotifications, 3000);
                     showPage('dashboard');
                   }
 
@@ -2802,52 +3647,104 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                   }
 
                     async function saveFicha() {
-                      const mob = document.getElementById('f-mobilizador').value.trim();
-                      const dt = document.getElementById('f-data').value;
+                      const mob    = document.getElementById('f-mobilizador').value.trim();
+                      const dt     = document.getElementById('f-data').value;
                       const bairro = document.getElementById('f-bairro').value.trim();
-                      if (!mob || !dt || !bairro) { showToast('Preencha o Bairro, Nome do Mobilizador e Data', 'error'); return }
+                      if (!mob || !dt || !bairro) { showToast('Preencha o Bairro, Nome do Mobilizador e Data', 'error'); return; }
 
-                    let selectedCoordId, selectedCoordNome;
-                    if (currentUser.tipo === 'admin') {
-                      const sel = document.getElementById('f-coordenacao');
-                      selectedCoordId = sel ? parseInt(sel.value) : null;
-                      const cord = _cords.find(c => c.id === selectedCoordId);
-                      selectedCoordNome = cord ? cord.nome : '';
-                      if (!selectedCoordId) { showToast('Seleccione uma coordenação destino', 'error'); return }
-                    } else {
-                    selectedCoordId = currentUser.coordId;
-                    const cord = _cords.find(c => c.id === currentUser.coordId);
-                    selectedCoordNome = cord ? cord.nome : '';
-                  }
+                      let selectedCoordId, selectedCoordNome;
+                      if (currentUser.tipo === 'admin') {
+                        const sel = document.getElementById('f-coordenacao');
+                        selectedCoordId = sel ? parseInt(sel.value) : null;
+                        const cord = _cords.find(c => c.id === selectedCoordId);
+                        selectedCoordNome = cord ? cord.nome : '';
+                        if (!selectedCoordId) { showToast('Seleccione uma coordenação destino', 'error'); return; }
+                      } else {
+                        selectedCoordId = currentUser.coordId;
+                        const cord = _cords.find(c => c.id === currentUser.coordId);
+                        selectedCoordNome = cord ? cord.nome : '';
+                      }
 
-                    const { totalLocais, totalPessoas } = getFichaTotals();
-                    const btn = document.getElementById('btnSave');
-                    const mobileBtn = document.getElementById('mobileBtnSave');
-                    if (btn) btn.disabled = true;
-                    if (mobileBtn) mobileBtn.disabled = true;
+                      const { totalLocais, totalPessoas } = getFichaTotals();
+                      const novaTableData = getFichaData();
+                      const novaSim    = parseInt(document.getElementById('f-sim').value)   || 0;
+                      const novaNao    = parseInt(document.getElementById('f-nao').value)   || 0;
+                      const novoMotivo = document.getElementById('f-motivo').value.trim();
 
-                    showLoading('A guardar ficha...');
-                    const ficha = {
-                      id: Date.now(), provincia: 'CUANZA-SUL', municipio: 'SUMBE',
-                      comuna: 'SEDE',
-                      bairro,
-                    data: dt, mobilizador: mob,
-                    telefone: '',
-                    coordId: selectedCoordId, coordNome: selectedCoordNome,
-                    userId: currentUser.id, tableData: getFichaData(),
-                    totalLocais, totalPessoas,
-                    sim: parseInt(document.getElementById('f-sim').value) || 0,
-                    nao: parseInt(document.getElementById('f-nao').value) || 0,
-                    motivo: document.getElementById('f-motivo').value.trim()
-                  };
-                    const ok = await persistFicha(ficha);
-                    hideLoading();
-                    if (btn) btn.disabled = false;
-                    if (mobileBtn) mobileBtn.disabled = false;
+                      const btn       = document.getElementById('btnSave');
+                      const mobileBtn = document.getElementById('mobileBtnSave');
+                      if (btn)       btn.disabled       = true;
+                      if (mobileBtn) mobileBtn.disabled = true;
 
-                    if (ok) { showToast('Ficha guardada com sucesso! ✓', 'success'); resetFicha(); showPage('listFichas'); }
-                    else showToast('Erro ao guardar. Verifique a ligação.', 'error');
-                  }
+                      // ── Verificar se já existe ficha deste mobilizador no mesmo dia ──
+                      const fichaExistente = getVisibleFichas().find(f =>
+                        (f.mobilizador||'').trim().toLowerCase() === mob.toLowerCase() && f.data === dt
+                      );
+
+                      showLoading(fichaExistente ? 'A somar dados à ficha existente...' : 'A guardar ficha...');
+
+                      if (fichaExistente) {
+                        // Merge: somar tableData locais a locais, pessoas a pessoas
+                        const mergedTableData = { ...fichaExistente.tableData };
+                        Object.keys(novaTableData).forEach(k => {
+                          const nv = novaTableData[k];
+                          const vv = mergedTableData[k];
+                          if (Array.isArray(nv)) {
+                            mergedTableData[k] = [
+                              ((Array.isArray(vv) ? vv[0] : 0) || 0) + (nv[0] || 0),
+                              ((Array.isArray(vv) ? vv[1] : 0) || 0) + (nv[1] || 0)
+                            ];
+                          }
+                        });
+                        let mLocais = 0, mPessoas = 0;
+                        Object.values(mergedTableData).forEach(v => { if (Array.isArray(v)) { mLocais += v[0]||0; mPessoas += v[1]||0; } });
+                        const fichaAtualizada = {
+                          ...fichaExistente,
+                          tableData: mergedTableData,
+                          totalLocais:  mLocais,
+                          totalPessoas: mPessoas,
+                          sim:    (fichaExistente.sim || 0) + novaSim,
+                          nao:    (fichaExistente.nao || 0) + novaNao,
+                          motivo: novoMotivo || fichaExistente.motivo || null,
+                          bairro: bairro || fichaExistente.bairro
+                        };
+                        const ok = await updateFichaRemote(fichaExistente.id, fichaAtualizada);
+                        hideLoading();
+                        if (btn)       btn.disabled       = false;
+                        if (mobileBtn) mobileBtn.disabled = false;
+                        if (ok) {
+                          const idx = _fichas.findIndex(f => f.id === fichaExistente.id);
+                          if (idx >= 0) _fichas[idx] = fichaAtualizada;
+                          const fichasDB = DB.get('fichas') || [];
+                          const idxDB = fichasDB.findIndex(f => f.id === fichaExistente.id);
+                          if (idxDB >= 0) { fichasDB[idxDB] = fichaAtualizada; DB.set('fichas', fichasDB); }
+                          const rondaTexto = currentUser.ronda ? ` · Ronda ${currentUser.ronda}ª` : '';
+                          showSaveConfirm({ bairro, mobilizador: mob, data: dt, totalPessoas: fichaAtualizada.totalPessoas, totalLocais: fichaAtualizada.totalLocais, sim: fichaAtualizada.sim, coordNome: selectedCoordNome, ronda: rondaTexto, merged: true });
+                          resetFicha();
+                        } else showToast('Erro ao actualizar ficha. Verifique a ligação.', 'error');
+                        return;
+                      }
+
+                      // ── Nova ficha ──
+                      const ficha = {
+                        id: Date.now(), provincia: 'CUANZA-SUL', municipio: 'SUMBE', comuna: 'SEDE',
+                        bairro, data: dt, mobilizador: mob, telefone: '',
+                        coordId: selectedCoordId, coordNome: selectedCoordNome,
+                        userId: currentUser.id, ronda: currentUser.ronda || null,
+                        tableData: novaTableData, totalLocais, totalPessoas,
+                        sim: novaSim, nao: novaNao, motivo: novoMotivo
+                      };
+                      const ok = await persistFicha(ficha);
+                      hideLoading();
+                      if (btn)       btn.disabled       = false;
+                      if (mobileBtn) mobileBtn.disabled = false;
+                      if (ok) {
+                        const rondaTexto = currentUser.ronda ? ` · Ronda ${currentUser.ronda}ª` : '';
+                        notifyFichaGuardada(mob, bairro, totalPessoas);
+                        showSaveConfirm({ bairro, mobilizador: mob, data: dt, totalPessoas, totalLocais, sim: novaSim, coordNome: selectedCoordNome, ronda: rondaTexto, merged: false });
+                        resetFicha();
+                      } else showToast('Erro ao guardar. Verifique a ligação.', 'error');
+                    }
 
                     function resetFicha() {
                       ['f-bairro', 'f-mobilizador', 'f-motivo'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
@@ -2860,6 +3757,24 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                     function updateCoordField() {
                       const wrap = document.getElementById('f-coordenacao-wrap');
                       if (!wrap) return;
+                      // Mostrar ronda activa no subtitle
+                      const sub = document.getElementById('fichaSubtitle');
+                      if (sub) {
+                        if (currentUser.tipo === 'supervisor' && currentUser.ronda) {
+                          const rondaColors = {'1':'#0369a1','2':'#15803d','3':'#92400e'};
+                          const rondaBgs   = {'1':'rgba(14,165,233,.1)','2':'rgba(34,197,94,.1)','3':'rgba(212,168,23,.1)'};
+                          const rondaIcons = {'1':'🔵','2':'🟢','3':'🟡'};
+                          const r = String(currentUser.ronda);
+                          const cor = rondaColors[r] || 'var(--text2)';
+                          const bg  = rondaBgs[r]   || 'rgba(0,0,0,.06)';
+                          const ic  = rondaIcons[r]  || '⚪';
+                          sub.innerHTML = `Registo de actividade do mobilizador &nbsp;·&nbsp; <span style="background:${bg};color:${cor};padding:2px 10px;border-radius:20px;font-weight:700;font-size:12px;border:1px solid ${cor}33">${ic} ${r}ª Ronda activa</span>`;
+                        } else if (currentUser.tipo === 'supervisor') {
+                          sub.innerHTML = `Registo de actividade do mobilizador &nbsp;·&nbsp; <span style="background:rgba(212,168,23,.1);color:var(--amber);padding:2px 10px;border-radius:20px;font-weight:600;font-size:12px;border:1px solid rgba(212,168,23,.3)">⚠️ Sem ronda atribuída</span>`;
+                        } else {
+                          sub.textContent = 'Registo de actividade do mobilizador';
+                        }
+                      }
                       if (currentUser.tipo === 'admin') {
                         let opts = _cords.map(c => `<option value="${c.id}">${c.nome}</option>`).join('');
                         wrap.innerHTML = `<label style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px">Coordenação</label>
@@ -2874,7 +3789,7 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                     }
                   }
 
-                    function getVisibleFichas() { return currentUser.tipo === 'admin' ? _fichas : _fichas.filter(f => f.coordId === currentUser.coordId); }
+                    function getVisibleFichas() { return currentUser.tipo === 'admin' ? _fichas : _fichas.filter(f => f.userId === currentUser.id); }
 
                     // PAGE ROUTING
                     let chartBar = null, chartDonut = null, chartBar2 = null, chartLine = null, chartDonut2 = null;
@@ -2887,17 +3802,18 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                         n.classList.toggle('active', !!(n.getAttribute('onclick') && n.getAttribute('onclick').includes("'" + id + "'")));
                       });
                       closeSidebar();
-                    if (id === 'ficha') { updateCoordField(); }
+                    if (id === 'ficha') { updateCoordField(); populateMobilizadoresList(); }
                     if (id === 'dashboard') renderDashboard();
                     if (id === 'mapa') renderMapPage();
                     if (id === 'listFichas') renderListFichas();
                     if (id === 'consolidado') renderConsolidado();
-                    if (id === 'relatorios') { populateRelCords(); populateRelDiaCords(); applyRelGeral(); }
+                    if (id === 'relatorios') { populateRelCords(); populateRelDiaCords(); populateRelSup(); applyRelGeral(); }
                     if (id === 'graficos') renderGraficos();
                     if (id === 'utilizadores') renderUsers();
                     if (id === 'coordenacoes') renderCords();
                     if (id === 'rondas') renderHistoricoRondas();
                     if (id === 'perfil') renderPerfil();
+                    if (id === 'mobilizadores') renderMobilizadoresPage();
                   }
 
                     // MAP PAGE
@@ -3064,9 +3980,17 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                     // Ranking de mobilizadores
                     generateRanking(fichas);
 
+                    // Painel de supervisores (só admin)
+                    renderDashSupPanel();
+
                     // Atualizar subtitle
                     const cord = _cords.find(c => c.id === currentUser.coordId);
-                    document.getElementById('dashSubtitle').textContent = currentUser.tipo === 'supervisor' && cord ? 'Coordenação: ' + cord.nome : 'Visão geral e análise inteligente do sistema';
+                    if (currentUser.tipo === 'supervisor' && cord) {
+                      const coordenadorSuffix = cord.coordenador ? ` — Coordenador: ${cord.coordenador}` : '';
+                      document.getElementById('dashSubtitle').textContent = 'Coordenação: ' + cord.nome + coordenadorSuffix;
+                    } else {
+                      document.getElementById('dashSubtitle').textContent = 'Visão geral e análise inteligente do sistema';
+                    }
 
                     // Gráficos
                     const ld = getLocalTotals(fichas);
@@ -3289,6 +4213,114 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                   }).join('');
                   }
 
+                    function renderDashSupPanel() {
+                      const panel = document.getElementById('dashSupPanel');
+                      const cont = document.getElementById('dashSupContent');
+                      if (!panel || !cont) return;
+                      if (currentUser.tipo !== 'admin') { panel.style.display = 'none'; return; }
+                      panel.style.display = 'block';
+                      const hoje = new Date().toISOString().split('T')[0];
+                      const sups = _users.filter(u => u.tipo === 'supervisor');
+                      const activos = sups.filter(u => u.activo !== false);
+                      const inativos = sups.filter(u => u.activo === false);
+                      const lancouHoje = activos.filter(u => _fichas.some(f => f.userId === u.id && f.data === hoje));
+                      const naoLancouHoje = activos.filter(u => !_fichas.some(f => f.userId === u.id && f.data === hoje));
+
+                      const rondaLabel = r => {
+                        if (!r) return '<span style="color:var(--text3);font-size:10px">—</span>';
+                        const c = r=='1'?'#0369a1':r=='2'?'#15803d':'#92400e';
+                        const bg = r=='1'?'rgba(14,165,233,.1)':r=='2'?'rgba(34,197,94,.1)':'rgba(212,168,23,.1)';
+                        return `<span style="background:${bg};color:${c};padding:1px 7px;border-radius:8px;font-size:10px;font-weight:700">${r}ª</span>`;
+                      };
+
+                      let html = `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px">
+                        <div style="background:rgba(34,177,76,.07);border:1px solid rgba(34,177,76,.2);border-radius:10px;padding:12px;text-align:center">
+                          <div style="font-size:22px;font-weight:800;color:var(--surf-dark);font-family:'JetBrains Mono',monospace">${activos.length}</div>
+                          <div style="font-size:11px;color:var(--text3);margin-top:2px">Activos</div>
+                        </div>
+                        <div style="background:rgba(231,76,60,.06);border:1px solid rgba(231,76,60,.18);border-radius:10px;padding:12px;text-align:center">
+                          <div style="font-size:22px;font-weight:800;color:var(--coral);font-family:'JetBrains Mono',monospace">${inativos.length}</div>
+                          <div style="font-size:11px;color:var(--text3);margin-top:2px">Inactivos</div>
+                        </div>
+                        <div style="background:rgba(44,95,45,.07);border:1px solid rgba(44,95,45,.2);border-radius:10px;padding:12px;text-align:center">
+                          <div style="font-size:22px;font-weight:800;color:var(--primary);font-family:'JetBrains Mono',monospace">${lancouHoje.length}</div>
+                          <div style="font-size:11px;color:var(--text3);margin-top:2px">Lançaram hoje</div>
+                        </div>
+                        <div style="background:rgba(212,168,23,.07);border:1px solid rgba(212,168,23,.2);border-radius:10px;padding:12px;text-align:center">
+                          <div style="font-size:22px;font-weight:800;color:var(--amber);font-family:'JetBrains Mono',monospace">${naoLancouHoje.length}</div>
+                          <div style="font-size:11px;color:var(--text3);margin-top:2px">Sem ficha hoje</div>
+                        </div>
+                      </div>`;
+
+                      if (naoLancouHoje.length > 0) {
+                        html += `<div style="font-size:11px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">⚠️ Sem ficha hoje (${naoLancouHoje.length})</div>
+                        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px">`;
+                        naoLancouHoje.forEach(u => {
+                          const cord = _cords.find(c => c.id === u.coordId);
+                          html += `<div style="background:rgba(212,168,23,.08);border:1px solid rgba(212,168,23,.25);border-radius:8px;padding:7px 12px;font-size:12px;display:flex;align-items:center;gap:7px">
+                            <span style="font-weight:600">${u.nome}</span>
+                            ${rondaLabel(u.ronda)}
+                            ${cord ? `<span style="color:var(--text3);font-size:10px">${cord.nome}</span>` : ''}
+                          </div>`;
+                        });
+                        html += `</div>`;
+                      }
+
+                      if (lancouHoje.length > 0) {
+                        html += `<div style="font-size:11px;font-weight:700;color:var(--surf-dark);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">✅ Lançaram hoje (${lancouHoje.length})</div>
+                        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px">`;
+                        lancouHoje.forEach(u => {
+                          const fichasHoje = _fichas.filter(f => f.userId === u.id && f.data === hoje);
+                          const pessoasHoje = fichasHoje.reduce((s,f) => s+(f.totalPessoas||0),0);
+                          html += `<div style="background:rgba(34,177,76,.07);border:1px solid rgba(34,177,76,.2);border-radius:8px;padding:7px 12px;font-size:12px;display:flex;align-items:center;gap:7px">
+                            <span style="font-weight:600">${u.nome}</span>
+                            ${rondaLabel(u.ronda)}
+                            <span style="color:var(--surf-dark);font-family:'JetBrains Mono',monospace;font-size:11px">${pessoasHoje} pess.</span>
+                          </div>`;
+                        });
+                        html += `</div>`;
+                      }
+
+                      // ── Ranking por ronda ──
+                      const rondas = ['1','2','3'];
+                      const rondaNomes = {'1':'1ª Ronda','2':'2ª Ronda','3':'3ª Ronda'};
+                      const rondaCores = {'1':'#0369a1','2':'#15803d','3':'#92400e'};
+                      const rondaBgs   = {'1':'rgba(14,165,233,.07)','2':'rgba(34,197,94,.07)','3':'rgba(212,168,23,.07)'};
+                      const rondaBords = {'1':'rgba(14,165,233,.2)','2':'rgba(34,197,94,.2)','3':'rgba(212,168,23,.2)'};
+                      const rondaIcons = {'1':'🔵','2':'🟢','3':'🟡'};
+
+                      let hasRanking = false;
+                      let rankHtml = `<div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">📊 Ranking por Ronda</div>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px">`;
+
+                      rondas.forEach(r => {
+                        const supsRonda = activos.filter(u => String(u.ronda) === r);
+                        if (!supsRonda.length) return;
+                        hasRanking = true;
+                        const sorted = supsRonda.map(u => ({
+                          ...u,
+                          fichasTotal: _fichas.filter(f => f.userId === u.id).length,
+                          pessoasTotal: _fichas.filter(f => f.userId === u.id).reduce((s,f)=>s+(f.totalPessoas||0),0)
+                        })).sort((a,b) => b.pessoasTotal - a.pessoasTotal);
+
+                        rankHtml += `<div style="background:${rondaBgs[r]};border:1px solid ${rondaBords[r]};border-radius:10px;padding:12px">
+                          <div style="font-size:12px;font-weight:700;color:${rondaCores[r]};margin-bottom:8px">${rondaIcons[r]} ${rondaNomes[r]} — ${supsRonda.length} sup.</div>`;
+                        sorted.slice(0,5).forEach((u,i) => {
+                          const medal = i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
+                          rankHtml += `<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid ${rondaBords[r]};font-size:12px">
+                            <span>${medal} <span style="font-weight:${i<3?'700':'500'}">${u.nome}</span></span>
+                            <span style="font-family:'JetBrains Mono',monospace;color:${rondaCores[r]};font-size:11px">${u.pessoasTotal.toLocaleString()} pess.</span>
+                          </div>`;
+                        });
+                        rankHtml += `</div>`;
+                      });
+                      rankHtml += `</div>`;
+
+                      if (hasRanking) html += rankHtml;
+
+                      cont.innerHTML = html || '<p style="color:var(--text3);font-size:13px">Nenhum supervisor activo.</p>';
+                    }
+
                     function refreshDashboard() {
                       showLoading('A atualizar dados...');
                     setTimeout(() => {
@@ -3306,8 +4338,73 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                     }
 
                     // LIST FICHAS
+                    function applyListFichasFilters() {
+                      const mob   = document.getElementById('filtListMob')?.value.trim().toLowerCase() || '';
+                      const cord  = document.getElementById('filtListCord')?.value || '';
+                      const sup   = document.getElementById('filtListSup')?.value || '';
+                      const ronda = document.getElementById('filtListRonda')?.value || '';
+                      const dtI   = document.getElementById('filtListDtI')?.value || '';
+                      const dtF   = document.getElementById('filtListDtF')?.value || '';
+                      let fichas = getVisibleFichas().slice().sort((a, b) => (b.data || '').localeCompare(a.data || ''));
+                      if (mob)   fichas = fichas.filter(f => (f.mobilizador || '').toLowerCase().includes(mob));
+                      if (cord)  fichas = fichas.filter(f => String(f.coordId) === cord);
+                      if (sup)   fichas = fichas.filter(f => String(f.userId) === sup);
+                      if (ronda) fichas = fichas.filter(f => String(f.ronda) === ronda);
+                      if (dtI)   fichas = fichas.filter(f => f.data >= dtI);
+                      if (dtF)   fichas = fichas.filter(f => f.data <= dtF);
+                      renderListFichasTable(fichas);
+                      const cnt = document.getElementById('filtListCount');
+                      if (cnt) cnt.textContent = fichas.length + ' ficha(s) encontrada(s)';
+                    }
+
+                    function clearListFichasFilters() {
+                      ['filtListMob','filtListDtI','filtListDtF'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+                      ['filtListCord','filtListRonda','filtListSup'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+                      const rondaSel = document.getElementById('filtListRonda');
+                      if (rondaSel) delete rondaSel.dataset.userSet;
+                      applyListFichasFilters();
+                    }
+
+                    function populateListFichasCords() {
+                      // Coordenação e Supervisor — só admin vê
+                      const cordWrap = document.getElementById('filtListCordWrap');
+                      const supWrap  = document.getElementById('filtListSupWrap');
+                      if (currentUser.tipo !== 'admin') {
+                        if (cordWrap) cordWrap.style.display = 'none';
+                        if (supWrap)  supWrap.style.display  = 'none';
+                      } else {
+                        if (supWrap) supWrap.style.display = '';
+                        const supSel = document.getElementById('filtListSup');
+                        if (supSel) {
+                          supSel.innerHTML = '<option value="">Todos</option>';
+                          _users.filter(u => u.tipo === 'supervisor').sort((a,b)=>a.nome.localeCompare(b.nome))
+                            .forEach(u => supSel.innerHTML += `<option value="${u.id}">${u.nome}</option>`);
+                        }
+                      }
+                      const sel = document.getElementById('filtListCord'); if (!sel) return;
+                      sel.innerHTML = '<option value="">Todas</option>';
+                      _cords.forEach(c => sel.innerHTML += `<option value="${c.id}">${c.nome}</option>`);
+
+                      // Ronda — supervisores vêem a sua ronda pré-seleccionada se tiverem ronda definida
+                      const rondaSel = document.getElementById('filtListRonda');
+                      if (rondaSel && currentUser.tipo === 'supervisor' && currentUser.ronda && !rondaSel.dataset.userSet) {
+                        rondaSel.value = String(currentUser.ronda);
+                        rondaSel.dataset.userSet = '1';
+                      }
+                    }
+
                     function renderListFichas() {
-                      const fichas = getVisibleFichas().slice().sort((a, b) => (b.data || '').localeCompare(a.data || ''));
+                      populateListFichasCords();
+                      applyListFichasFilters();
+                    }
+
+                    function renderListFichasTable(fichas) {
+                      const rondaLabel = r => {
+                        if (!r) return '<span style="color:var(--text3);font-size:11px">—</span>';
+                        const c = r=='1'?'#0369a1':r=='2'?'#15803d':'#92400e';
+                        const bg = r=='1'?'rgba(14,165,233,.12)':r=='2'?'rgba(34,197,94,.12)':'rgba(212,168,23,.12)';
+                        return `<span style="background:${bg};color:${c};padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700">${r}ª Ronda</span>`;
+                      };
                       const tbody = document.getElementById('listFichasBody');
                       tbody.innerHTML = '';
                       fichas.forEach((f, i) => {
@@ -3316,7 +4413,7 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
       <td>${f.data || '—'}</td>
       <td style="font-weight:600">${f.mobilizador || '—'}</td>
       <td><span class="badge badge-sup">${f.coordNome || '—'}</span></td>
-      <td>${f.municipio || '—'}</td>
+      <td>${rondaLabel(f.ronda)}</td>
       <td>${f.bairro || '—'}</td>
       <td style="font-family:'JetBrains Mono',monospace">${f.totalLocais || 0}</td>
       <td style="font-family:'JetBrains Mono',monospace;color:var(--accent)">${(f.totalPessoas || 0).toLocaleString()}</td>
@@ -3325,9 +4422,9 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
         <button class="btn btn-danger btn-sm" onclick="deleteFicha(${f.id})">🗑</button>
       </td>
     </tr>`;
-                    });
-                    if (!fichas.length) tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:32px;color:var(--text3)">Nenhuma ficha registada</td></tr>';
-                  }
+                      });
+                      if (!fichas.length) tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:32px;color:var(--text3)">Nenhuma ficha encontrada</td></tr>';
+                    }
 
                     function verFicha(id) {
                       const f = _fichas.find(x => x.id === id);
@@ -3373,14 +4470,15 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                     function switchRelTab(el, id) {
                       document.querySelectorAll('#page-relatorios .tab').forEach(t => t.classList.remove('active'));
                       el.classList.add('active');
-                    ['rel-locais', 'rel-coordenacao', 'rel-dia', 'rel-export'].forEach(s => {
-                      const el2 = document.getElementById(s); if (el2) el2.style.display = s === id ? 'block' : 'none';
-                    });
-                    if (id === 'rel-locais') { populateRelCords(); applyRelGeral(); }
-                    if (id === 'rel-coordenacao') { applyRelCord(); }
-                    if (id === 'rel-dia') { populateRelCords(); populateRelDiaCords(); }
-                    if (id === 'rel-export') { populateExpCords(); previewRelatorio(); }
-                  }
+                      ['rel-locais','rel-supervisor','rel-coordenacao','rel-dia','rel-export'].forEach(s => {
+                        const el2 = document.getElementById(s); if (el2) el2.style.display = s === id ? 'block' : 'none';
+                      });
+                      if (id === 'rel-locais')      { populateRelCords(); applyRelGeral(); }
+                      if (id === 'rel-supervisor')   { populateRelSup(); applyRelSupervisor(); }
+                      if (id === 'rel-coordenacao') { applyRelCord(); }
+                      if (id === 'rel-dia')          { populateRelCords(); populateRelDiaCords(); }
+                      if (id === 'rel-export')       { populateExpCords(); previewRelatorio(); }
+                    }
 
                     function agregaLocais(fichas) {
                       const totals = {};
@@ -3449,10 +4547,12 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                     function applyRelGeral() {
                       let fichas = getVisibleFichas();
                       const cord = document.getElementById('relFiltCord')?.value;
+                      const ronda = document.getElementById('relFiltRonda')?.value;
                       const dtI = document.getElementById('relFiltDtI')?.value;
                       const dtF = document.getElementById('relFiltDtF')?.value;
                       const bairro = document.getElementById('relFiltBairro')?.value.trim().toLowerCase();
                       if (cord) fichas = fichas.filter(f => String(f.coordId) === cord);
+                      if (ronda) fichas = fichas.filter(f => String(f.ronda) === ronda);
                       if (dtI) fichas = fichas.filter(f => f.data >= dtI);
                       if (dtF) fichas = fichas.filter(f => f.data <= dtF);
                       if (bairro) fichas = fichas.filter(f => (f.bairro || '').toLowerCase().includes(bairro));
@@ -3880,7 +4980,7 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                       const sups = _users.filter(u => u.tipo === 'supervisor');
                       const activos = sups.filter(u => u.activo !== false).length;
                       const inativos = sups.filter(u => u.activo === false).length;
-                      const lancaram = sups.filter(u => _fichas.some(f => f.userId === u.id || f.coordId === u.coordId)).length;
+                      const lancaram = sups.filter(u => _fichas.some(f => f.userId === u.id)).length;
                       const statTotal = document.getElementById('stat-sup-total'); if (statTotal) statTotal.textContent = sups.length;
                       const statAct = document.getElementById('stat-sup-activos'); if (statAct) statAct.textContent = activos;
                       const statInact = document.getElementById('stat-sup-inativos'); if (statInact) statInact.textContent = inativos;
@@ -3909,6 +5009,7 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
       <td style="font-family:'JetBrains Mono',monospace;color:var(--text3)">${i + 1}</td>
       <td style="font-weight:600">${u.nome}</td>
       <td style="color:var(--text3);font-size:12px">${u.email}</td>
+      <td style="font-size:12px;color:var(--text2)">${u.contacto ? `📞 ${u.contacto}` : '—'}</td>
       <td><span class="badge ${u.tipo === 'admin' ? 'badge-admin' : 'badge-sup'}">${u.tipo}</span></td>
       <td>${protegido ? '<span style="color:var(--text3)">—</span>' : rondaLabel(u.ronda)}</td>
       <td>${cord ? `<span class="badge badge-sup">${cord.nome}</span>` : '—'}</td>
@@ -3927,6 +5028,7 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                       const isAdmin = document.getElementById('u-tipo').value === 'admin';
                       document.getElementById('u-cordField').style.display = isAdmin ? 'none' : 'flex';
                       document.getElementById('u-rondaField').style.display = isAdmin ? 'none' : 'flex';
+                      document.getElementById('u-contactoField').style.display = isAdmin ? 'none' : 'flex';
                     }
 
                     async function addUser() {
@@ -3934,6 +5036,7 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                       const email = document.getElementById('u-email').value.trim().toLowerCase();
                       const senha = document.getElementById('u-senha').value;
                       const tipo = document.getElementById('u-tipo').value;
+                      const contacto = tipo === 'admin' ? null : (document.getElementById('u-contacto')?.value || '').trim() || null;
                       const coordId = tipo === 'admin' ? null : parseInt(document.getElementById('u-coord').value);
                       const ronda = tipo === 'admin' ? null : document.getElementById('u-ronda').value;
                       if (!nome || !email || !senha) { showToast('Preencha todos os campos', 'error'); return; }
@@ -3942,8 +5045,8 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                       if (tipo === 'supervisor' && !coordId) { showToast('Seleccione uma coordenação para o supervisor', 'error'); return; }
                       showLoading('A adicionar...');
                     try {
-                      await persistUser({ nome, email, senha, tipo, coordId, ronda, activo: true });
-                      ['u-nome', 'u-email', 'u-senha'].forEach(id => document.getElementById(id).value = '');
+                      await persistUser({ nome, email, senha, tipo, coordId, ronda, contacto, activo: true });
+                      ['u-nome', 'u-email', 'u-senha', 'u-contacto'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
                       renderUsers();
                       showToast('Utilizador adicionado!', 'success');
                     } catch (e) { showToast(e.message, 'error'); }
@@ -4018,8 +5121,693 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                       cont.innerHTML = html;
                     }
 
+                    // ══════════════════════════════════════════════════════
+                    // RELATÓRIO POR SUPERVISOR / MOBILIZADOR
+                    // ══════════════════════════════════════════════════════
+
+                    // Agrupa fichas por mobilizador (nome normalizado), somando dados do período
+                    function agrupaFichasPorMobilizador(fichas) {
+                      const map = {};
+                      fichas.forEach(f => {
+                        const key = (f.mobilizador || '').trim().toLowerCase();
+                        if (!key) return;
+                        if (!map[key]) {
+                          map[key] = {
+                            nome: f.mobilizador,
+                            coordNome: f.coordNome || '—',
+                            coordId: f.coordId,
+                            ronda: f.ronda,
+                            userId: f.userId,
+                            fichas: [],
+                            totalLocais: 0, totalPessoas: 0, sim: 0, nao: 0,
+                            dias: new Set()
+                          };
+                        }
+                        map[key].fichas.push(f);
+                        map[key].totalLocais  += f.totalLocais  || 0;
+                        map[key].totalPessoas += f.totalPessoas || 0;
+                        map[key].sim += f.sim || 0;
+                        map[key].nao += f.nao || 0;
+                        if (f.data) map[key].dias.add(f.data);
+                        // Actualizar ronda pelo userId se disponível
+                        if (!map[key].ronda && f.ronda) map[key].ronda = f.ronda;
+                      });
+                      return Object.values(map).sort((a,b) => b.totalPessoas - a.totalPessoas);
+                    }
+
+                    function populateRelSup() {
+                      const sel = document.getElementById('relSupFiltSup'); if (!sel) return;
+                      // Construir lista única de mobilizadores a partir das fichas
+                      const nomes = [...new Set(getVisibleFichas().map(f => (f.mobilizador||'').trim()).filter(Boolean))].sort();
+                      sel.innerHTML = '<option value="">Todos</option>';
+                      nomes.forEach(n => sel.innerHTML += `<option value="${n}">${n}</option>`);
+                      // Se supervisor, pré-seleccionar o próprio nome se já lançou fichas
+                      if (currentUser.tipo === 'supervisor') {
+                        const propFichas = _fichas.filter(f => f.userId === currentUser.id);
+                        if (propFichas.length) {
+                          const nomeProp = propFichas[0].mobilizador;
+                          if (nomeProp) sel.value = nomeProp;
+                        }
+                      }
+                    }
+
+                    function applyRelSupervisor() {
+                      const supFilt  = document.getElementById('relSupFiltSup')?.value  || '';
+                      const rondaFilt= document.getElementById('relSupFiltRonda')?.value || '';
+                      const dtI      = document.getElementById('relSupFiltDtI')?.value  || '';
+                      const dtF      = document.getElementById('relSupFiltDtF')?.value  || '';
+
+                      let fichas = getVisibleFichas();
+                      if (rondaFilt) fichas = fichas.filter(f => String(f.ronda) === rondaFilt);
+                      if (dtI)       fichas = fichas.filter(f => f.data >= dtI);
+                      if (dtF)       fichas = fichas.filter(f => f.data <= dtF);
+                      if (supFilt)   fichas = fichas.filter(f => (f.mobilizador||'').trim() === supFilt.trim());
+
+                      // Info do período
+                      const info = document.getElementById('relSupFiltInfo');
+                      if (info) {
+                        const parts = [];
+                        if (dtI || dtF) parts.push(`Período: ${dtI||'início'} → ${dtF||'hoje'}`);
+                        if (supFilt)    parts.push(`Mobilizador: ${supFilt}`);
+                        if (rondaFilt)  parts.push(`Ronda: ${rondaFilt}ª`);
+                        info.textContent = parts.length ? parts.join(' · ') : 'A mostrar todos os dados';
+                      }
+
+                      const grupos = agrupaFichasPorMobilizador(fichas);
+
+                      // Stats
+                      const totalPessoas = grupos.reduce((s,g)=>s+g.totalPessoas,0);
+                      const totalLocais  = grupos.reduce((s,g)=>s+g.totalLocais,0);
+                      const totalSim     = grupos.reduce((s,g)=>s+g.sim,0);
+                      const totalNao     = grupos.reduce((s,g)=>s+g.nao,0);
+                      const pctGeral     = totalSim+totalNao>0 ? Math.round(totalSim/(totalSim+totalNao)*100) : 0;
+                      document.getElementById('relSupStats').innerHTML = `
+                        <div class="stat-card amber"><div class="stat-icon">👤</div><div class="stat-value">${grupos.length}</div><div class="stat-label">Mobilizadores</div></div>
+                        <div class="stat-card green"><div class="stat-icon">👥</div><div class="stat-value">${totalPessoas.toLocaleString()}</div><div class="stat-label">Pessoas Alcançadas</div></div>
+                        <div class="stat-card blue"><div class="stat-icon">📍</div><div class="stat-value">${totalLocais}</div><div class="stat-label">Locais Visitados</div></div>
+                        <div class="stat-card purple"><div class="stat-icon">✅</div><div class="stat-value">${pctGeral}%</div><div class="stat-label">Taxa de Aceitação</div></div>`;
+
+                      const rondaLabel = r => {
+                        if (!r) return '<span style="color:var(--text3);font-size:11px">—</span>';
+                        const c  = r=='1'?'#0369a1':r=='2'?'#15803d':'#92400e';
+                        const bg = r=='1'?'rgba(14,165,233,.12)':r=='2'?'rgba(34,197,94,.12)':'rgba(212,168,23,.12)';
+                        return `<span style="background:${bg};color:${c};padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700">${r}ª Ronda</span>`;
+                      };
+
+                      const tbody = document.getElementById('relSupBody');
+                      tbody.innerHTML = '';
+                      if (!grupos.length) {
+                        tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:32px;color:var(--text3)">Nenhum dado para os filtros seleccionados</td></tr>';
+                        document.getElementById('relSupDetalhe').style.display = 'none';
+                        return;
+                      }
+
+                      grupos.forEach((g,i) => {
+                        const pct = g.sim+g.nao>0 ? Math.round(g.sim/(g.sim+g.nao)*100) : 0;
+                        const pctColor = pct>=70?'var(--surf-dark)':pct>=50?'var(--amber)':'var(--coral)';
+                        tbody.innerHTML += `<tr style="cursor:pointer" onclick="mostrarDetalheSupRel('${g.nome.replace(/'/g,"\\'")}', ${JSON.stringify(dtI)}, ${JSON.stringify(dtF)}, ${JSON.stringify(rondaFilt)})" title="Clique para ver detalhe por dia">
+                          <td style="font-family:'JetBrains Mono',monospace;color:var(--text3)">${i+1}</td>
+                          <td style="font-weight:700">${g.nome} <span style="font-size:10px;color:var(--text3)">▶</span></td>
+                          <td><span class="badge badge-sup">${g.coordNome}</span></td>
+                          <td>${rondaLabel(g.ronda)}</td>
+                          <td style="text-align:center;font-family:'JetBrains Mono',monospace">${g.dias.size}</td>
+                          <td style="text-align:center;font-family:'JetBrains Mono',monospace">${g.fichas.length}</td>
+                          <td style="text-align:center;font-family:'JetBrains Mono',monospace">${g.totalLocais}</td>
+                          <td style="font-family:'JetBrains Mono',monospace;color:var(--accent);font-weight:700">${g.totalPessoas.toLocaleString()}</td>
+                          <td style="color:var(--surf-dark)">${g.sim}</td>
+                          <td style="color:var(--coral)">${g.nao}</td>
+                          <td style="font-weight:700;color:${pctColor}">${pct}%</td>
+                        </tr>`;
+                      });
+
+                      // Se filtrado para um só mobilizador, mostrar detalhe automaticamente
+                      if (supFilt && grupos.length === 1) {
+                        mostrarDetalheSupRel(grupos[0].nome, dtI, dtF, rondaFilt);
+                      } else {
+                        document.getElementById('relSupDetalhe').style.display = 'none';
+                      }
+                    }
+
+                    function mostrarDetalheSupRel(nome, dtI, dtF, rondaFilt) {
+                      let fichas = getVisibleFichas().filter(f => (f.mobilizador||'').trim().toLowerCase() === nome.trim().toLowerCase());
+                      if (rondaFilt) fichas = fichas.filter(f => String(f.ronda) === rondaFilt);
+                      if (dtI)       fichas = fichas.filter(f => f.data >= dtI);
+                      if (dtF)       fichas = fichas.filter(f => f.data <= dtF);
+
+                      // Agrupar por data (sem duplicar o mesmo dia)
+                      const porDia = {};
+                      fichas.forEach(f => {
+                        const k = f.data || '—';
+                        if (!porDia[k]) porDia[k] = { data: k, bairros: [], coordNome: f.coordNome||'—', totalLocais:0, totalPessoas:0, sim:0, nao:0, fichaIds:[] };
+                        porDia[k].totalLocais  += f.totalLocais  || 0;
+                        porDia[k].totalPessoas += f.totalPessoas || 0;
+                        porDia[k].sim += f.sim || 0;
+                        porDia[k].nao += f.nao || 0;
+                        if (f.bairro && !porDia[k].bairros.includes(f.bairro)) porDia[k].bairros.push(f.bairro);
+                        porDia[k].fichaIds.push(f.id);
+                      });
+
+                      const dias = Object.values(porDia).sort((a,b)=>(b.data||'').localeCompare(a.data||''));
+                      document.getElementById('relSupDetalheTitle').textContent = `Detalhe por Dia — ${nome}`;
+                      const tbody = document.getElementById('relSupDetalheBody');
+                      tbody.innerHTML = '';
+                      dias.forEach(d => {
+                        tbody.innerHTML += `<tr>
+                          <td style="font-family:'JetBrains Mono',monospace">${d.data}</td>
+                          <td style="font-size:12px">${d.bairros.join(', ')||'—'}</td>
+                          <td><span class="badge badge-sup">${d.coordNome}</span></td>
+                          <td style="font-family:'JetBrains Mono',monospace;text-align:center">${d.totalLocais}</td>
+                          <td style="font-family:'JetBrains Mono',monospace;color:var(--accent);font-weight:700">${d.totalPessoas.toLocaleString()}</td>
+                          <td style="color:var(--surf-dark)">${d.sim}</td>
+                          <td style="color:var(--coral)">${d.nao}</td>
+                          <td>${d.fichaIds.map(id=>`<button class="btn btn-blue btn-sm" onclick="verFicha(${id})">👁</button>`).join(' ')}</td>
+                        </tr>`;
+                      });
+                      if (!dias.length) tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--text3)">Sem dados no período</td></tr>';
+                      document.getElementById('relSupDetalhe').style.display = 'block';
+                      document.getElementById('relSupDetalhe').scrollIntoView({behavior:'smooth', block:'nearest'});
+                    }
+
+                    function clearRelSupFiltros() {
+                      ['relSupFiltDtI','relSupFiltDtF'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+                      ['relSupFiltSup','relSupFiltRonda'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+                      applyRelSupervisor();
+                    }
+
+                    // ══════════════════════════════════════════════════════
+                    // MOBILIZADORES — CADASTRO, AUTOCOMPLETE E GESTÃO
+                    // ══════════════════════════════════════════════════════
+
+                    // ── Persistência no Firestore / localStorage ──
+                    let _mobilizadores = []; // [{id, nome, supervisorId, supervisorNome, activo}]
+
+                    async function loadMobilizadores() {
+                      try {
+                        const snap = await db.collection('mobilizadores').orderBy('nome').get();
+                        _mobilizadores = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                        DB.set('mobilizadores', _mobilizadores);
+                      } catch(e) {
+                        console.warn('loadMobilizadores offline:', e);
+                        _mobilizadores = DB.get('mobilizadores') || [];
+                      }
+                    }
+
+                    async function persistMobilizador(nome, overrideSupervisorId, overrideSupervisorNome, overrideCoordId) {
+                      const supId = overrideSupervisorId || currentUser.id;
+                      const supNome = overrideSupervisorNome || currentUser.nome;
+                      const payload = {
+                        nome: nome.trim(),
+                        supervisorId: supId,
+                        supervisorNome: supNome,
+                        coordId: overrideCoordId || null,
+                        activo: true,
+                        created_at: firebase.firestore.FieldValue.serverTimestamp()
+                      };
+                      try {
+                        const ref = await db.collection('mobilizadores').add(payload);
+                        await loadMobilizadores();
+                        return ref.id;
+                      } catch(e) {
+                        console.warn('persistMobilizador offline:', e);
+                        const id = 'local_' + Date.now();
+                        _mobilizadores.push({ id, ...payload, created_at: new Date().toISOString() });
+                        DB.set('mobilizadores', _mobilizadores);
+                        return id;
+                      }
+                    }
+
+                    async function toggleMobilizadorActivo(id, novoEstado) {
+                      try {
+                        await db.collection('mobilizadores').doc(String(id)).update({ activo: novoEstado });
+                      } catch(e) {
+                        console.warn('toggleMobilizadorActivo offline:', e);
+                      }
+                      const m = _mobilizadores.find(x => x.id === id);
+                      if (m) m.activo = novoEstado;
+                      DB.set('mobilizadores', _mobilizadores);
+                    }
+
+                    async function deleteMobilizadorRemote(id) {
+                      try {
+                        await db.collection('mobilizadores').doc(String(id)).delete();
+                      } catch(e) {
+                        console.warn('deleteMobilizadorRemote offline:', e);
+                      }
+                      _mobilizadores = _mobilizadores.filter(x => x.id !== id);
+                      DB.set('mobilizadores', _mobilizadores);
+                    }
+
+                    // ── Helpers ──
+                    function getMobilizadoresDeSupervisor() {
+                      if (!currentUser) return [];
+                      if (currentUser.tipo === 'admin') return _mobilizadores;
+                      return _mobilizadores.filter(m => String(m.supervisorId) === String(currentUser.id));
+                    }
+
+                    function getMobilizadoresActivosDeSupervisor() {
+                      return getMobilizadoresDeSupervisor().filter(m => m.activo !== false);
+                    }
+
+                    // ── Adicionar mobilizador ──
+                    async function addMobilizador() {
+                      const input = document.getElementById('mob-novo-nome');
+                      const aviso = document.getElementById('mob-novo-aviso');
+                      const nome = (input?.value || '').trim();
+                      if (!nome) { showToast('Escreva o nome do mobilizador', 'error'); return; }
+
+                      let overrideSupId = null, overrideSupNome = null, overrideCoordId = null;
+
+                      if (currentUser.tipo === 'admin') {
+                        const supSel = document.getElementById('mob-novo-sup');
+                        const coordSel = document.getElementById('mob-novo-coord');
+                        const supVal = supSel?.value;
+                        const coordVal = coordSel?.value;
+                        if (!coordVal) { showToast('Seleccione a coordenação do mobilizador', 'error'); return; }
+                        if (!supVal) { showToast('Seleccione o supervisor do mobilizador', 'error'); return; }
+                        const supObj = _users.find(u => u.id === supVal);
+                        overrideSupId = supVal;
+                        overrideSupNome = supObj ? supObj.nome : '';
+                        overrideCoordId = coordVal;
+                      }
+
+                      // Verificar duplicado no mesmo supervisor
+                      const jaExiste = getMobilizadoresDeSupervisor().find(
+                        m => m.nome.trim().toLowerCase() === nome.toLowerCase()
+                      );
+                      if (jaExiste) {
+                        if (aviso) {
+                          aviso.style.display = 'block';
+                          aviso.textContent = `⚠️ "${nome}" já está cadastrado.`;
+                        }
+                        showToast('Mobilizador já cadastrado', 'error');
+                        return;
+                      }
+                      if (aviso) aviso.style.display = 'none';
+
+                      showLoading('A cadastrar mobilizador...');
+                      await persistMobilizador(nome, overrideSupId, overrideSupNome, overrideCoordId);
+                      hideLoading();
+                      input.value = '';
+                      if (currentUser.tipo === 'admin') {
+                        const supSel = document.getElementById('mob-novo-sup');
+                        const coordSel = document.getElementById('mob-novo-coord');
+                        if (supSel) supSel.value = '';
+                        if (coordSel) coordSel.value = '';
+                        populateMobSupSelect();
+                      }
+                      renderMobilizadoresList();
+                      renderMobilizadoresAdmin();
+                      showToast(`"${nome}" cadastrado com sucesso ✓`, 'success');
+                    }
+
+                    function onMobNovoInput(val) {
+                      const aviso = document.getElementById('mob-novo-aviso');
+                      if (!aviso) return;
+                      if (!val.trim()) { aviso.style.display = 'none'; return; }
+                      const jaExiste = getMobilizadoresDeSupervisor().find(
+                        m => m.nome.trim().toLowerCase() === val.trim().toLowerCase()
+                      );
+                      if (jaExiste) {
+                        aviso.style.display = 'block';
+                        aviso.textContent = `⚠️ "${val.trim()}" já está cadastrado.`;
+                      } else {
+                        aviso.style.display = 'none';
+                      }
+                    }
+
+                    // ── Filtro da lista de mobilizadores ──
+                    let _mobFiltro = 'todos';
+                    let _mobAdmFiltro = 'todos';
+
+                    function filterMobilizadores(f) {
+                      _mobFiltro = f;
+                      ['mobFiltTodos','mobFiltActivos','mobFiltInactivos'].forEach(id => {
+                        const el = document.getElementById(id);
+                        if(el) el.classList.remove('active');
+                      });
+                      const map = {todos:'mobFiltTodos', activos:'mobFiltActivos', inactivos:'mobFiltInactivos'};
+                      const el = document.getElementById(map[f]);
+                      if(el) el.classList.add('active');
+                      renderMobilizadoresList();
+                    }
+
+                    function filterMobilizadoresAdmin(f) {
+                      _mobAdmFiltro = f;
+                      ['mobAdmFiltTodos','mobAdmFiltActivos','mobAdmFiltInactivos'].forEach(id => {
+                        const el = document.getElementById(id);
+                        if(el) el.classList.remove('active');
+                      });
+                      const map = {todos:'mobAdmFiltTodos', activos:'mobAdmFiltActivos', inactivos:'mobAdmFiltInactivos'};
+                      const el = document.getElementById(map[f]);
+                      if(el) el.classList.add('active');
+                      renderMobilizadoresAdmin();
+                    }
+
+                    // ── Renderizar lista supervisor ──
+                    function renderMobilizadoresList() {
+                      const cont = document.getElementById('mobListContainer');
+                      if (!cont) return;
+                      const search = (document.getElementById('mobSearchInput')?.value || '').toLowerCase();
+                      let lista = getMobilizadoresDeSupervisor();
+                      if (_mobFiltro === 'activos') lista = lista.filter(m => m.activo !== false);
+                      if (_mobFiltro === 'inactivos') lista = lista.filter(m => m.activo === false);
+                      if (search) lista = lista.filter(m => m.nome.toLowerCase().includes(search));
+
+                      if (!lista.length) {
+                        cont.innerHTML = `<div style="padding:32px;text-align:center;color:var(--text3);font-size:13px">
+                          ${search ? 'Nenhum resultado para a pesquisa.' : 'Nenhum mobilizador cadastrado ainda.<br>Adicione o primeiro usando o formulário acima.'}</div>`;
+                        return;
+                      }
+
+                      const ontem2 = getOntemStr();
+                      const fichasOntem2 = _fichas.filter(f => f.data === ontem2);
+                      const mobsComFichaOntem2 = new Set(fichasOntem2.map(f => (f.mobilizador||'').toLowerCase().trim()));
+                      const rows = lista.map((m,i) => {
+                        const initials = m.nome.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
+                        const isActivo = m.activo !== false;
+                        const semFichaOntem = isActivo && !mobsComFichaOntem2.has(m.nome.toLowerCase().trim());
+                        return `<div class="mob-list-item${semFichaOntem?' mob-list-item-alert':''}">
+                          <div class="mob-list-avatar${isActivo?'':' inactivo'}">${initials}</div>
+                          <div style="flex:1;min-width:0">
+                            <div style="font-size:14px;font-weight:600;color:${isActivo?'var(--text)':'var(--text3)'}">${m.nome}
+                              ${semFichaOntem?'<span class="mob-alert-badge" style="margin-left:6px">⚠️ sem ficha ontem</span>':''}</div>
+                            <div style="margin-top:3px">
+                              ${isActivo
+                                ? '<span class="mob-badge-activo">✅ Activo</span>'
+                                : '<span class="mob-badge-inactivo">🚫 Inactivo</span>'}
+                            </div>
+                          </div>
+                          <div style="display:flex;align-items:center;gap:8px">
+                            <button class="btn btn-outline btn-sm" onclick="openMobProfile('${m.nome.replace(/'/g,"\'")}')" title="Ver perfil" style="padding:5px 10px">👤 Perfil</button>
+                            <button class="mob-toggle ${isActivo?'on':'off'}" title="${isActivo?'Clique para inactivar':'Clique para activar'}"
+                              onclick="toggleMobItem('${m.id}', ${!isActivo})"></button>
+                            <button class="btn btn-danger btn-sm" onclick="confirmDeleteMob('${m.id}','${m.nome.replace(/'/g,"\'")}')" title="Remover">🗑</button>
+                          </div>
+                        </div>`;
+                      }).join('');
+
+                      cont.innerHTML = rows;
+                    }
+
+                    // ── Renderizar lista admin ──
+                    function renderMobilizadoresAdmin() {
+                      const cont = document.getElementById('mobAdminListContainer');
+                      if (!cont) return;
+                      const search = (document.getElementById('mobAdmSearchInput')?.value || '').toLowerCase();
+                      const supFilt = document.getElementById('mobAdmFiltSup')?.value || '';
+                      let lista = [..._mobilizadores];
+                      if (_mobAdmFiltro === 'activos') lista = lista.filter(m => m.activo !== false);
+                      if (_mobAdmFiltro === 'inactivos') lista = lista.filter(m => m.activo === false);
+                      if (search) lista = lista.filter(m => m.nome.toLowerCase().includes(search));
+                      if (supFilt) lista = lista.filter(m => String(m.supervisorId) === supFilt);
+
+                      if (!lista.length) {
+                        cont.innerHTML = `<div style="padding:32px;text-align:center;color:var(--text3);font-size:13px">Nenhum mobilizador encontrado.</div>`;
+                        return;
+                      }
+
+                      const rows = lista.map(m => {
+                        const initials = m.nome.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
+                        const isActivo = m.activo !== false;
+                        return `<div class="mob-list-item">
+                          <div class="mob-list-avatar${isActivo?'':' inactivo'}">${initials}</div>
+                          <div style="flex:1;min-width:0">
+                            <div style="font-size:14px;font-weight:600;color:${isActivo?'var(--text)':'var(--text3)'}">${m.nome}</div>
+                            <div style="font-size:11px;color:var(--text3);margin-top:2px">Supervisor: ${m.supervisorNome||'—'}</div>
+                            <div style="margin-top:4px">
+                              ${isActivo
+                                ? '<span class="mob-badge-activo">✅ Activo</span>'
+                                : '<span class="mob-badge-inactivo">🚫 Inactivo</span>'}
+                            </div>
+                          </div>
+                          <div style="display:flex;align-items:center;gap:8px">
+                            <button class="mob-toggle ${isActivo?'on':'off'}" title="${isActivo?'Inactivar':'Activar'}"
+                              onclick="toggleMobItemAdmin('${m.id}', ${!isActivo})"></button>
+                          </div>
+                        </div>`;
+                      }).join('');
+
+                      cont.innerHTML = rows;
+                    }
+
+                    // ── Popular select de supervisores no filtro admin ──
+                    function populateMobAdmSupFilter() {
+                      const sel = document.getElementById('mobAdmFiltSup'); if (!sel) return;
+                      const sups = _users.filter(u => u.tipo === 'supervisor');
+                      sel.innerHTML = '<option value="">Todos os supervisores</option>';
+                      sups.forEach(s => sel.innerHTML += `<option value="${s.id}">${s.nome}</option>`);
+                    }
+
+                    // ── Toggle activo/inactivo ──
+                    async function toggleMobItem(id, novoEstado) {
+                      await toggleMobilizadorActivo(id, novoEstado);
+                      renderMobilizadoresList();
+                      updateMobAcDropdown(document.getElementById('f-mobilizador')?.value || '');
+                      showToast(novoEstado ? 'Mobilizador activado ✓' : 'Mobilizador inactivado ✓',
+                        novoEstado ? 'success' : 'info');
+                    }
+
+                    async function toggleMobItemAdmin(id, novoEstado) {
+                      await toggleMobilizadorActivo(id, novoEstado);
+                      renderMobilizadoresList();
+                      renderMobilizadoresAdmin();
+                      updateMobAcDropdown(document.getElementById('f-mobilizador')?.value || '');
+                      showToast(novoEstado ? 'Mobilizador activado ✓' : 'Mobilizador inactivado ✓',
+                        novoEstado ? 'success' : 'info');
+                    }
+
+                    // ── Confirmar remoção ──
+                    function confirmDeleteMob(id, nome) {
+                      if (!confirm(`Remover "${nome}" da lista de mobilizadores?\n\nAs fichas já lançadas com este nome serão preservadas.`)) return;
+                      deleteMobilizadorRemote(id).then(() => {
+                        renderMobilizadoresList();
+                        showToast(`"${nome}" removido ✓`, 'info');
+                      });
+                    }
+
+                    // ── Renderizar página de mobilizadores ──
+                    function renderMobilizadoresPage() {
+                      if (currentUser.tipo === 'admin') {
+                        const panel = document.getElementById('mobAdminPanel');
+                        if (panel) panel.style.display = 'block';
+                        // Admin also sees the add form with coord/sup selectors
+                        const card = document.querySelector('#page-mobilizadores > .card:first-child');
+                        if (card) card.style.display = 'block';
+                        // Show admin-specific fields
+                        const adminFields = document.getElementById('mob-admin-fields');
+                        if (adminFields) adminFields.style.display = 'block';
+                        document.getElementById('mobPageTitle').textContent = 'Gestão de Mobilizadores';
+                        document.getElementById('mobPageSubtitle').textContent = 'Cadastrar e gerir mobilizadores de todos os supervisores';
+                        // Populate coord dropdown
+                        const coordSel = document.getElementById('mob-novo-coord');
+                        if (coordSel) {
+                          coordSel.innerHTML = '<option value="">— Seleccionar Coordenação —</option>';
+                          _cords.forEach(c => coordSel.innerHTML += `<option value="${c.id}">${c.nome}${c.coordenador ? ' (' + c.coordenador + ')' : ''}</option>`);
+                        }
+                        populateMobAdmSupFilter();
+                        renderMobilizadoresAdmin();
+                      } else {
+                        const panel = document.getElementById('mobAdminPanel');
+                        if (panel) panel.style.display = 'none';
+                        const card = document.querySelector('#page-mobilizadores > .card:first-child');
+                        if (card) card.style.display = 'block';
+                        const adminFields = document.getElementById('mob-admin-fields');
+                        if (adminFields) adminFields.style.display = 'none';
+                        renderMobilizadoresList();
+                      }
+                      // Always render ranking and alert
+                      renderMobRanking();
+                      renderMobAlertOntemInPage();
+                    }
+
+                    function renderMobAlertOntemInPage() {
+                      const cont = document.getElementById('mobAlertaOntem'); if (!cont) return;
+                      const semFicha = getMobsSemFichaOntem();
+                      if (!semFicha.length) { cont.style.display = 'none'; return; }
+                      cont.style.display = 'block';
+                      cont.innerHTML = `<div style="background:rgba(212,168,23,.1);border:1.5px solid rgba(212,168,23,.4);border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+                        <span style="font-size:20px">⚠️</span>
+                        <div style="flex:1">
+                          <div style="font-size:13px;font-weight:700;color:var(--amber)">Mobilizadores sem ficha ontem (${getOntemStr()})</div>
+                          <div style="font-size:12px;color:var(--text2);margin-top:3px">${semFicha.slice(0,5).map(m=>m.nome).join(', ')}${semFicha.length>5?` e mais ${semFicha.length-5}`:''}.</div>
+                        </div>
+                        <button class="btn btn-outline" style="font-size:12px;padding:6px 14px;border-color:var(--amber);color:var(--amber)" onclick="openMobAlertModal()">Ver todos →</button>
+                      </div>`;
+                    }
+
+                    // Populate supervisor select based on selected coordenação
+                    function populateMobSupSelect() {
+                      const coordSel = document.getElementById('mob-novo-coord');
+                      const supSel = document.getElementById('mob-novo-sup');
+                      if (!coordSel || !supSel) return;
+                      const coordId = coordSel.value;
+                      supSel.innerHTML = '<option value="">— Seleccionar Supervisor —</option>';
+                      if (!coordId) return;
+                      const sups = _users.filter(u => u.tipo === 'supervisor' && String(u.coordId) === String(coordId) && u.activo !== false);
+                      sups.forEach(s => supSel.innerHTML += `<option value="${s.id}">${s.nome}</option>`);
+                      if (!sups.length) supSel.innerHTML += '<option disabled>Sem supervisores nesta coordenação</option>';
+                    }
+
+                    // ── AUTOCOMPLETE CUSTOMIZADO NO CAMPO MOBILIZADOR DA FICHA ──
+                    let _mobAcIdx = -1;
+
+                    function getMobAcItems(val) {
+                      const q = (val || '').trim().toLowerCase();
+                      const lista = getMobilizadoresActivosDeSupervisor();
+                      if (!q) return lista.slice(0, 8);
+                      return lista.filter(m => m.nome.toLowerCase().includes(q)).slice(0, 8);
+                    }
+
+                    function updateMobAcDropdown(val) {
+                      const dd = document.getElementById('mobAcDropdown'); if (!dd) return;
+                      const items = getMobAcItems(val);
+                      _mobAcIdx = -1;
+                      if (!items.length) {
+                        const q = (val || '').trim();
+                        dd.innerHTML = q
+                          ? `<div class="mob-ac-empty">Nenhum mobilizador encontrado para "<b>${q}</b>".<br><span style="color:var(--primary);cursor:pointer" onclick="showPage('mobilizadores')">Ir ao cadastro ↗</span></div>`
+                          : `<div class="mob-ac-empty">Sem mobilizadores activos cadastrados.<br><span style="color:var(--primary);cursor:pointer" onclick="showPage('mobilizadores')">Cadastrar agora ↗</span></div>`;
+                        dd.classList.add('show');
+                        return;
+                      }
+                      const q = (val || '').trim().toLowerCase();
+                      dd.innerHTML = items.map((m, i) => {
+                        const initials = m.nome.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
+                        const highlighted = q
+                          ? m.nome.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')', 'gi'), '<b>$1</b>')
+                          : m.nome;
+                        return `<div class="mob-ac-item" data-nome="${m.nome}" data-idx="${i}"
+                          onmousedown="selectMobAc('${m.nome.replace(/'/g,"\\'")}')" >
+                          <div class="mob-ac-avatar">${initials}</div>
+                          <span class="mob-ac-name">${highlighted}</span>
+                        </div>`;
+                      }).join('');
+                      dd.classList.add('show');
+                    }
+
+                    function showMobAcDropdown() {
+                      const val = document.getElementById('f-mobilizador')?.value || '';
+                      updateMobAcDropdown(val);
+                    }
+
+                    function hideMobAcDropdown() {
+                      const dd = document.getElementById('mobAcDropdown'); if (dd) dd.classList.remove('show');
+                      _mobAcIdx = -1;
+                    }
+
+                    function selectMobAc(nome) {
+                      const inp = document.getElementById('f-mobilizador');
+                      if (inp) { inp.value = nome; onMobilizadorInput(nome); }
+                      hideMobAcDropdown();
+                    }
+
+                    function mobAcKeydown(e) {
+                      const dd = document.getElementById('mobAcDropdown');
+                      if (!dd || !dd.classList.contains('show')) return;
+                      const items = dd.querySelectorAll('.mob-ac-item');
+                      if (e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        _mobAcIdx = Math.min(_mobAcIdx + 1, items.length - 1);
+                        items.forEach((el,i) => el.classList.toggle('selected', i === _mobAcIdx));
+                      } else if (e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        _mobAcIdx = Math.max(_mobAcIdx - 1, -1);
+                        items.forEach((el,i) => el.classList.toggle('selected', i === _mobAcIdx));
+                      } else if (e.key === 'Enter') {
+                        if (_mobAcIdx >= 0 && items[_mobAcIdx]) {
+                          e.preventDefault();
+                          selectMobAc(items[_mobAcIdx].dataset.nome);
+                        }
+                      } else if (e.key === 'Escape') {
+                        hideMobAcDropdown();
+                      }
+                    }
+
+                    // ── Autocomplete do campo Mobilizador na Ficha ──
+                    function populateMobilizadoresList() {
+                      // mantido para compatibilidade, agora usa dropdown customizado
+                    }
+
+                    function onMobilizadorInput(val) {
+                      updateMobAcDropdown(val);
+                      const aviso = document.getElementById('mobDuplicaAviso'); if (!aviso) return;
+                      const dt = document.getElementById('f-data')?.value;
+                      if (!val.trim() || !dt) { aviso.style.display='none'; return; }
+                      const nome = val.trim().toLowerCase();
+                      const jaExiste = getVisibleFichas().find(f =>
+                        (f.mobilizador||'').trim().toLowerCase() === nome && f.data === dt
+                      );
+                      if (jaExiste) {
+                        aviso.style.display = 'block';
+                        aviso.innerHTML = `⚠️ <b>${val.trim()}</b> já tem ficha em ${dt}. Ao guardar, os dados serão <b>somados</b> à ficha existente.`;
+                      } else {
+                        aviso.style.display = 'none';
+                      }
+                    }
+
+                    // ── Gestão de datas de rondas ──
+                    const RONDAS_KEY = 'sismob_rondas_datas';
+
+                    function getRondasDatas() {
+                      try { return JSON.parse(localStorage.getItem(RONDAS_KEY)) || {}; } catch { return {}; }
+                    }
+
+                    function saveRondaDatas() {
+                      const dados = {};
+                      ['1','2','3'].forEach(r => {
+                        const ini = document.getElementById(`ronda-ini-${r}`)?.value || null;
+                        const fim = document.getElementById(`ronda-fim-${r}`)?.value || null;
+                        dados[r] = { inicio: ini, fim: fim };
+                      });
+                      localStorage.setItem(RONDAS_KEY, JSON.stringify(dados));
+                      updateRondasEstados(dados);
+                      showToast('Datas das rondas guardadas', 'success');
+                    }
+
+                    function updateRondasEstados(dados) {
+                      const hoje = new Date().toISOString().split('T')[0];
+                      ['1','2','3'].forEach(r => {
+                        const el = document.getElementById(`ronda-estado-${r}`); if (!el) return;
+                        const d = dados[r] || {};
+                        if (!d.inicio && !d.fim) { el.textContent = ''; return; }
+                        if (d.inicio && !d.fim && hoje >= d.inicio)
+                          el.innerHTML = '<span style="background:rgba(34,197,94,.15);color:#15803d;padding:2px 8px;border-radius:8px">🟢 Em curso</span>';
+                        else if (d.inicio && d.fim && hoje > d.fim)
+                          el.innerHTML = '<span style="background:rgba(212,168,23,.12);color:#92400e;padding:2px 8px;border-radius:8px">🏁 Encerrada</span>';
+                        else if (d.inicio && hoje < d.inicio)
+                          el.innerHTML = '<span style="background:rgba(14,165,233,.1);color:#0369a1;padding:2px 8px;border-radius:8px">⏳ Futura</span>';
+                        else
+                          el.textContent = '';
+                      });
+                    }
+
+                    function loadRondasDatasUI() {
+                      const dados = getRondasDatas();
+                      ['1','2','3'].forEach(r => {
+                        const d = dados[r] || {};
+                        const ini = document.getElementById(`ronda-ini-${r}`); if (ini && d.inicio) ini.value = d.inicio;
+                        const fim = document.getElementById(`ronda-fim-${r}`); if (fim && d.fim)   fim.value = d.fim;
+                      });
+                      updateRondasEstados(dados);
+                    }
+
                     function renderHistoricoRondas() {
                       const cont = document.getElementById('rondasHistoricoContainer'); if (!cont) return;
+
+                      // Mostrar/ocultar painel de datas conforme perfil
+                      const datasPanel = document.getElementById('rondasDatasPanel');
+                      if (datasPanel) {
+                        if (currentUser.tipo === 'admin') {
+                          datasPanel.style.display = 'block';
+                          loadRondasDatasUI();
+                        } else {
+                          datasPanel.style.display = 'none';
+                        }
+                      }
+
+                      const rondaDatas = getRondasDatas();
+                      const hoje = new Date().toISOString().split('T')[0];
+
                       const rondaFilt = document.getElementById('hist-ronda')?.value || '';
                       const estadoFilt = document.getElementById('hist-estado')?.value || '';
                       const rondas = rondaFilt ? [rondaFilt] : ['1','2','3'];
@@ -4034,9 +5822,27 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                         const fichasRonda = _fichas.filter(f => sups.some(s => s.id === f.userId));
                         const totalPessoas = fichasRonda.reduce((s,f) => s+(f.totalPessoas||0),0);
                         const lancaram = sups.filter(u => _fichas.some(f => f.userId === u.id)).length;
+
+                        // Datas da ronda
+                        const rd = rondaDatas[r] || {};
+                        const fmtDt = d => d ? new Date(d+'T00:00:00').toLocaleDateString('pt-PT',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+                        let estadoRondaBadge = '';
+                        if (rd.inicio && !rd.fim && hoje >= rd.inicio)
+                          estadoRondaBadge = `<span style="background:rgba(34,197,94,.15);color:#15803d;padding:2px 8px;border-radius:8px;font-size:11px;font-weight:700">🟢 Em curso</span>`;
+                        else if (rd.inicio && rd.fim && hoje > rd.fim)
+                          estadoRondaBadge = `<span style="background:rgba(212,168,23,.12);color:#92400e;padding:2px 8px;border-radius:8px;font-size:11px;font-weight:700">🏁 Encerrada</span>`;
+                        else if (rd.inicio && hoje < rd.inicio)
+                          estadoRondaBadge = `<span style="background:rgba(14,165,233,.1);color:#0369a1;padding:2px 8px;border-radius:8px;font-size:11px;font-weight:700">⏳ Futura</span>`;
+
+                        const datasHtml = (rd.inicio || rd.fim)
+                          ? `<div style="font-size:11px;color:var(--text3);margin-top:4px">📅 ${fmtDt(rd.inicio)} → ${fmtDt(rd.fim)} &nbsp; ${estadoRondaBadge}</div>` : '';
+
                         html += `<div class="card" style="border-color:${rondaColor(r)};background:${rondaBg(r)};margin-bottom:16px">
           <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px">
-            <div class="card-title" style="margin:0;color:${rondaColor(r)};font-size:17px"><span class="dot" style="background:${rondaColor(r)}"></span>${rondaNome(r)}</div>
+            <div>
+              <div class="card-title" style="margin:0;color:${rondaColor(r)};font-size:17px"><span class="dot" style="background:${rondaColor(r)}"></span>${rondaNome(r)}</div>
+              ${datasHtml}
+            </div>
             <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:12px">
               <span>👥 <b>${sups.length}</b> supervisores</span>
               <span>✅ <b>${sups.filter(u=>u.activo!==false).length}</b> activos</span>
@@ -4079,15 +5885,19 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                     function renderCords() {
                       const tbody = document.getElementById('cordTableBody'); tbody.innerHTML = '';
                       if (!_cords.length) {
-                        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:32px;color:var(--text3)">Nenhuma coordenação criada</td></tr>';
+                        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--text3)">Nenhuma coordenação criada</td></tr>';
                         return;
                       }
                     _cords.forEach((c, i) => {
                       const sups = _users.filter(u => u.coordId === c.id && u.tipo === 'supervisor');
                       const supNames = sups.length ? sups.map(s => s.nome).join(', ') : '<span style="color:var(--text3)">—</span>';
+                      const coordenadorDisplay = c.coordenador
+                        ? `<span style="font-weight:600;color:var(--primary)">${c.coordenador}</span>`
+                        : '<span style="color:var(--text3)">—</span>';
                       tbody.innerHTML += `<tr>
       <td>${i + 1}</td>
       <td style="font-weight:600">${c.nome}</td>
+      <td>${coordenadorDisplay}</td>
       <td style="font-size:11px;color:var(--text2)">${supNames}</td>
       <td><button class="btn btn-danger btn-sm" onclick="deleteCord(${c.id})">🗑 Apagar</button></td>
     </tr>`;
@@ -4095,11 +5905,14 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                   }
                     async function addCord() {
                       const nome = document.getElementById('cord-nome').value.trim();
+                      const coordenador = (document.getElementById('cord-coordenador')?.value || '').trim();
                       if (!nome) { showToast('Insira o nome da coordenação', 'error'); return; }
                       if (_cords.find(c => c.nome.toLowerCase() === nome.toLowerCase())) { showToast('Já existe uma coordenação com este nome', 'error'); return; }
                       showLoading('A adicionar...');
-                      await persistCord(nome);
+                      await persistCord(nome, coordenador);
                     document.getElementById('cord-nome').value = '';
+                    const cordCInput = document.getElementById('cord-coordenador');
+                    if (cordCInput) cordCInput.value = '';
                     hideLoading();
                     renderCords();
                     showToast('Coordenação adicionada!', 'success');
@@ -4771,6 +6584,52 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                       setPresenceStore(store);
                     }
 
+                    // ── MODAL DE CONFIRMAÇÃO DE FICHA GUARDADA ──
+                    function showSaveConfirm({ bairro, mobilizador, data, totalPessoas, totalLocais, sim, coordNome, ronda, merged }) {
+                      const existingModal = document.getElementById('saveConfirmModal');
+                      if (existingModal) existingModal.remove();
+                      const dataFmt = data ? new Date(data + 'T00:00:00').toLocaleDateString('pt-PT', { day: '2-digit', month: 'long', year: 'numeric' }) : '—';
+                      const titulo  = merged ? 'Dados Somados!' : 'Ficha Guardada!';
+                      const icone   = merged ? '🔄' : '✅';
+                      const corIcon = merged ? 'rgba(14,165,233,.12)' : 'rgba(34,177,76,.12)';
+                      const corBord = merged ? 'rgba(14,165,233,.3)'  : 'rgba(34,177,76,.3)';
+                      const subtit  = merged
+                        ? `<div style="font-size:11px;background:rgba(14,165,233,.1);color:#0369a1;border-radius:6px;padding:5px 10px;margin-bottom:8px">ℹ️ Já existia ficha de <b>${mobilizador}</b> em ${dataFmt}. Os dados foram <b>somados</b>.</div>`
+                        : '';
+                      const modal = document.createElement('div');
+                      modal.id = 'saveConfirmModal';
+                      modal.style.cssText = 'position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);animation:fadeIn .2s ease';
+                      modal.innerHTML = `
+                        <div style="background:#fff;border-radius:16px;padding:32px;max-width:420px;width:90%;box-shadow:0 20px 40px rgba(0,0,0,.2);text-align:center;position:relative">
+                          <div style="width:56px;height:56px;border-radius:50%;background:${corIcon};border:2px solid ${corBord};display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 16px">${icone}</div>
+                          <div style="font-size:20px;font-weight:800;color:var(--primary);margin-bottom:4px;letter-spacing:-.3px">${titulo}</div>
+                          <div style="font-size:12px;color:var(--text3);margin-bottom:12px">${dataFmt}${ronda}</div>
+                          ${subtit}
+                          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px">
+                            <div style="background:rgba(34,177,76,.07);border:1px solid rgba(34,177,76,.2);border-radius:10px;padding:14px">
+                              <div style="font-size:26px;font-weight:800;color:var(--surf-dark);font-family:'JetBrains Mono',monospace">${totalPessoas.toLocaleString()}</div>
+                              <div style="font-size:11px;color:var(--text3);margin-top:2px">${merged ? 'Total acumulado pessoas' : 'Pessoas alcançadas'}</div>
+                            </div>
+                            <div style="background:rgba(44,95,45,.07);border:1px solid rgba(44,95,45,.2);border-radius:10px;padding:14px">
+                              <div style="font-size:26px;font-weight:800;color:var(--primary);font-family:'JetBrains Mono',monospace">${totalLocais}</div>
+                              <div style="font-size:11px;color:var(--text3);margin-top:2px">${merged ? 'Total acumulado locais' : 'Locais visitados'}</div>
+                            </div>
+                          </div>
+                          <div style="font-size:12px;color:var(--text2);margin-bottom:20px;background:var(--bg3);border-radius:8px;padding:10px 14px;text-align:left">
+                            <div><b>Mobilizador:</b> ${mobilizador}</div>
+                            <div><b>Bairro:</b> ${bairro}</div>
+                            <div><b>Coordenação:</b> ${coordNome}</div>
+                            ${sim ? `<div><b>Responderam Sim:</b> ${sim}</div>` : ''}
+                          </div>
+                          <div style="display:flex;gap:10px;justify-content:center">
+                            <button class="btn btn-outline" onclick="document.getElementById('saveConfirmModal').remove();showPage('listFichas')">📋 Ver Fichas</button>
+                            <button class="btn btn-accent" onclick="document.getElementById('saveConfirmModal').remove()">+ Nova Ficha</button>
+                          </div>
+                        </div>`;
+                      document.body.appendChild(modal);
+                    }
+
+
                     // ══════════════════════════════════
 
                     main();
@@ -4792,12 +6651,31 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                       document.getElementById('offlineBanner').classList.add('show');
                     }
 
-                    // Scroll FAB mobile
+                    // Scroll: esconder topbar ao rolar para baixo, mostrar ao rolar para cima ou no topo
                     let lastScrollTop = 0;
                     const fab = document.getElementById('fabButton');
-                    window.addEventListener('scroll', () => {
-                      const st = window.pageYOffset || document.documentElement.scrollTop;
-                      if (window.innerWidth <= 768) {
+                    const mainScrollEl = document.querySelector('.main');
+
+                    function handleMainScroll() {
+                      const st = mainScrollEl ? mainScrollEl.scrollTop : (window.pageYOffset || document.documentElement.scrollTop);
+                      const topbar = document.getElementById('fichasTopbar');
+
+                      // Esconder/mostrar topbar
+                      if (topbar && topbar.classList.contains('show')) {
+                        if (st <= 5) {
+                          // No topo: sempre mostrar
+                          topbar.classList.remove('topbar-hidden');
+                        } else if (st > lastScrollTop + 8) {
+                          // Rolando para baixo: esconder
+                          topbar.classList.add('topbar-hidden');
+                        } else if (st < lastScrollTop - 5) {
+                          // Rolando para cima: mostrar
+                          topbar.classList.remove('topbar-hidden');
+                        }
+                      }
+
+                      // FAB mobile
+                      if (window.innerWidth <= 768 && fab) {
                         if (st > lastScrollTop && st > 100) {
                           fab.style.transform = 'translateY(100px)';
                         } else {
@@ -4805,7 +6683,13 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                         }
                       }
                       lastScrollTop = st <= 0 ? 0 : st;
-                    }, { passive: true });
+                    }
+
+                    // Attach to .main scroll (desktop) and window scroll (mobile)
+                    if (mainScrollEl) {
+                      mainScrollEl.addEventListener('scroll', handleMainScroll, { passive: true });
+                    }
+                    window.addEventListener('scroll', handleMainScroll, { passive: true });
 
                     // Tema escuro/claro
                     let isDarkMode = localStorage.getItem('darkMode') === 'true';
@@ -4822,6 +6706,32 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                     }
                     document.getElementById('themeToggle').addEventListener('click', toggleTheme);
 
+                    // Toggle Sidebar
+                    function toggleSidebar() {
+                      const sidebar = document.querySelector('.sidebar');
+                      if (sidebar) {
+                        sidebar.classList.toggle('sidebar-hidden');
+                        const isHidden = sidebar.classList.contains('sidebar-hidden');
+                        localStorage.setItem('sidebarHidden', isHidden);
+                        const btn = document.getElementById('sidebarToggleBtn');
+                        if (btn) {
+                          btn.textContent = isHidden ? '☰' : '✕';
+                        }
+                      }
+                    }
+                    // Restaurar estado do sidebar ao carregar
+                    window.addEventListener('load', () => {
+                      const sidebarHidden = localStorage.getItem('sidebarHidden') === 'true';
+                      const sidebar = document.querySelector('.sidebar');
+                      if (sidebar && sidebarHidden) {
+                        sidebar.classList.add('sidebar-hidden');
+                        const btn = document.getElementById('sidebarToggleBtn');
+                        if (btn) {
+                          btn.textContent = '☰';
+                        }
+                      }
+                    });
+
                     // Busca global
                     function openSearch() {
                       document.getElementById('searchGlobal').classList.add('show');
@@ -4831,8 +6741,380 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                       document.getElementById('searchGlobal').classList.remove('show');
                       document.getElementById('searchInput').value = '';
                     }
+                    // ══════════════════════════════════════════════
+                    // SISTEMA DE NOTIFICAÇÕES MELHORADO
+                    // ══════════════════════════════════════════════
+                    let _notifications = [];
+                    let _notifTab = 'all';
+                    const NOTIF_KEY = 'sismob_notifications';
+
+                    function loadNotificationsStore() {
+                      try { _notifications = JSON.parse(localStorage.getItem(NOTIF_KEY)) || []; } catch { _notifications = []; }
+                    }
+                    function saveNotificationsStore() {
+                      try { localStorage.setItem(NOTIF_KEY, JSON.stringify(_notifications.slice(0, 100))); } catch {}
+                    }
+                    function addNotification(text, type, category) {
+                      // type: 'success'|'warning'|'error'|'info', category: 'alert'|'info'
+                      loadNotificationsStore();
+                      _notifications.unshift({ id: Date.now(), text, type: type || 'info', category: category || 'info', read: false, time: new Date().toISOString() });
+                      saveNotificationsStore();
+                      updateNotifBadge();
+                      renderNotificationList();
+                    }
+                    function updateNotifBadge() {
+                      loadNotificationsStore();
+                      const unread = _notifications.filter(n => !n.read).length;
+                      const badge = document.getElementById('notifBadge');
+                      if (badge) { badge.textContent = unread > 9 ? '9+' : unread; badge.style.display = unread > 0 ? 'flex' : 'none'; }
+                    }
+                    function switchNotifTab(tab) {
+                      _notifTab = tab;
+                      document.querySelectorAll('.notif-tab').forEach(t => t.classList.remove('active'));
+                      const el = document.getElementById('ntab-' + tab); if (el) el.classList.add('active');
+                      renderNotificationList();
+                    }
+                    function renderNotificationList() {
+                      const list = document.getElementById('notificationList'); if (!list) return;
+                      loadNotificationsStore();
+                      let items = _notifications;
+                      if (_notifTab === 'alert') items = items.filter(n => n.category === 'alert');
+                      else if (_notifTab === 'info') items = items.filter(n => n.category !== 'alert');
+                      if (!items.length) {
+                        list.innerHTML = '<div style="padding:32px;text-align:center;color:var(--text3);font-size:13px">Sem notificações</div>';
+                        return;
+                      }
+                      const icons = { success: '✅', warning: '⚠️', error: '🚨', info: 'ℹ️' };
+                      list.innerHTML = items.map(n => {
+                        const ago = getTimeAgo(n.time);
+                        return `<div class="notif-item ${n.read ? '' : 'unread'} type-${n.type}" onclick="markNotifRead(${n.id})">
+                          <div class="ni-text"><span class="ni-icon">${icons[n.type]||'ℹ️'}</span>${n.text}</div>
+                          <div class="ni-time">${ago}</div>
+                        </div>`;
+                      }).join('');
+                    }
+                    function markNotifRead(id) {
+                      loadNotificationsStore();
+                      const n = _notifications.find(x => x.id === id);
+                      if (n) n.read = true;
+                      saveNotificationsStore();
+                      updateNotifBadge();
+                      renderNotificationList();
+                    }
+                    function markAllNotificationsRead() {
+                      loadNotificationsStore();
+                      _notifications.forEach(n => n.read = true);
+                      saveNotificationsStore();
+                      updateNotifBadge();
+                      renderNotificationList();
+                    }
+                    function clearAllNotifications() {
+                      _notifications = [];
+                      saveNotificationsStore();
+                      updateNotifBadge();
+                      renderNotificationList();
+                    }
+                    function getTimeAgo(isoStr) {
+                      const diff = Math.floor((Date.now() - new Date(isoStr).getTime()) / 1000);
+                      if (diff < 60) return 'agora mesmo';
+                      if (diff < 3600) return `há ${Math.floor(diff/60)}m`;
+                      if (diff < 86400) return `há ${Math.floor(diff/3600)}h`;
+                      return `há ${Math.floor(diff/86400)}d`;
+                    }
+                    function toggleNotifications() {
+                      const nc = document.getElementById('notificationCenter');
+                      if (nc.classList.contains('show')) {
+                        nc.classList.remove('show');
+                      } else {
+                        renderNotificationList();
+                        nc.classList.add('show');
+                      }
+                    }
                     function closeNotifications() {
                       document.getElementById('notificationCenter').classList.remove('show');
+                    }
+
+                    // ══════════════════════════════════════════════
+                    // BARRA FIXA DE FICHAS + RONDA
+                    // ══════════════════════════════════════════════
+                    function updateTopbar() {
+                      if (!currentUser) return;
+                      const topbar = document.getElementById('fichasTopbar');
+                      if (!topbar) return;
+                      topbar.classList.add('show');
+                      // Show bell (inside topbar)
+                      const bell = document.getElementById('notifBellBtn');
+                      if (bell) bell.style.display = 'flex';
+
+                      // Contagem de fichas
+                      const fichas = getVisibleFichas();
+                      const numEl = document.getElementById('topbarFichasNum');
+                      if (numEl) numEl.textContent = fichas.length.toLocaleString();
+
+                      // Ronda activa (supervisor)
+                      const rondaInfo = document.getElementById('topbarRondaInfo');
+                      const rondaBadge = document.getElementById('topbarRondaBadge');
+                      if (currentUser.tipo === 'supervisor' && currentUser.ronda) {
+                        const rondaIcons = {'1':'🔵 1ª Ronda','2':'🟢 2ª Ronda','3':'🟡 3ª Ronda'};
+                        if (rondaInfo && rondaBadge) {
+                          rondaBadge.textContent = rondaIcons[String(currentUser.ronda)] || currentUser.ronda + 'ª Ronda';
+                          rondaInfo.style.display = 'flex';
+                        }
+                      } else if (currentUser.tipo === 'admin') {
+                        // Show active rondas count
+                        const rondaSet = new Set(_users.filter(u => u.ronda).map(u => String(u.ronda)));
+                        if (rondaInfo && rondaBadge && rondaSet.size > 0) {
+                          rondaBadge.textContent = [...rondaSet].sort().map(r => r + 'ª').join(', ') + ' Ronda';
+                          rondaInfo.style.display = 'flex';
+                        }
+                      }
+
+                      // Alertas: mobilizadores sem ficha ontem (só supervisor e admin vêem)
+                      checkMobAlertOntem();
+                      updateNotifBadge();
+                    }
+
+                    // Adjust top padding of app when topbar visible
+                    function adjustForTopbar() {
+                      const main = document.querySelector('.main');
+                      const topbar = document.getElementById('fichasTopbar');
+                      const sidebar = document.querySelector('.sidebar');
+                      const notifCenter = document.getElementById('notificationCenter');
+                      const mobileHeader = document.querySelector('.mobile-header');
+                      if (!main || !topbar) return;
+                      if (topbar.classList.contains('show')) {
+                        main.style.paddingTop = '0';
+                        if (sidebar) sidebar.style.marginTop = '44px';
+                        // Offset notification center below topbar
+                        if (notifCenter) notifCenter.style.top = '52px';
+                        // Mobile header below topbar
+                        if (mobileHeader) mobileHeader.style.top = '44px';
+                      }
+                    }
+
+                    // ══════════════════════════════════════════════
+                    // ALERTAS: MOBILIZADORES SEM FICHA ONTEM
+                    // ══════════════════════════════════════════════
+                    function getOntemStr() {
+                      const d = new Date(); d.setDate(d.getDate() - 1);
+                      return d.toISOString().split('T')[0];
+                    }
+
+                    function getMobsSemFichaOntem() {
+                      const ontem = getOntemStr();
+                      let mobs = _mobilizadores || [];
+                      // Filter to supervisor's mobs if supervisor
+                      if (currentUser.tipo === 'supervisor') {
+                        mobs = mobs.filter(m => m.supervisorId === currentUser.id || !m.supervisorId);
+                      }
+                      const activosMobs = mobs.filter(m => m.activo !== false);
+                      const fichasOntem = _fichas.filter(f => f.data === ontem);
+                      const mobsComFicha = new Set(fichasOntem.map(f => (f.mobilizador||'').toLowerCase().trim()));
+                      return activosMobs.filter(m => !mobsComFicha.has((m.nome||'').toLowerCase().trim()));
+                    }
+
+                    function checkMobAlertOntem() {
+                      const semFicha = getMobsSemFichaOntem();
+                      const btn = document.getElementById('topbarAlertBtn');
+                      const countEl = document.getElementById('topbarAlertCount');
+                      if (!btn || !countEl) return;
+                      if (semFicha.length > 0) {
+                        countEl.textContent = semFicha.length;
+                        btn.style.display = 'flex';
+                      } else {
+                        btn.style.display = 'none';
+                      }
+                    }
+
+                    function openMobAlertModal() {
+                      const semFicha = getMobsSemFichaOntem();
+                      const ontem = getOntemStr();
+                      const list = document.getElementById('mobAlertList');
+                      if (!list) return;
+                      if (!semFicha.length) {
+                        list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--surf-dark);font-size:14px">✅ Todos os mobilizadores registaram ficha ontem!</div>';
+                      } else {
+                        list.innerHTML = `<div style="font-size:12px;color:var(--text3);margin-bottom:12px">Data de referência: <b>${ontem}</b> · ${semFicha.length} sem ficha</div>`
+                          + semFicha.map(m => {
+                            const cord = _cords.find(c => c.id === m.coordId);
+                            return `<div class="mob-ranking-item" style="cursor:default">
+                              <div class="mob-profile-avatar" style="width:36px;height:36px;font-size:14px">${(m.nome||'?')[0].toUpperCase()}</div>
+                              <div style="flex:1">
+                                <div style="font-weight:600;font-size:13px">${m.nome}</div>
+                                ${cord ? `<div style="font-size:11px;color:var(--text3)">${cord.nome}</div>` : ''}
+                              </div>
+                              <div class="mob-alert-badge">⚠️ Sem ficha</div>
+                            </div>`;
+                          }).join('');
+                      }
+                      document.getElementById('mobAlertOverlay').classList.add('show');
+                    }
+                    function closeMobAlertModal() {
+                      document.getElementById('mobAlertOverlay').classList.remove('show');
+                    }
+
+                    // ══════════════════════════════════════════════
+                    // PERFIL DO MOBILIZADOR
+                    // ══════════════════════════════════════════════
+                    function openMobProfile(mobNome) {
+                      const fichasMob = _fichas.filter(f => (f.mobilizador||'').toLowerCase().trim() === (mobNome||'').toLowerCase().trim());
+                      const totalPessoas = fichasMob.reduce((s,f) => s+(f.totalPessoas||0), 0);
+                      const totalLocais = fichasMob.reduce((s,f) => s+(f.totalLocais||0), 0);
+                      const totalSim = fichasMob.reduce((s,f) => s+(f.sim||0), 0);
+                      const totalNao = fichasMob.reduce((s,f) => s+(f.nao||0), 0);
+                      const pct = totalSim+totalNao > 0 ? Math.round(totalSim/(totalSim+totalNao)*100) : 0;
+                      const diasUnicos = new Set(fichasMob.map(f => f.data)).size;
+                      const cord = fichasMob.length > 0 ? _cords.find(c => c.id === fichasMob[0].coordId) : null;
+
+                      // Check se sem ficha ontem
+                      const ontem = getOntemStr();
+                      const temFichaOntem = fichasMob.some(f => f.data === ontem);
+
+                      const initials = (mobNome||'M').split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
+                      document.getElementById('mpAvatar').textContent = initials;
+                      document.getElementById('mpName').textContent = mobNome;
+                      document.getElementById('mpMeta').innerHTML = `${cord ? cord.nome : '—'} ${temFichaOntem ? '' : '<span class="mob-alert-badge" style="margin-left:8px">⚠️ Sem ficha ontem</span>'}`;
+
+                      document.getElementById('mpStats').innerHTML = `
+                        <div class="mob-stat-box"><div class="msv">${fichasMob.length}</div><div class="msl">Fichas</div></div>
+                        <div class="mob-stat-box"><div class="msv" style="color:var(--surf-dark)">${totalPessoas.toLocaleString()}</div><div class="msl">Pessoas</div></div>
+                        <div class="mob-stat-box"><div class="msv" style="color:var(--primary)">${totalLocais}</div><div class="msl">Locais</div></div>
+                        <div class="mob-stat-box"><div class="msv" style="color:var(--amber)">${diasUnicos}</div><div class="msl">Dias trab.</div></div>
+                        <div class="mob-stat-box"><div class="msv" style="color:${pct>=70?'var(--surf-dark)':'var(--coral)'}">${pct}%</div><div class="msl">Aceitação</div></div>
+                      `;
+
+                      const sorted = [...fichasMob].sort((a,b) => (b.data||'').localeCompare(a.data||''));
+                      if (!sorted.length) {
+                        document.getElementById('mpHistTable').innerHTML = '<div style="padding:16px;text-align:center;color:var(--text3);font-size:13px">Nenhuma ficha registada</div>';
+                      } else {
+                        document.getElementById('mpHistTable').innerHTML = `<div class="table-wrap"><table class="mob-hist-table">
+                          <thead><tr><th>Data</th><th>Bairro</th><th>Coordenação</th><th>Ronda</th><th>Pessoas</th><th>Locais</th><th>Sim</th></tr></thead>
+                          <tbody>${sorted.slice(0,30).map(f => {
+                            const c2 = _cords.find(c => c.id === f.coordId);
+                            const rondaLabel = f.ronda ? `<span style="font-size:10px;font-weight:700">${f.ronda}ª</span>` : '—';
+                            return `<tr><td>${f.data||'—'}</td><td>${f.bairro||'—'}</td><td>${c2?c2.nome:'—'}</td><td>${rondaLabel}</td><td style="font-family:'JetBrains Mono',monospace;font-weight:700">${(f.totalPessoas||0).toLocaleString()}</td><td>${f.totalLocais||0}</td><td>${f.sim||0}</td></tr>`;
+                          }).join('')}</tbody>
+                        </table></div>`;
+                      }
+                      document.getElementById('mobProfileOverlay').classList.add('show');
+                    }
+                    function closeMobProfile() {
+                      document.getElementById('mobProfileOverlay').classList.remove('show');
+                    }
+
+                    // ══════════════════════════════════════════════
+                    // RANKING DE MOBILIZADORES POR COORDENAÇÃO
+                    // ══════════════════════════════════════════════
+                    function renderMobRanking() {
+                      const card = document.getElementById('mobRankingCard');
+                      const container = document.getElementById('mobRankingContainer');
+                      if (!card || !container) return;
+
+                      // Group fichas by mobilizador
+                      const byMob = {};
+                      _fichas.forEach(f => {
+                        const nome = (f.mobilizador||'').trim(); if (!nome) return;
+                        if (!byMob[nome]) byMob[nome] = { nome, coordId: f.coordId, fichas: 0, pessoas: 0, locais: 0 };
+                        byMob[nome].fichas++;
+                        byMob[nome].pessoas += f.totalPessoas || 0;
+                        byMob[nome].locais += f.totalLocais || 0;
+                      });
+
+                      // Group by coordenação
+                      const byCord = {};
+                      Object.values(byMob).forEach(m => {
+                        const cordId = m.coordId || 'sem';
+                        if (!byCord[cordId]) byCord[cordId] = [];
+                        byCord[cordId].push(m);
+                      });
+
+                      // Filter to visible cords
+                      let cordIds = Object.keys(byCord);
+                      if (currentUser.tipo === 'supervisor') {
+                        cordIds = cordIds.filter(id => String(id) === String(currentUser.coordId) || id === 'sem');
+                      }
+
+                      if (!cordIds.length) { card.style.display = 'none'; return; }
+                      card.style.display = 'block';
+
+                      const ontem = getOntemStr();
+                      const fichasOntem = _fichas.filter(f => f.data === ontem);
+                      const mobsComFichaOntem = new Set(fichasOntem.map(f => (f.mobilizador||'').toLowerCase().trim()));
+
+                      container.innerHTML = cordIds.map(cid => {
+                        const cord = _cords.find(c => String(c.id) === String(cid)) || { nome: 'Sem Coordenação' };
+                        const mobs = byCord[cid].sort((a,b) => b.pessoas - a.pessoas);
+                        const posClasses = ['gold','silver','bronze'];
+                        return `<div class="mob-ranking-section">
+                          <div class="mob-ranking-cord-title">🏠 ${cord.nome} <span style="font-size:11px;color:var(--text3);font-weight:500">(${mobs.length} mobilizadores)</span></div>
+                          ${mobs.slice(0,10).map((m, i) => {
+                            const semFichaOntem = !mobsComFichaOntem.has(m.nome.toLowerCase().trim());
+                            return `<div class="mob-ranking-item" onclick="openMobProfile('${m.nome.replace(/'/g,"\'")}')">
+                              <div class="mob-rank-pos ${posClasses[i]||''}">${i<3?['🥇','🥈','🥉'][i]:i+1}</div>
+                              <div style="flex:1">
+                                <div class="mob-rank-name">${m.nome} ${semFichaOntem ? '<span class="mob-alert-badge">⚠️ sem ficha ontem</span>' : ''}</div>
+                                <div class="mob-rank-sub">${m.fichas} fichas · ${m.locais} locais</div>
+                              </div>
+                              <div>
+                                <div class="mob-rank-val">${m.pessoas.toLocaleString()}</div>
+                                <div style="font-size:10px;color:var(--text3);text-align:right">pessoas</div>
+                              </div>
+                            </div>`;
+                          }).join('')}
+                        </div>`;
+                      }).join('');
+                    }
+
+                    // ══════════════════════════════════════════════
+                    // NOTIFICAÇÕES AUTOMÁTICAS
+                    // ══════════════════════════════════════════════
+                    function checkAndFireNotifications() {
+                      if (!currentUser) return;
+                      loadNotificationsStore();
+                      const hoje = new Date().toISOString().split('T')[0];
+                      const storageKey = 'sismob_notif_checked_' + hoje;
+
+                      // Alerta meta diária (só admin)
+                      if (currentUser.tipo === 'admin') {
+                        const totalMobs = (_mobilizadores || []).filter(m => m.activo !== false).length;
+                        if (totalMobs > 0) {
+                          const fichasHoje = _fichas.filter(f => f.data === hoje).length;
+                          const metaDiaria = totalMobs; // meta = 1 ficha por mobilizador
+                          const metaKey = 'notif_meta_' + hoje;
+                          if (!localStorage.getItem(metaKey)) {
+                            if (fichasHoje < metaDiaria * 0.5) {
+                              addNotification(`Meta diária em risco: ${fichasHoje} fichas de ${metaDiaria} esperadas hoje (${Math.round(fichasHoje/metaDiaria*100)}%)`, 'warning', 'alert');
+                              localStorage.setItem(metaKey, '1');
+                            }
+                          }
+                        }
+
+                        // Alerta supervisores sem ficha hoje
+                        const supsActivos = _users.filter(u => u.tipo === 'supervisor' && u.activo !== false);
+                        const supsComFicha = new Set(_fichas.filter(f => f.data === hoje).map(f => f.userId));
+                        const supsSemFicha = supsActivos.filter(u => !supsComFicha.has(u.id));
+                        const supAlertKey = 'notif_supsemficha_' + hoje;
+                        if (!localStorage.getItem(supAlertKey) && supsSemFicha.length > 0 && new Date().getHours() >= 14) {
+                          addNotification(`${supsSemFicha.length} supervisor(es) ainda não submeteram fichas hoje`, 'warning', 'alert');
+                          localStorage.setItem(supAlertKey, '1');
+                        }
+                      }
+
+                      // Alerta mobilizadores sem ficha ontem
+                      const semFichaOntem = getMobsSemFichaOntem();
+                      const ontemAlertKey = 'notif_mobontem_' + getOntemStr();
+                      if (!localStorage.getItem(ontemAlertKey) && semFichaOntem.length > 0) {
+                        addNotification(`${semFichaOntem.length} mobilizador(es) não registaram ficha ontem (${getOntemStr()})`, 'warning', 'alert');
+                        localStorage.setItem(ontemAlertKey, '1');
+                      }
+                    }
+
+                    // Notificar quando supervisor guarda ficha (chamado de saveFicha)
+                    function notifyFichaGuardada(mobilizador, bairro, pessoas) {
+                      if (currentUser && currentUser.tipo === 'supervisor') {
+                        addNotification(`Ficha guardada: ${mobilizador} · ${bairro} · ${pessoas} pessoas`, 'success', 'info');
+                      }
+                      updateTopbar();
                     }
                     function closeShortcuts() {
                       document.getElementById('shortcutsPanel').classList.remove('show');
@@ -4843,13 +7125,125 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
 
                     // Atalhos teclado
                     document.addEventListener('keydown', e => {
-                      if (e.ctrlKey && e.key === 'k') { e.preventDefault(); openSearch(); }
+                      if (e.ctrlKey && e.key === 'b') { e.preventDefault(); toggleSidebar(); }
                       if (e.ctrlKey && e.key === 'n') { e.preventDefault(); showPage('ficha'); }
                       if (e.ctrlKey && e.key === 'd') { e.preventDefault(); showPage('dashboard'); }
                       if (e.ctrlKey && e.key === 't') { e.preventDefault(); toggleTheme(); }
                       if (e.key === '?' && document.activeElement.tagName !== 'INPUT') { e.preventDefault(); openShortcuts(); }
                       if (e.key === 'Escape') { closeSearch(); closeNotifications(); closeShortcuts(); }
                     });
+
+                    // ══════════════════════════════════════════════
+                    // EXPORTAÇÃO DE GRÁFICOS
+                    // ══════════════════════════════════════════════
+                    
+                    // Função para exportar gráfico como PDF
+                    function exportChartPDF(chartId, chartName) {
+                      showToast('Gerando PDF do gráfico...', 'info');
+                      setTimeout(() => {
+                        const canvas = document.getElementById(chartId);
+                        if (!canvas) { showToast('Gráfico não encontrado', 'error'); return; }
+                        
+                        const imageData = canvas.toDataURL('image/png');
+                        const doc = new jsPDF({
+                          orientation: 'landscape',
+                          unit: 'mm',
+                          format: 'a4'
+                        });
+                        
+                        const pageWidth = doc.internal.pageSize.getWidth();
+                        const pageHeight = doc.internal.pageSize.getHeight();
+                        
+                        // Adicionar título
+                        doc.setFontSize(18);
+                        doc.text(chartName, pageWidth / 2, 15, { align: 'center' });
+                        
+                        // Adicionar data
+                        doc.setFontSize(10);
+                        doc.text('Data: ' + new Date().toLocaleDateString('pt-PT'), pageWidth / 2, 22, { align: 'center' });
+                        
+                        // Adicionar gráfico
+                        const imgWidth = pageWidth - 20;
+                        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                        doc.addImage(imageData, 'PNG', 10, 30, imgWidth, imgHeight);
+                        
+                        // Salvar
+                        doc.save('Grafico_' + chartName.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '_' + new Date().toISOString().split('T')[0] + '.pdf');
+                        showToast('PDF do gráfico exportado com sucesso!', 'success');
+                      }, 300);
+                    }
+                    
+                    // Função para exportar gráfico como Excel
+                    function exportChartExcel(chartId, chartName) {
+                      showToast('Gerando Excel do gráfico...', 'info');
+                      setTimeout(() => {
+                        const canvas = document.getElementById(chartId);
+                        if (!canvas) { showToast('Gráfico não encontrado', 'error'); return; }
+                        
+                        // Obter dados do gráfico através do Chart.js
+                        let chartInstance;
+                        if (chartId === 'chartBar') chartInstance = chartBar;
+                        else if (chartId === 'chartDonut') chartInstance = chartDonut;
+                        else if (chartId === 'chartBar2') chartInstance = chartBar2;
+                        else if (chartId === 'chartLine') chartInstance = chartLine;
+                        else if (chartId === 'chartDonut2') chartInstance = chartDonut2;
+                        
+                        if (!chartInstance) { showToast('Gráfico não encontrado', 'error'); return; }
+                        
+                        const data = chartInstance.data;
+                        const excelData = [];
+                        
+                        // Adicionar cabeçalho
+                        excelData.push({
+                          'Gráfico': chartName,
+                          'Data Exportação': new Date().toLocaleDateString('pt-PT')
+                        });
+                        excelData.push({});
+                        
+                        // Extrair dados do gráfico
+                        if (chartId === 'chartLine') {
+                          // Gráfico de linha - mostrar dados por data
+                          const labels = data.labels || [];
+                          const values = data.datasets[0]?.data || [];
+                          excelData.push({ 'Data': 'Pessoas' });
+                          labels.forEach((label, idx) => {
+                            excelData.push({
+                              'Data': label,
+                              'Pessoas': values[idx] || 0
+                            });
+                          });
+                        } else if (chartId === 'chartDonut' || chartId === 'chartDonut2') {
+                          // Gráficos de rosca
+                          const labels = data.labels || [];
+                          const values = data.datasets[0]?.data || [];
+                          excelData.push({ 'Categoria': 'Valor' });
+                          labels.forEach((label, idx) => {
+                            excelData.push({
+                              'Categoria': label,
+                              'Valor': values[idx] || 0
+                            });
+                          });
+                        } else {
+                          // Gráficos de barras
+                          const labels = data.labels || [];
+                          const values = data.datasets[0]?.data || [];
+                          excelData.push({ 'Local': 'Pessoas' });
+                          labels.forEach((label, idx) => {
+                            excelData.push({
+                              'Local': label,
+                              'Pessoas': values[idx] || 0
+                            });
+                          });
+                        }
+                        
+                        // Criar sheet e salvar
+                        const ws = XLSX.utils.json_to_sheet(excelData);
+                        const wb = XLSX.utils.book_new();
+                        XLSX.utils.book_append_sheet(wb, ws, chartName.substring(0, 30));
+                        XLSX.writeFile(wb, 'Grafico_' + chartName.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '_' + new Date().toISOString().split('T')[0] + '.xlsx');
+                        showToast('Excel do gráfico exportado com sucesso!', 'success');
+                      }, 300);
+                    }
 
                     // Exportação
                     function exportToPDF() {
