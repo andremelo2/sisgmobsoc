@@ -218,15 +218,22 @@ body{
   overflow-y:auto;
   overflow-x:hidden;
   box-shadow:1px 0 0 var(--sidebar-border),4px 0 20px rgba(0,0,0,.25);
-  position:relative;z-index:10;
-  transition:transform 0.3s ease, margin-left 0.3s ease;
+  position:fixed;left:0;top:0;bottom:0;z-index:10;
+  transition:transform 0.3s ease;
   transform:translateX(0);
 }
 .sidebar.sidebar-hidden{
   transform:translateX(-100%);
-  position:absolute;
-  margin-left:-260px;
   box-shadow:none;
+}
+/* Espaço reservado para o sidebar no layout */
+.sidebar-spacer{
+  width:260px;
+  flex-shrink:0;
+  transition:width 0.3s ease;
+}
+.sidebar-spacer.hidden{
+  width:0;
 }
 .sidebar-header{
   padding:22px 16px 20px;
@@ -1323,7 +1330,7 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
 
 /* ── TOPBAR FIXA DE FICHAS + RONDA ── */
 #fichasTopbar{
-  position:fixed;top:0;left:0;right:0;z-index:180;
+  position:fixed;top:0;left:260px;right:0;z-index:170;
   display:none;
   background:#0d1f2d;
   color:#ffffff;
@@ -1336,11 +1343,12 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
   flex-wrap:nowrap;
   overflow:hidden;
   transform:translateY(0);
-  transition:transform 0.3s cubic-bezier(.4,0,.2,1), opacity 0.3s ease;
+  transition:transform 0.3s cubic-bezier(.4,0,.2,1), opacity 0.3s ease, left 0.3s ease;
   opacity:1;
 }
 #fichasTopbar.show{display:flex}
 #fichasTopbar.topbar-hidden{transform:translateY(-100%);opacity:0;pointer-events:none}
+#fichasTopbar.sidebar-collapsed{left:0}
 .topbar-sidebar-toggle{
   display:flex;
   align-items:center;
@@ -1553,10 +1561,12 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
 @media(max-width:768px){
   .sidebar{position:fixed;left:-280px;top:0;bottom:0;z-index:95;transition:.3s;width:280px;box-shadow:4px 0 20px rgba(0,0,0,.3)}
   .sidebar.open{left:0}
+  .sidebar-spacer{display:none}
   .sidebar-overlay.open{display:block}
   .mobile-header{display:flex}
   .layout{flex-direction:column}
   .main{height:calc(100vh - 100px);overflow-y:auto;margin-top:100px}
+  #fichasTopbar{left:0 !important}
   .page{padding:16px;animation:pageEnter .3s ease}
   .stats-grid{grid-template-columns:1fr 1fr;gap:12px}
   .stats-grid .stat-card{padding:16px}
@@ -1732,6 +1742,7 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
       <div id="fichaDetailContent" style="font-size:13px;line-height:1.6"></div>
       <div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end">
         <button class="btn btn-outline" onclick="printFichaDetail()">🖨 Imprimir</button>
+        <button class="btn btn-outline" id="fichaDetailEditBtn" onclick="editFichaFromModal()" style="border-color:var(--amber);color:var(--amber);display:none">✏️ Editar</button>
         <button class="btn btn-danger" id="fichaDetailDeleteBtn" onclick="deleteFichaFromModal()" style="display:none">🗑 Apagar Ficha</button>
       </div>
     </div>
@@ -1841,6 +1852,7 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
       <button class="btn btn-accent btn-sm" onclick="showPage('ficha');closeSidebar()">+ Ficha</button>
       </div>
       <div class="layout">
+        <div class="sidebar-spacer" id="sidebarSpacer"></div>
         <aside class="sidebar" id="sidebar">
           <div class="sidebar-header">
             <div class="sidebar-logo-wrap">
@@ -4470,8 +4482,9 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
       <td style="font-family:'JetBrains Mono',monospace">${f.totalLocais || 0}</td>
       <td style="font-family:'JetBrains Mono',monospace;color:var(--accent)">${(f.totalPessoas || 0).toLocaleString()}</td>
       <td style="display:flex;gap:6px">
-        <button class="btn btn-blue btn-sm" onclick="verFicha(${f.id})">👁 Ver</button>
-        ${podeApagar ? `<button class="btn btn-danger btn-sm" onclick="deleteFicha(${f.id})" title="Apagar ficha">🗑 Apagar</button>` : ''}
+        <button class="btn btn-blue btn-sm" onclick="verFicha('${f.id}')">👁 Ver</button>
+        ${podeApagar ? `<button class="btn btn-outline btn-sm" onclick="abrirEditFicha('${f.id}')" style="border-color:var(--amber);color:var(--amber)">✏️ Editar</button>` : ''}
+        ${podeApagar ? `<button class="btn btn-danger btn-sm" onclick="deleteFicha('${f.id}')" title="Apagar ficha">🗑 Apagar</button>` : ''}
       </td>
     </tr>`;
                       });
@@ -4479,7 +4492,7 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                     }
 
                     function verFicha(id) {
-                      const f = _fichas.find(x => x.id === id);
+                      const f = _fichas.find(x => String(x.id) === String(id));
                       if (!f) return;
                       const isAdmin = currentUser && currentUser.tipo === 'admin';
                       const canDelete = isAdmin || (currentUser && f.userId === currentUser.id);
@@ -4501,6 +4514,11 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                         deleteBtn.style.display = canDelete ? 'block' : 'none';
                         deleteBtn.dataset.fichaId = fichaId;
                       }
+                      const editBtn = document.getElementById('fichaDetailEditBtn');
+                      if (editBtn) {
+                        editBtn.style.display = canDelete ? 'inline-flex' : 'none';
+                        editBtn.dataset.fichaId = fichaId;
+                      }
                       document.getElementById('fichaDetailOverlay').classList.add('show');
                     }
                     function closeFichaDetail() {
@@ -4511,6 +4529,10 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                       document.getElementById('printArea').innerHTML = `<div style="font-family:Arial,sans-serif;padding:20px">${content}</div>`;
                       window.print();
                     }
+                    function editFichaFromModal() {
+                      const fichaId = document.getElementById('fichaDetailEditBtn').dataset.fichaId;
+                      if (fichaId) { closeFichaDetail(); abrirEditFicha(fichaId); }
+                    }
                     function deleteFichaFromModal() {
                       const fichaId = document.getElementById('fichaDetailDeleteBtn').dataset.fichaId;
                       if (fichaId) {
@@ -4519,12 +4541,103 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                       }
                     }
 
+                    // ── Modal de Edição de Ficha ──
+                    function abrirEditFicha(id) {
+                      const f = _fichas.find(x => String(x.id) === String(id));
+                      if (!f) { showToast('Ficha não encontrada', 'error'); return; }
+                      const isAdmin = currentUser && currentUser.tipo === 'admin';
+                      const podeEditar = isAdmin || (currentUser && String(f.userId) === String(currentUser.id));
+                      if (!podeEditar) { showToast('Sem permissão para editar esta ficha', 'error'); return; }
+
+                      let overlay = document.getElementById('editFichaOverlay');
+                      if (!overlay) {
+                        overlay = document.createElement('div');
+                        overlay.id = 'editFichaOverlay';
+                        overlay.style.cssText = 'position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);overflow-y:auto;padding:20px 10px';
+                        document.body.appendChild(overlay);
+                      }
+                      const cordsOptions = _cords.map(c => `<option value="${c.id}" ${String(c.id)===String(f.coordId)?'selected':''}>${c.nome}</option>`).join('');
+                      overlay.innerHTML = `
+                        <div style="background:#fff;border-radius:16px;padding:28px;max-width:560px;width:100%;box-shadow:0 20px 40px rgba(0,0,0,.2);position:relative;margin:auto">
+                          <button onclick="fecharEditFicha()" style="position:absolute;top:14px;right:16px;background:none;border:none;font-size:22px;cursor:pointer;color:#999">×</button>
+                          <div style="font-size:18px;font-weight:800;color:var(--primary);margin-bottom:20px">✏️ Editar Ficha</div>
+                          <input type="hidden" id="ef-id" value="${f.id}">
+                          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+                            <div>
+                              <label style="font-size:11px;font-weight:700;color:#333;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:5px">Data</label>
+                              <input type="date" id="ef-data" value="${f.data||''}" style="width:100%;background:#f9f9f9;border:1px solid var(--border-solid);border-radius:8px;padding:10px 12px;font-family:Inter,sans-serif;font-size:13px">
+                            </div>
+                            <div>
+                              <label style="font-size:11px;font-weight:700;color:#333;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:5px">Bairro</label>
+                              <input type="text" id="ef-bairro" value="${f.bairro||''}" style="width:100%;background:#f9f9f9;border:1px solid var(--border-solid);border-radius:8px;padding:10px 12px;font-family:Inter,sans-serif;font-size:13px">
+                            </div>
+                            <div>
+                              <label style="font-size:11px;font-weight:700;color:#333;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:5px">Mobilizador</label>
+                              <input type="text" id="ef-mobilizador" value="${f.mobilizador||''}" style="width:100%;background:#f9f9f9;border:1px solid var(--border-solid);border-radius:8px;padding:10px 12px;font-family:Inter,sans-serif;font-size:13px">
+                            </div>
+                            <div>
+                              <label style="font-size:11px;font-weight:700;color:#333;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:5px">Coordenação</label>
+                              <select id="ef-cord" style="width:100%;background:#f9f9f9;border:1px solid var(--border-solid);border-radius:8px;padding:10px 12px;font-family:Inter,sans-serif;font-size:13px;color:var(--text)">${cordsOptions}</select>
+                            </div>
+                            <div>
+                              <label style="font-size:11px;font-weight:700;color:#333;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:5px">Responderam Sim</label>
+                              <input type="number" id="ef-sim" value="${f.sim||0}" min="0" style="width:100%;background:#f9f9f9;border:1px solid var(--border-solid);border-radius:8px;padding:10px 12px;font-family:Inter,sans-serif;font-size:13px">
+                            </div>
+                            <div>
+                              <label style="font-size:11px;font-weight:700;color:#333;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:5px">Responderam Não</label>
+                              <input type="number" id="ef-nao" value="${f.nao||0}" min="0" style="width:100%;background:#f9f9f9;border:1px solid var(--border-solid);border-radius:8px;padding:10px 12px;font-family:Inter,sans-serif;font-size:13px">
+                            </div>
+                          </div>
+                          <div style="margin-bottom:16px">
+                            <label style="font-size:11px;font-weight:700;color:#333;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:5px">Motivo de Recusa</label>
+                            <input type="text" id="ef-motivo" value="${(f.motivo||'').replace(/"/g,'&quot;')}" placeholder="Opcional" style="width:100%;background:#f9f9f9;border:1px solid var(--border-solid);border-radius:8px;padding:10px 12px;font-family:Inter,sans-serif;font-size:13px">
+                          </div>
+                          <div style="background:rgba(26,82,118,.06);border:1px solid rgba(26,82,118,.15);border-radius:10px;padding:12px;margin-bottom:16px;font-size:12px;color:var(--text2)">
+                            ℹ️ Para alterar os valores de locais e pessoas por tipo, apague esta ficha e crie uma nova.
+                          </div>
+                          <div style="display:flex;gap:10px;justify-content:flex-end">
+                            <button class="btn btn-outline" onclick="fecharEditFicha()">✕ Cancelar</button>
+                            <button class="btn btn-accent" onclick="guardarEditFicha()">💾 Guardar Alterações</button>
+                          </div>
+                        </div>`;
+                      overlay.style.display = 'flex';
+                    }
+                    function fecharEditFicha() {
+                      const o = document.getElementById('editFichaOverlay'); if (o) o.style.display = 'none';
+                    }
+                    async function guardarEditFicha() {
+                      const id = document.getElementById('ef-id').value;
+                      const f = _fichas.find(x => String(x.id) === String(id));
+                      if (!f) { showToast('Ficha não encontrada', 'error'); return; }
+                      const data = document.getElementById('ef-data').value;
+                      const bairro = document.getElementById('ef-bairro').value.trim();
+                      const mobilizador = document.getElementById('ef-mobilizador').value.trim();
+                      const cordId = document.getElementById('ef-cord').value;
+                      const sim = parseInt(document.getElementById('ef-sim').value) || 0;
+                      const nao = parseInt(document.getElementById('ef-nao').value) || 0;
+                      const motivo = document.getElementById('ef-motivo').value.trim();
+                      if (!data || !bairro || !mobilizador) { showToast('Data, Bairro e Mobilizador são obrigatórios', 'error'); return; }
+                      const cord = _cords.find(c => String(c.id) === String(cordId));
+                      const fichaAtualizada = { ...f, data, bairro, mobilizador, coordId: cordId, coordNome: cord ? cord.nome : f.coordNome, sim, nao, motivo: motivo || null };
+                      showLoading('A guardar alterações...');
+                      const ok = await updateFichaRemote(id, fichaAtualizada);
+                      if (ok) {
+                        const idx = _fichas.findIndex(x => String(x.id) === String(id));
+                        if (idx >= 0) _fichas[idx] = fichaAtualizada;
+                        DB.set('fichas', _fichas);
+                        fecharEditFicha();
+                        renderListFichas();
+                        showToast('Ficha actualizada com sucesso ✓', 'success');
+                      } else { showToast('Erro ao guardar. Verifique a ligação.', 'error'); }
+                      hideLoading();
+                    }
+
                     async function deleteFicha(id) {
                       // Verificar permissão: admin pode apagar qualquer ficha, supervisor só as suas
                       if (!currentUser) return;
-                      const f = _fichas.find(x => x.id === id);
+                      const f = _fichas.find(x => String(x.id) === String(id));
                       if (!f) { showToast('Ficha não encontrada', 'error'); return; }
-                      if (currentUser.tipo !== 'admin' && f.userId !== currentUser.id) {
+                      if (currentUser.tipo !== 'admin' && String(f.userId) !== String(currentUser.id)) {
                         showToast('Sem permissão para apagar esta ficha', 'error'); return;
                       }
                       const confirmMsg = `⚠️ Apagar a ficha de "${f.mobilizador || '?'}" do dia ${f.data || '?'}?\n\nEsta acção é IRREVERSÍVEL.`;
@@ -5612,6 +5725,7 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                           </div>
                           <div style="display:flex;align-items:center;gap:8px">
                             <button class="btn btn-outline btn-sm" onclick="openMobProfile('${m.nome.replace(/'/g,"\'")}')" title="Ver perfil" style="padding:5px 10px">👤 Perfil</button>
+                            <button class="btn btn-blue btn-sm" onclick="openEditMob('${m.id}','${m.nome.replace(/'/g,"\\'")}')" title="Editar nome" style="padding:5px 10px">✏️ Editar</button>
                             <button class="mob-toggle ${isActivo?'on':'off'}" title="${isActivo?'Clique para inactivar':'Clique para activar'}"
                               onclick="toggleMobItem('${m.id}', ${!isActivo})"></button>
                             <button class="btn btn-danger btn-sm" onclick="confirmDeleteMob('${m.id}','${m.nome.replace(/'/g,"\'")}')" title="Remover">🗑</button>
@@ -5654,6 +5768,7 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                             </div>
                           </div>
                           <div style="display:flex;align-items:center;gap:8px">
+                            <button class="btn btn-blue btn-sm" onclick="openEditMob('${m.id}','${m.nome.replace(/'/g,"\\'")}')" title="Editar">✏️</button>
                             <button class="mob-toggle ${isActivo?'on':'off'}" title="${isActivo?'Inactivar':'Activar'}"
                               onclick="toggleMobItemAdmin('${m.id}', ${!isActivo})"></button>
                           </div>
@@ -5696,6 +5811,61 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                         renderMobilizadoresList();
                         showToast(`"${nome}" removido ✓`, 'info');
                       });
+                    }
+
+                    // ── Editar nome do mobilizador ──
+                    function openEditMob(id, nomeActual) {
+                      let overlay = document.getElementById('editMobOverlay');
+                      if (!overlay) {
+                        overlay = document.createElement('div');
+                        overlay.id = 'editMobOverlay';
+                        overlay.style.cssText = 'position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)';
+                        overlay.innerHTML = `
+                          <div style="background:#fff;border-radius:16px;padding:32px;max-width:420px;width:94%;box-shadow:0 20px 40px rgba(0,0,0,.2);position:relative">
+                            <button onclick="closeEditMob()" style="position:absolute;top:14px;right:16px;background:none;border:none;font-size:22px;cursor:pointer;color:#999">×</button>
+                            <div style="font-size:18px;font-weight:800;color:var(--primary);margin-bottom:20px">✏️ Editar Mobilizador</div>
+                            <input type="hidden" id="editMobId">
+                            <div style="margin-bottom:20px">
+                              <label style="font-size:11px;font-weight:700;color:#333;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Nome Completo</label>
+                              <input type="text" id="editMobNome" style="width:100%;background:#f9f9f9;border:1px solid var(--border-solid);border-radius:8px;padding:11px 14px;font-family:Inter,sans-serif;font-size:14px;color:var(--text)"
+                                onkeydown="if(event.key==='Enter')saveEditMob()">
+                            </div>
+                            <div style="display:flex;gap:10px;justify-content:flex-end">
+                              <button class="btn btn-outline" onclick="closeEditMob()">✕ Cancelar</button>
+                              <button class="btn btn-accent" onclick="saveEditMob()">💾 Guardar</button>
+                            </div>
+                          </div>`;
+                        document.body.appendChild(overlay);
+                      }
+                      document.getElementById('editMobId').value = id;
+                      document.getElementById('editMobNome').value = nomeActual;
+                      overlay.style.display = 'flex';
+                      setTimeout(() => document.getElementById('editMobNome').focus(), 100);
+                    }
+                    function closeEditMob() {
+                      const o = document.getElementById('editMobOverlay'); if (o) o.style.display = 'none';
+                    }
+                    async function saveEditMob() {
+                      const id = document.getElementById('editMobId').value;
+                      const novoNome = document.getElementById('editMobNome').value.trim();
+                      if (!novoNome) { showToast('O nome não pode estar vazio', 'error'); return; }
+                      const mob = _mobilizadores.find(m => String(m.id) === String(id));
+                      if (!mob) { showToast('Mobilizador não encontrado', 'error'); return; }
+                      const nomeAntigo = mob.nome;
+                      showLoading('A guardar...');
+                      try {
+                        await db.collection('mobilizadores').doc(String(id)).update({ nome: novoNome });
+                        mob.nome = novoNome;
+                        DB.set('mobilizadores', _mobilizadores);
+                      } catch(e) {
+                        mob.nome = novoNome;
+                        DB.set('mobilizadores', _mobilizadores);
+                      }
+                      hideLoading();
+                      closeEditMob();
+                      renderMobilizadoresList();
+                      renderMobilizadoresAdmin();
+                      showToast(`Mobilizador renomeado para "${novoNome}" ✓`, 'success');
                     }
 
                     // ── Renderizar página de mobilizadores ──
@@ -6012,7 +6182,10 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
       <td style="font-weight:600">${c.nome}</td>
       <td>${coordenadorDisplay}</td>
       <td style="font-size:11px;color:var(--text2)">${supNames}</td>
-      <td><button class="btn btn-danger btn-sm" onclick="deleteCord(${c.id})">🗑 Apagar</button></td>
+      <td style="display:flex;gap:6px">
+        <button class="btn btn-blue btn-sm" onclick="openEditCord('${c.id}')">✏️ Editar</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteCord('${c.id}')">🗑 Apagar</button>
+      </td>
     </tr>`;
                   });
                   }
@@ -6031,20 +6204,81 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                     showToast('Coordenação adicionada!', 'success');
                   }
                     async function deleteCord(id) {
-                      const sups = _users.filter(u => u.coordId === id && u.tipo === 'supervisor');
+                      const sups = _users.filter(u => String(u.coordId) === String(id) && u.tipo === 'supervisor');
                       if (sups.length > 0) {
                         if (!confirm(`Esta coordenação tem ${sups.length} supervisor(es) associado(s).\nApagar irá desassociá-los. Continuar?`)) return;
                       } else {
-                      if (!confirm('Apagar coordenação?')) return;
+                        if (!confirm('Apagar coordenação?')) return;
+                      }
+                      showLoading('A apagar...');
+                      await deleteCordRemote(id);
+                      _users.forEach(u => { if (String(u.coordId) === String(id)) u.coordId = null; });
+                      DB.set('users', _users);
+                      hideLoading();
+                      renderCords();
+                      showToast('Coordenação apagada', 'success');
                     }
-                    showLoading('A apagar...');
-                    await deleteCordRemote(id);
-                    _users.forEach(u => { if (u.coordId === id) u.coordId = null; });
-                    DB.set('users', _users);
-                    hideLoading();
-                    renderCords();
-                    showToast('Coordenação apagada', 'success');
-                  }
+
+                    // ── Editar Coordenação ──
+                    let _editCordId = null;
+                    function openEditCord(id) {
+                      const c = _cords.find(x => String(x.id) === String(id));
+                      if (!c) return;
+                      _editCordId = id;
+                      // Criar modal inline se não existir
+                      let overlay = document.getElementById('editCordOverlay');
+                      if (!overlay) {
+                        overlay = document.createElement('div');
+                        overlay.id = 'editCordOverlay';
+                        overlay.style.cssText = 'position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)';
+                        overlay.innerHTML = `
+                          <div style="background:#fff;border-radius:16px;padding:32px;max-width:480px;width:94%;box-shadow:0 20px 40px rgba(0,0,0,.2);position:relative">
+                            <button onclick="closeEditCord()" style="position:absolute;top:14px;right:16px;background:none;border:none;font-size:22px;cursor:pointer;color:#999">×</button>
+                            <div style="font-size:18px;font-weight:800;color:var(--primary);margin-bottom:20px">✏️ Editar Coordenação</div>
+                            <div class="form-field" style="margin-bottom:14px">
+                              <label style="font-size:11px;font-weight:700;color:#333;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Nome da Coordenação</label>
+                              <input type="text" id="editCordNome" style="width:100%;background:#f9f9f9;border:1px solid var(--border-solid);border-radius:8px;padding:11px 14px;font-family:Inter,sans-serif;font-size:14px;color:var(--text)">
+                            </div>
+                            <div class="form-field" style="margin-bottom:20px">
+                              <label style="font-size:11px;font-weight:700;color:#333;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Nome do Coordenador</label>
+                              <input type="text" id="editCordCoordenador" style="width:100%;background:#f9f9f9;border:1px solid var(--border-solid);border-radius:8px;padding:11px 14px;font-family:Inter,sans-serif;font-size:14px;color:var(--text)">
+                            </div>
+                            <div style="display:flex;gap:10px;justify-content:flex-end">
+                              <button class="btn btn-outline" onclick="closeEditCord()">✕ Cancelar</button>
+                              <button class="btn btn-accent" onclick="saveEditCord()">💾 Guardar</button>
+                            </div>
+                          </div>`;
+                        document.body.appendChild(overlay);
+                      }
+                      document.getElementById('editCordNome').value = c.nome || '';
+                      document.getElementById('editCordCoordenador').value = c.coordenador || '';
+                      overlay.style.display = 'flex';
+                    }
+                    function closeEditCord() {
+                      const o = document.getElementById('editCordOverlay'); if (o) o.style.display = 'none';
+                    }
+                    async function saveEditCord() {
+                      const nome = document.getElementById('editCordNome').value.trim();
+                      const coordenador = document.getElementById('editCordCoordenador').value.trim();
+                      if (!nome) { showToast('O nome não pode estar vazio', 'error'); return; }
+                      showLoading('A guardar...');
+                      try {
+                        await db.collection('coordenacoes').doc(String(_editCordId)).update({ nome, coordenador: coordenador || '' });
+                        const c = _cords.find(x => String(x.id) === String(_editCordId));
+                        if (c) { c.nome = nome; c.coordenador = coordenador; }
+                        // actualizar fichas em memória
+                        _fichas.forEach(f => { if (String(f.coordId) === String(_editCordId)) { f.coordNome = nome; } });
+                        DB.set('coordenacoes', _cords);
+                      } catch(e) {
+                        const c = _cords.find(x => String(x.id) === String(_editCordId));
+                        if (c) { c.nome = nome; c.coordenador = coordenador; }
+                        DB.set('coordenacoes', _cords);
+                      }
+                      hideLoading();
+                      closeEditCord();
+                      renderCords();
+                      showToast('Coordenação actualizada ✓', 'success');
+                    }
 
                     // EXPORT EXCEL FICHAS
                     function exportExcel() {
@@ -6831,6 +7065,8 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                     }
                     function toggleSidebar() {
                       const sidebar = document.querySelector('.sidebar');
+                      const spacer = document.getElementById('sidebarSpacer');
+                      const topbar = document.getElementById('fichasTopbar');
                       const overlay = document.getElementById('sidebarOverlay');
                       if (!sidebar) return;
                       if (isMobile()) {
@@ -6841,6 +7077,8 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                         // Desktop: usa classe .sidebar-hidden + guarda estado
                         sidebar.classList.toggle('sidebar-hidden');
                         const isHidden = sidebar.classList.contains('sidebar-hidden');
+                        if (spacer) spacer.classList.toggle('hidden', isHidden);
+                        if (topbar) topbar.classList.toggle('sidebar-collapsed', isHidden);
                         localStorage.setItem('sidebarHidden', isHidden);
                         const btn = document.getElementById('sidebarToggleBtn');
                         if (btn) btn.textContent = isHidden ? '☰' : '✕';
@@ -6863,8 +7101,12 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                       if (isMobile()) return;
                       const sidebarHidden = localStorage.getItem('sidebarHidden') === 'true';
                       const sidebar = document.querySelector('.sidebar');
+                      const spacer = document.getElementById('sidebarSpacer');
+                      const topbar = document.getElementById('fichasTopbar');
                       if (sidebar && sidebarHidden) {
                         sidebar.classList.add('sidebar-hidden');
+                        if (spacer) spacer.classList.add('hidden');
+                        if (topbar) topbar.classList.add('sidebar-collapsed');
                         const btn = document.getElementById('sidebarToggleBtn');
                         if (btn) btn.textContent = '☰';
                       }
@@ -7016,17 +7258,18 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                     function adjustForTopbar() {
                       const main = document.querySelector('.main');
                       const topbar = document.getElementById('fichasTopbar');
-                      const sidebar = document.querySelector('.sidebar');
                       const notifCenter = document.getElementById('notificationCenter');
                       const mobileHeader = document.querySelector('.mobile-header');
                       if (!main || !topbar) return;
                       if (topbar.classList.contains('show')) {
-                        main.style.paddingTop = '0';
-                        if (sidebar) sidebar.style.marginTop = '44px';
-                        // Offset notification center below topbar
+                        // Adicionar padding-top para compensar a topbar fixa
+                        main.style.paddingTop = '48px';
+                        // Notification center below topbar
                         if (notifCenter) notifCenter.style.top = '52px';
                         // Mobile header below topbar
                         if (mobileHeader) mobileHeader.style.top = '44px';
+                      } else {
+                        main.style.paddingTop = '0';
                       }
                     }
 
