@@ -1849,9 +1849,10 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
           </div>
           <div class="sidebar-user" style="cursor:pointer" onclick="showPage('perfil')" title="Clique para editar perfil">
             <div class="sidebar-avatar" id="sidebarAvatar">A</div>
-            <div>
+            <div style="flex:1;min-width:0">
               <div class="uname" id="sidebarName">—</div>
               <div class="ucord" id="sidebarCord">—</div>
+              <div id="sidebarCoordenador" style="display:none;font-size:10px;margin-top:2px;padding:2px 7px;border-radius:8px;background:rgba(93,173,226,.18);color:#5dade2;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
             </div>
           </div>
           <nav>
@@ -2903,10 +2904,19 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
           <div id="mobAdminPanel" style="display:none">
             <div class="card" style="border-color:rgba(26,82,118,.3);background:rgba(26,82,118,.03)">
               <div class="card-title"><span class="dot"></span>🛡️ Gestão Global de Mobilizadores (Administrador)</div>
-              <p style="font-size:13px;color:var(--text2);margin-bottom:16px">
+              <p style="font-size:13px;color:var(--text2);margin-bottom:12px">
                 Visualize e gira mobilizadores de todos os supervisores. Use o toggle para activar/inactivar.
-                Um mobilizador inactivado deixa de aparecer no autocomplete do supervisor, mas os dados históricos são preservados.
+                Use <b style="color:var(--coral)">🗑 Apagar</b> para remover definitivamente da base de dados (incluindo fichas associadas).
               </p>
+              <!-- BOTÕES DE BACKUP -->
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;padding:12px 14px;background:rgba(202,138,4,.07);border:1px solid rgba(202,138,4,.25);border-radius:10px;align-items:center">
+                <span style="font-size:12px;font-weight:700;color:var(--amber);flex-shrink:0">💾 Backup do Sistema:</span>
+                <button class="btn btn-outline btn-sm" onclick="backupMobilizadores()" style="font-size:12px">📥 Mobilizadores (JSON)</button>
+                <button class="btn btn-outline btn-sm" onclick="backupSupervisores()" style="font-size:12px">📥 Supervisores (JSON)</button>
+                <button class="btn btn-outline btn-sm" onclick="backupFichas()" style="font-size:12px">📥 Dados Lançados (JSON)</button>
+                <button class="btn btn-outline btn-sm" onclick="backupCompleto()" style="font-size:12px;border-color:var(--primary);color:var(--primary)">📦 Backup Completo (JSON)</button>
+                <button class="btn btn-outline btn-sm" onclick="backupExcel()" style="font-size:12px;border-color:var(--surf-dark);color:var(--surf-dark)">📊 Exportar Excel</button>
+              </div>
               <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap">
                 <button class="mob-filter-tab active" id="mobAdmFiltTodos" onclick="filterMobilizadoresAdmin('todos')">Todos</button>
                 <button class="mob-filter-tab" id="mobAdmFiltActivos" onclick="filterMobilizadoresAdmin('activos')">✅ Activos</button>
@@ -3591,12 +3601,21 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                     const av = document.getElementById('sidebarAvatar');
                     if(av) av.textContent = (currentUser.nome||'?')[0].toUpperCase();
                     document.getElementById('sidebarRole').textContent = currentUser.tipo === 'admin' ? 'ADMINISTRADOR' : 'SUPERVISOR';
-                    // Show coord name + coordenador name for supervisor
+                    // Show coord name for supervisor, and coordinator name fixed below
                     if (currentUser.tipo === 'supervisor' && cord) {
-                      const coordenadorInfo = cord.coordenador ? ` · ${cord.coordenador}` : '';
-                      document.getElementById('sidebarCord').textContent = cord.nome + coordenadorInfo;
+                      document.getElementById('sidebarCord').textContent = cord.nome;
+                      const coordenadorEl = document.getElementById('sidebarCoordenador');
+                      if (coordenadorEl && cord.coordenador) {
+                        coordenadorEl.style.display = 'block';
+                        coordenadorEl.textContent = '👤 Coord.: ' + cord.coordenador;
+                        coordenadorEl.title = 'Coordenador responsável: ' + cord.coordenador;
+                      } else if (coordenadorEl) {
+                        coordenadorEl.style.display = 'none';
+                      }
                     } else {
                       document.getElementById('sidebarCord').textContent = currentUser.tipo === 'admin' ? 'Acesso Global' : '—';
+                      const coordenadorEl = document.getElementById('sidebarCoordenador');
+                      if (coordenadorEl) coordenadorEl.style.display = 'none';
                     }
                     document.getElementById('adminNav').style.display = currentUser.tipo === 'admin' ? 'block' : 'none';
                     buildFichaTable(); setTodayDate(); updateCoordField();
@@ -5786,9 +5805,10 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                             </div>
                           </div>
                           <div style="display:flex;align-items:center;gap:8px">
-                            <button class="btn btn-blue btn-sm" onclick="openEditMob('${m.id}','${m.nome.replace(/'/g,"\\'")}')" title="Editar">✏️</button>
+                            <button class="btn btn-blue btn-sm" onclick="openEditMob('${m.id}','${m.nome.replace(/'/g,"\\'")}')" title="Editar nome" style="padding:5px 10px">✏️ Editar</button>
                             <button class="mob-toggle ${isActivo?'on':'off'}" title="${isActivo?'Inactivar':'Activar'}"
                               onclick="toggleMobItemAdmin('${m.id}', ${!isActivo})"></button>
+                            <button class="btn btn-danger btn-sm" onclick="confirmDeleteMobAdmin('${m.id}','${m.nome.replace(/'/g,"\\'")}')" title="Apagar do sistema" style="padding:5px 10px">🗑 Apagar</button>
                           </div>
                         </div>`;
                       }).join('');
@@ -5829,6 +5849,117 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                         renderMobilizadoresList();
                         showToast(`"${nome}" removido ✓`, 'info');
                       });
+                    }
+
+                    // ── Confirmar remoção pelo Admin (apaga da base de dados) ──
+                    function confirmDeleteMobAdmin(id, nome) {
+                      if (!confirm(`⚠️ ATENÇÃO — Apagar permanentemente!\n\nVai remover "${nome}" da base de dados.\nTodas as fichas associadas a este mobilizador também serão apagadas.\n\nEsta acção NÃO pode ser desfeita.\n\nConfirma?`)) return;
+                      showLoading('A apagar mobilizador e fichas associadas...');
+                      deleteMobilizadorRemote(id).then(() => {
+                        hideLoading();
+                        renderMobilizadoresAdmin();
+                        renderMobilizadoresList();
+                        showToast(`"${nome}" apagado permanentemente ✓`, 'info');
+                      }).catch(e => {
+                        hideLoading();
+                        showToast('Erro ao apagar: ' + e.message, 'error');
+                      });
+                    }
+
+                    // ── BACKUP / EXPORTAÇÃO DE DADOS ──
+                    function downloadJSON(data, filename) {
+                      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.href = url; a.download = filename; a.click();
+                      URL.revokeObjectURL(url);
+                    }
+
+                    function backupMobilizadores() {
+                      const data = {
+                        exportado_em: new Date().toISOString(),
+                        total: _mobilizadores.length,
+                        mobilizadores: _mobilizadores
+                      };
+                      downloadJSON(data, `SisMob_Backup_Mobilizadores_${new Date().toISOString().split('T')[0]}.json`);
+                      showToast(`Backup de ${_mobilizadores.length} mobilizadores exportado ✓`, 'success');
+                    }
+
+                    function backupSupervisores() {
+                      const sups = _users.filter(u => u.tipo === 'supervisor').map(u => ({
+                        id: u.id, nome: u.nome, email: u.email,
+                        coordId: u.coordId, ronda: u.ronda, activo: u.activo
+                      }));
+                      const data = {
+                        exportado_em: new Date().toISOString(),
+                        total: sups.length,
+                        supervisores: sups
+                      };
+                      downloadJSON(data, `SisMob_Backup_Supervisores_${new Date().toISOString().split('T')[0]}.json`);
+                      showToast(`Backup de ${sups.length} supervisores exportado ✓`, 'success');
+                    }
+
+                    function backupFichas() {
+                      const data = {
+                        exportado_em: new Date().toISOString(),
+                        total: _fichas.length,
+                        fichas: _fichas
+                      };
+                      downloadJSON(data, `SisMob_Backup_Fichas_${new Date().toISOString().split('T')[0]}.json`);
+                      showToast(`Backup de ${_fichas.length} fichas exportado ✓`, 'success');
+                    }
+
+                    function backupCompleto() {
+                      const sups = _users.filter(u => u.tipo === 'supervisor').map(u => ({
+                        id: u.id, nome: u.nome, email: u.email,
+                        coordId: u.coordId, ronda: u.ronda, activo: u.activo
+                      }));
+                      const data = {
+                        exportado_em: new Date().toISOString(),
+                        sistema: 'SisMob',
+                        coordenacoes: { total: _cords.length, dados: _cords },
+                        supervisores: { total: sups.length, dados: sups },
+                        mobilizadores: { total: _mobilizadores.length, dados: _mobilizadores },
+                        fichas: { total: _fichas.length, dados: _fichas }
+                      };
+                      downloadJSON(data, `SisMob_Backup_COMPLETO_${new Date().toISOString().split('T')[0]}.json`);
+                      showToast('Backup completo exportado ✓', 'success');
+                    }
+
+                    function backupExcel() {
+                      showToast('A gerar Excel de backup...', 'info');
+                      const wb = XLSX.utils.book_new();
+
+                      // Aba Mobilizadores
+                      const mobData = _mobilizadores.map(m => ({
+                        'Nome': m.nome, 'Supervisor': m.supervisorNome || '—',
+                        'Estado': m.activo !== false ? 'Activo' : 'Inactivo'
+                      }));
+                      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(mobData), 'Mobilizadores');
+
+                      // Aba Supervisores
+                      const supData = _users.filter(u => u.tipo === 'supervisor').map(u => {
+                        const cord = _cords.find(c => c.id === u.coordId);
+                        return {
+                          'Nome': u.nome, 'Email': u.email,
+                          'Coordenação': cord ? cord.nome : '—',
+                          'Ronda': u.ronda ? u.ronda + 'ª' : '—',
+                          'Estado': u.activo !== false ? 'Activo' : 'Inactivo'
+                        };
+                      });
+                      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(supData), 'Supervisores');
+
+                      // Aba Fichas
+                      const fichaData = _fichas.map(f => ({
+                        'Data': f.data || '—', 'Mobilizador': f.mobilizador || '—',
+                        'Coordenação': f.coordNome || '—', 'Bairro': f.bairro || '—',
+                        'Total Locais': f.totalLocais || 0, 'Total Pessoas': f.totalPessoas || 0,
+                        'Aceitaram': f.sim || 0, 'Recusaram': f.nao || 0
+                      }));
+                      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(fichaData), 'Fichas');
+
+                      XLSX.writeFile(wb, `SisMob_Backup_${new Date().toISOString().split('T')[0]}.xlsx`);
+                      showToast('Excel de backup exportado ✓', 'success');
                     }
 
                     // ── Editar nome do mobilizador ──

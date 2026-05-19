@@ -5,7 +5,7 @@ user: anicia@sismob.ao
 senha: mob2026
 
 chingo 2
-user: quilina@sismob.ao
+user: miquilina@sismob.ao
 senha: mob2026
 user: ana@sismob.ao
 senha: mob2026
