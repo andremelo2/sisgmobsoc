@@ -14,60 +14,65 @@
 <style>
 /* ═══════════════════════════════════════════════════════════
    SISMOB — DESIGN SYSTEM MODERNO
-   Paleta: Violeta · Surf · Coral · Âmbar · Gradiente Premium
+   Paleta: Azul Torrado · Mario · Âmbar · Vermelho · Contraste
    ═══════════════════════════════════════════════════════════ */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
 :root{
-  /* Cores Principais — Simplificadas */
-  --primary:#2c5f2d;
-  --primary-dark:#1d4620;
-  --primary-light:#3d7f3e;
+  /* Cores Principais — Azul Torrado (Teal escuro / Petróleo) */
+  --primary:#1a5276;
+  --primary-dark:#0e3a57;
+  --primary-light:#2874a6;
 
-  /* Secundária — Verde */
-  --surf:#22b14c;
-  --surf-dark:#1a8a3a;
-  --surf-light:#5fd888;
+  /* Secundária — Azul Médio vibrante */
+  --surf:#2e86c1;
+  --surf-dark:#1f618d;
+  --surf-light:#5dade2;
 
-  /* Acento — Vermelho */
-  --coral:#e74c3c;
-  --coral-light:rgba(231,76,60,.12);
+  /* Acento — Vermelho Contraste */
+  --coral:#c0392b;
+  --coral-light:rgba(192,57,43,.12);
 
-  /* Destaque — Amarelo Torrado */
-  --amber:#d4a817;
-  --amber-light:rgba(212,168,23,.15);
+  /* Destaque — Amarelo Torrado / Âmbar */
+  --amber:#ca8a04;
+  --amber-light:rgba(202,138,4,.15);
+
+  /* Mario — Marrom/Castanho Quente */
+  --mario:#7d4e24;
+  --mario-light:rgba(125,78,36,.14);
+  --mario-bright:#a0522d;
 
   /* Preto */
   --black:#1a1a1a;
 
   /* Backgrounds */
-  --bg:#fafafa;
-  --bg-solid:#f5f5f5;
+  --bg:#f7f9fb;
+  --bg-solid:#f0f4f8;
   --bg2:#ffffff;
-  --bg3:#f0f0f0;
+  --bg3:#e8eef4;
   --card:#ffffff;
   --card-solid:#ffffff;
-  --border:#e0e0e0;
-  --border-solid:#d0d0d0;
+  --border:#d1dce8;
+  --border-solid:#bccad8;
 
   /* Texto */
-  --text:#1a1a1a;
-  --text2:#4a4a4a;
-  --text3:#7a7a7a;
+  --text:#1a1f2e;
+  --text2:#3a4558;
+  --text3:#6b7a96;
 
-  /* Sidebar — Paleta refinada */
-  --sidebar-bg:#0f1a10;
-  --sidebar-surface:#1a2e1b;
-  --sidebar-border:rgba(255,255,255,.06);
-  --sidebar-text:rgba(255,255,255,.55);
-  --sidebar-text-hover:rgba(255,255,255,.9);
+  /* Sidebar — Azul Petróleo Escuro Premium */
+  --sidebar-bg:#0d1f2d;
+  --sidebar-surface:#142536;
+  --sidebar-border:rgba(255,255,255,.07);
+  --sidebar-text:rgba(255,255,255,.52);
+  --sidebar-text-hover:rgba(255,255,255,.92);
   --sidebar-item-hover:rgba(255,255,255,.07);
-  --sidebar-active-bg:#22b14c;
+  --sidebar-active-bg:#2e86c1;
   --sidebar-active-text:#ffffff;
-  --sidebar-active-indicator:#5fd888;
+  --sidebar-active-indicator:#5dade2;
   --sidebar-section-label:rgba(255,255,255,.22);
-  --sidebar-avatar-bg:#2d6a4f;
-  --sidebar-logo-icon-bg:#1a3d1b;
+  --sidebar-avatar-bg:#1a5276;
+  --sidebar-logo-icon-bg:#0e3a57;
 
   /* Legado mapeado */
   --accent:var(--primary);
@@ -75,7 +80,7 @@
   --accent3:var(--amber);
   --danger:var(--coral);
   --green:var(--surf);
-  --purple:var(--primary);
+  --purple:var(--mario);
   --gold:var(--amber);
   --blue-gov:var(--primary-dark);
   --red-gov:var(--coral);
@@ -127,13 +132,13 @@ body{
 #loginScreen{
   display:flex;align-items:center;justify-content:center;
   min-height:100vh;position:relative;overflow:hidden;
-  background:radial-gradient(ellipse at 30% 20%, #3d7f3e 0%, #2c5f2d 40%, #1a3d1b 100%);
+  background:radial-gradient(ellipse at 30% 20%, #1a5276 0%, #0e3a57 40%, #081c2b 100%);
 }
 #loginScreen::before{
   content:'';position:absolute;inset:0;
   background:
-    radial-gradient(circle at 70% 80%, rgba(34,177,76,0.18) 0%, transparent 55%),
-    radial-gradient(circle at 10% 90%, rgba(44,95,45,0.35) 0%, transparent 45%);
+    radial-gradient(circle at 70% 80%, rgba(202,138,4,0.15) 0%, transparent 55%),
+    radial-gradient(circle at 10% 90%, rgba(125,78,36,0.22) 0%, transparent 45%);
   pointer-events:none;
 }
 #loginScreen::after{
@@ -162,7 +167,7 @@ body{
 }
 .login-logo .mark{
   font-size:28px;font-weight:800;
-  color:#06a509;letter-spacing:-1px;
+  color:#2e86c1;letter-spacing:-1px;
 }
 .login-logo p{color:#666;font-size:13px;margin-top:6px;font-weight:400}
 .form-group{margin-bottom:20px}
@@ -185,7 +190,7 @@ body{
   outline:none;
   border-color:var(--primary);
   background:#ffffff;
-  box-shadow:0 0 0 2px rgba(44,95,45,.15);
+  box-shadow:0 0 0 2px rgba(26,82,118,.18);
 }
 .btn-primary{
   width:100%;
@@ -300,8 +305,8 @@ nav{flex:1;padding:10px 8px}
   color:var(--sidebar-text-hover);
 }
 .nav-item.active{
-  background:rgba(34,177,76,.18);
-  color:#5fd888;
+  background:rgba(46,134,193,.18);
+  color:#5dade2;
   font-weight:600;
 }
 .nav-item.active::before{
@@ -309,11 +314,11 @@ nav{flex:1;padding:10px 8px}
   width:3px;
   background:var(--sidebar-active-indicator);
   border-radius:0 3px 3px 0;
-  box-shadow:0 0 8px rgba(95,216,136,.5);
+  box-shadow:0 0 8px rgba(93,173,226,.5);
 }
 .nav-item svg{width:16px;height:16px;flex-shrink:0;opacity:.7}
 .nav-item:hover svg{opacity:.9}
-.nav-item.active svg{opacity:1;color:#5fd888}
+.nav-item.active svg{opacity:1;color:#5dade2}
 .nav-item:active{transform:scale(.97)}
 .sidebar-footer{padding:12px 8px 16px;border-top:1px solid var(--sidebar-border)}
 .btn-logout{
@@ -476,20 +481,20 @@ nav{flex:1;padding:10px 8px}
 .btn-danger:active{background:rgba(231,76,60,.35)!important;color:#fff!important;transform:scale(.95)!important}
 
 .btn-green{
-  background:rgba(34,177,76,.1);
-  border:1.5px solid rgba(34,177,76,.3);
+  background:rgba(46,134,193,.1);
+  border:1.5px solid rgba(46,134,193,.3);
   color:var(--surf-dark);
 }
-.btn-green:hover{background:rgba(34,177,76,.2);border-color:var(--surf)}
-.btn-green:active{background:rgba(34,177,76,.35)!important;color:#fff!important;transform:scale(.95)!important}
+.btn-green:hover{background:rgba(46,134,193,.2);border-color:var(--surf)}
+.btn-green:active{background:rgba(46,134,193,.35)!important;color:#fff!important;transform:scale(.95)!important}
 
 .btn-blue{
-  background:rgba(44,95,45,.1);
-  border:1.5px solid rgba(44,95,45,.3);
+  background:rgba(26,82,118,.1);
+  border:1.5px solid rgba(26,82,118,.3);
   color:var(--primary);
 }
-.btn-blue:hover{background:rgba(44,95,45,.2);border-color:var(--primary)}
-.btn-blue:active{background:rgba(44,95,45,.4)!important;color:#fff!important;transform:scale(.95)!important}
+.btn-blue:hover{background:rgba(26,82,118,.2);border-color:var(--primary)}
+.btn-blue:active{background:rgba(26,82,118,.4)!important;color:#fff!important;transform:scale(.95)!important}
 
 /* ── FORMS ── */
 .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
@@ -512,7 +517,7 @@ nav{flex:1;padding:10px 8px}
 .form-field input:focus,.form-field select:focus,.form-field textarea:focus{
   outline:none;
   border-color:var(--primary);
-  box-shadow:0 0 0 2px rgba(44,95,45,.15);
+  box-shadow:0 0 0 2px rgba(26,82,118,.15);
   background:#ffffff;
 }
 .form-field input[type=number]{font-family:'JetBrains Mono',monospace}
@@ -856,10 +861,10 @@ tbody td{padding:11px 14px;color:var(--text2)}
   border-bottom:1px solid var(--border);
 }
 .mob-ac-item:last-child{border-bottom:none}
-.mob-ac-item:hover,.mob-ac-item.selected{background:rgba(44,95,45,.08);color:var(--primary)}
+.mob-ac-item:hover,.mob-ac-item.selected{background:rgba(26,82,118,.08);color:var(--primary)}
 .mob-ac-item .mob-ac-avatar{
   width:28px;height:28px;border-radius:50%;
-  background:rgba(44,95,45,.15);
+  background:rgba(26,82,118,.15);
   display:flex;align-items:center;justify-content:center;
   font-size:11px;font-weight:700;color:var(--primary);flex-shrink:0;
 }
@@ -874,10 +879,10 @@ tbody td{padding:11px 14px;color:var(--text2)}
   transition:var(--transition);
 }
 .mob-list-item:last-child{border-bottom:none}
-.mob-list-item:hover{background:rgba(44,95,45,.04)}
+.mob-list-item:hover{background:rgba(26,82,118,.04)}
 .mob-list-avatar{
   width:36px;height:36px;border-radius:50%;
-  background:rgba(44,95,45,.15);
+  background:rgba(26,82,118,.15);
   display:flex;align-items:center;justify-content:center;
   font-size:13px;font-weight:700;color:var(--primary);flex-shrink:0;
 }
@@ -885,7 +890,7 @@ tbody td{padding:11px 14px;color:var(--text2)}
 .mob-badge-activo{
   display:inline-flex;align-items:center;gap:4px;
   font-size:11px;font-weight:600;
-  background:rgba(34,177,76,.12);color:var(--surf-dark);
+  background:rgba(46,134,193,.12);color:var(--surf-dark);
   padding:3px 10px;border-radius:20px;
 }
 .mob-badge-inactivo{
@@ -968,9 +973,9 @@ tbody td{padding:11px 14px;color:var(--text2)}
   color:var(--text);
 }
 .toast.show{transform:none}
-.toast.success{border-color:var(--surf);color:var(--surf-dark);background:rgba(34,177,76,.05)}
+.toast.success{border-color:var(--surf);color:var(--surf-dark);background:rgba(46,134,193,.05)}
 .toast.error{border-color:var(--coral);color:var(--coral);background:rgba(231,76,60,.05)}
-.toast.info{border-color:var(--primary);color:var(--primary);background:rgba(44,95,45,.05)}
+.toast.info{border-color:var(--primary);color:var(--primary);background:rgba(26,82,118,.05)}
 
 /* ── LOADING ── */
 .loading-overlay{
@@ -1162,12 +1167,12 @@ tbody td{padding:11px 14px;color:var(--text2)}
 .notification-item{
   padding:12px;border-radius:8px;
   margin-bottom:8px;
-  background:rgba(44,95,45,.04);
+  background:rgba(26,82,118,.04);
   border-left:3px solid var(--primary);
   cursor:pointer;transition:var(--transition);
 }
 .notification-item:hover{transform:translateX(-2px);box-shadow:var(--shadow-sm)}
-.notification-item.unread{background:rgba(44,95,45,.08);font-weight:600}
+.notification-item.unread{background:rgba(26,82,118,.08);font-weight:600}
 .notification-item.success{border-left-color:var(--surf)}
 .notification-item.warning{border-left-color:var(--amber)}
 .notification-item.error{border-left-color:var(--coral)}
@@ -1260,26 +1265,26 @@ body.dark-mode .card,body.dark-mode .stat-card,body.dark-mode .chart-card,body.d
 body.dark-mode .form-field input,body.dark-mode .form-field select,body.dark-mode .form-field textarea{background:#2a2a2a;border-color:#3a3a3a;color:#e8e8e8}
 body.dark-mode .btn-outline{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
 body.dark-mode thead th{background:#2a2a2a;color:var(--primary-light);border-color:#3a3a3a}
-body.dark-mode tbody tr:nth-child(even){background:rgba(44,95,45,.08)}
-body.dark-mode tbody tr:hover{background:rgba(44,95,45,.12)}
+body.dark-mode tbody tr:nth-child(even){background:rgba(26,82,118,.08)}
+body.dark-mode tbody tr:hover{background:rgba(26,82,118,.12)}
 body.dark-mode tbody tr,body.dark-mode tbody td{border-color:#3a3a3a}
 body.dark-mode .tabs{background:#2a2a2a;border-color:#3a3a3a}
 body.dark-mode .search-box,body.dark-mode .notification-center,body.dark-mode .export-menu{background:#242424;border-color:#3a3a3a}
-body.dark-mode .shortcut-key{background:rgba(44,95,45,.2);border-color:rgba(44,95,45,.4)}
+body.dark-mode .shortcut-key{background:rgba(26,82,118,.2);border-color:rgba(26,82,118,.4)}
 body.dark-mode .login-card{background:#242424;border-color:#3a3a3a}
 body.dark-mode .toast{background:#242424;border-color:#3a3a3a;color:#e8e8e8}
 /* db-status agora integrado na topbar amarela */
 /* theme-toggle agora integrado na topbar */
-body.dark-mode .mobile-header{background:#2c5f2d}
+body.dark-mode .mobile-header{background:#1a5276}
 body.dark-mode #page-dashboard{background:#1a1a1a}
-body.dark-mode .ficha-table td.loc-cell{background:rgba(44,95,45,.08)}
-body.dark-mode .ranking-item{background:rgba(44,95,45,.08);border-color:rgba(44,95,45,.15)}
+body.dark-mode .ficha-table td.loc-cell{background:rgba(26,82,118,.08)}
+body.dark-mode .ranking-item{background:rgba(26,82,118,.08);border-color:rgba(26,82,118,.15)}
 body.dark-mode .metric-card{background:#2a2a2a;border-color:#3a3a3a}
 body.dark-mode .sbox{background:#2a2a2a}
 body.dark-mode .insight-card{background:#2a2a2a;border-color:#3a3a3a}
 body.dark-mode .shortcuts-panel{background:#242424;border-color:#3a3a3a}
 body.dark-mode .shortcut-row{border-color:#3a3a3a}
-body.dark-mode .notification-item{background:rgba(44,95,45,.1)}
+body.dark-mode .notification-item{background:rgba(26,82,118,.1)}
 body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
 
 /* ── DASHBOARD TEXTURE ── */
@@ -1397,10 +1402,10 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
 .mob-stat-box .msv{font-size:22px;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--primary)}
 .mob-stat-box .msl{font-size:10px;color:var(--text3);margin-top:3px;font-weight:500}
 .mob-hist-table{width:100%;border-collapse:collapse;font-size:12px}
-.mob-hist-table th{padding:8px 10px;text-align:left;background:rgba(44,95,45,.08);color:var(--primary);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.mob-hist-table th{padding:8px 10px;text-align:left;background:rgba(26,82,118,.08);color:var(--primary);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
 .mob-hist-table td{padding:8px 10px;border-bottom:1px solid var(--border)}
 .mob-hist-table tr:last-child td{border-bottom:none}
-.mob-hist-table tr:hover td{background:rgba(44,95,45,.04)}
+.mob-hist-table tr:hover td{background:rgba(26,82,118,.04)}
 
 /* ── MOB LIST ITEM ENHANCED ── */
 .mob-list-item-alert{
@@ -1426,9 +1431,9 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
 .notif-center-actions{display:flex;gap:8px;align-items:center}
 .notif-mark-all{
   font-size:11px;color:var(--primary);cursor:pointer;font-weight:600;
-  background:rgba(44,95,45,.08);border-radius:8px;padding:3px 8px;border:none;
+  background:rgba(26,82,118,.08);border-radius:8px;padding:3px 8px;border:none;
 }
-.notif-mark-all:hover{background:rgba(44,95,45,.15)}
+.notif-mark-all:hover{background:rgba(26,82,118,.15)}
 .notif-tabs{
   display:flex;border-bottom:1px solid var(--border-solid);
 }
@@ -1447,7 +1452,7 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
   background:var(--bg3);
 }
 .notif-item:hover{transform:translateX(-2px);box-shadow:var(--shadow-sm)}
-.notif-item.unread{background:rgba(44,95,45,.06);border-left-color:var(--primary)}
+.notif-item.unread{background:rgba(26,82,118,.06);border-left-color:var(--primary)}
 .notif-item.type-success{border-left-color:var(--surf)}
 .notif-item.type-warning{border-left-color:var(--amber);background:rgba(212,168,23,.06)}
 .notif-item.type-error{border-left-color:var(--coral);background:rgba(231,76,60,.04)}
@@ -1478,7 +1483,7 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
   font-size:12px;font-weight:700;color:var(--text2);
   text-transform:uppercase;letter-spacing:.8px;
   margin-bottom:8px;padding:6px 12px;
-  background:rgba(44,95,45,.07);border-radius:8px;
+  background:rgba(26,82,118,.07);border-radius:8px;
   display:flex;align-items:center;gap:8px;
 }
 .mob-ranking-item{
@@ -1487,7 +1492,7 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
   background:var(--bg3);border:1px solid var(--border);
   transition:var(--transition);cursor:pointer;
 }
-.mob-ranking-item:hover{background:rgba(44,95,45,.06);transform:translateX(3px)}
+.mob-ranking-item:hover{background:rgba(26,82,118,.06);transform:translateX(3px)}
 .mob-rank-pos{
   width:28px;height:28px;border-radius:50%;
   display:flex;align-items:center;justify-content:center;
@@ -2855,7 +2860,7 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
 
           <!-- NOTA ADMIN: gerir todos os mobilizadores -->
           <div id="mobAdminPanel" style="display:none">
-            <div class="card" style="border-color:rgba(44,95,45,.3);background:rgba(44,95,45,.03)">
+            <div class="card" style="border-color:rgba(26,82,118,.3);background:rgba(26,82,118,.03)">
               <div class="card-title"><span class="dot"></span>🛡️ Gestão Global de Mobilizadores (Administrador)</div>
               <p style="font-size:13px;color:var(--text2);margin-bottom:16px">
                 Visualize e gira mobilizadores de todos os supervisores. Use o toggle para activar/inactivar.
@@ -2900,7 +2905,7 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                 <div style="font-size:13px;color:var(--text2);margin-top:3px" id="perf-display-email">—</div>
                 <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
                   <span class="badge badge-admin" id="perf-display-tipo">—</span>
-                  <span style="font-size:11px;color:var(--accent);background:rgba(0,212,170,.1);padding:3px 10px;border-radius:20px"
+                  <span style="font-size:11px;color:var(--accent);background:rgba(46,134,193,.1);padding:3px 10px;border-radius:20px"
                     id="perf-display-cord"></span>
                   </div>
                   </div>
@@ -3882,7 +3887,7 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                       if (pessoas === 0) return '#64748b';
                       if (pessoas < 50) return '#60a5fa';
                       if (pessoas < 100) return '#0ea5e9';
-                      if (pessoas < 200) return '#00d4aa';
+                      if (pessoas < 200) return '#2e86c1';
                       if (pessoas < 300) return '#10b981';
                       return '#059669';
                     };
@@ -3998,7 +4003,7 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                     chartBar = new Chart(document.getElementById('chartBar'), { type: 'bar', data: { labels: ld.labels, datasets: [{ data: ld.values, backgroundColor: 'rgba(0,102,204,.7)', borderRadius: 8, borderWidth: 2, borderColor: 'rgba(0,102,204,1)' }] }, options: { plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#718096', font: { size: 11 } } }, y: { ticks: { color: '#718096' } } }, responsive: true } });
 
                     if (chartDonut) chartDonut.destroy();
-                    chartDonut = new Chart(document.getElementById('chartDonut'), { type: 'doughnut', data: { labels: ['Sim', 'Não'], datasets: [{ data: [ts, tn], backgroundColor: ['rgba(0,168,89,.85)', 'rgba(211,47,47,.85)'], borderWidth: 3, borderColor: '#fff' }] }, options: { plugins: { legend: { labels: { color: '#4a5568', font: { size: 12 } } } }, responsive: true, cutout: '70%' } });
+                    chartDonut = new Chart(document.getElementById('chartDonut'), { type: 'doughnut', data: { labels: ['Sim', 'Não'], datasets: [{ data: [ts, tn], backgroundColor: ['rgba(26,82,118,.85)', 'rgba(211,47,47,.85)'], borderWidth: 3, borderColor: '#fff' }] }, options: { plugins: { legend: { labels: { color: '#4a5568', font: { size: 12 } } } }, responsive: true, cutout: '70%' } });
                   }
 
                     function animateValue(id, start, end, duration) {
@@ -4234,7 +4239,7 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                       };
 
                       let html = `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px">
-                        <div style="background:rgba(34,177,76,.07);border:1px solid rgba(34,177,76,.2);border-radius:10px;padding:12px;text-align:center">
+                        <div style="background:rgba(46,134,193,.07);border:1px solid rgba(46,134,193,.2);border-radius:10px;padding:12px;text-align:center">
                           <div style="font-size:22px;font-weight:800;color:var(--surf-dark);font-family:'JetBrains Mono',monospace">${activos.length}</div>
                           <div style="font-size:11px;color:var(--text3);margin-top:2px">Activos</div>
                         </div>
@@ -4242,7 +4247,7 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                           <div style="font-size:22px;font-weight:800;color:var(--coral);font-family:'JetBrains Mono',monospace">${inativos.length}</div>
                           <div style="font-size:11px;color:var(--text3);margin-top:2px">Inactivos</div>
                         </div>
-                        <div style="background:rgba(44,95,45,.07);border:1px solid rgba(44,95,45,.2);border-radius:10px;padding:12px;text-align:center">
+                        <div style="background:rgba(26,82,118,.07);border:1px solid rgba(26,82,118,.2);border-radius:10px;padding:12px;text-align:center">
                           <div style="font-size:22px;font-weight:800;color:var(--primary);font-family:'JetBrains Mono',monospace">${lancouHoje.length}</div>
                           <div style="font-size:11px;color:var(--text3);margin-top:2px">Lançaram hoje</div>
                         </div>
@@ -4272,7 +4277,7 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                         lancouHoje.forEach(u => {
                           const fichasHoje = _fichas.filter(f => f.userId === u.id && f.data === hoje);
                           const pessoasHoje = fichasHoje.reduce((s,f) => s+(f.totalPessoas||0),0);
-                          html += `<div style="background:rgba(34,177,76,.07);border:1px solid rgba(34,177,76,.2);border-radius:8px;padding:7px 12px;font-size:12px;display:flex;align-items:center;gap:7px">
+                          html += `<div style="background:rgba(46,134,193,.07);border:1px solid rgba(46,134,193,.2);border-radius:8px;padding:7px 12px;font-size:12px;display:flex;align-items:center;gap:7px">
                             <span style="font-weight:600">${u.nome}</span>
                             ${rondaLabel(u.ronda)}
                             <span style="color:var(--surf-dark);font-family:'JetBrains Mono',monospace;font-size:11px">${pessoasHoje} pess.</span>
@@ -4947,14 +4952,14 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                     function renderGraficos() {
                       const fichas = getVisibleFichas(); const ld = getLocalTotals(fichas);
                       if (chartBar2) chartBar2.destroy();
-                      chartBar2 = new Chart(document.getElementById('chartBar2'), { type: 'bar', data: { labels: ld.labels, datasets: [{ label: 'Pessoas', data: ld.values, backgroundColor: ['rgba(0,212,170,.7)', 'rgba(14,165,233,.7)', 'rgba(245,158,11,.7)', 'rgba(139,92,246,.7)', 'rgba(16,185,129,.7)', 'rgba(239,68,68,.7)', 'rgba(96,165,250,.7)', 'rgba(251,191,36,.7)'], borderRadius: 8 }] }, options: { plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#64748b' } }, y: { ticks: { color: '#64748b' } } }, responsive: true } });
+                      chartBar2 = new Chart(document.getElementById('chartBar2'), { type: 'bar', data: { labels: ld.labels, datasets: [{ label: 'Pessoas', data: ld.values, backgroundColor: ['rgba(46,134,193,.8)', 'rgba(202,138,4,.75)', 'rgba(245,158,11,.7)', 'rgba(139,92,246,.7)', 'rgba(125,78,36,.75)', 'rgba(239,68,68,.7)', 'rgba(96,165,250,.7)', 'rgba(251,191,36,.7)'], borderRadius: 8 }] }, options: { plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#64748b' } }, y: { ticks: { color: '#64748b' } } }, responsive: true } });
                       const byDate = {}; fichas.forEach(f => { byDate[f.data] = (byDate[f.data] || 0) + (f.totalPessoas || 0) });
                       const dates = Object.keys(byDate).sort();
                       if (chartLine) chartLine.destroy();
-                      chartLine = new Chart(document.getElementById('chartLine'), { type: 'line', data: { labels: dates, datasets: [{ label: 'Pessoas', data: dates.map(d => byDate[d]), borderColor: '#00d4aa', backgroundColor: 'rgba(0,212,170,.1)', tension: .4, fill: true, pointRadius: 4, pointBackgroundColor: '#00d4aa' }] }, options: { plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#64748b' } }, y: { ticks: { color: '#64748b' } } }, responsive: true } });
+                      chartLine = new Chart(document.getElementById('chartLine'), { type: 'line', data: { labels: dates, datasets: [{ label: 'Pessoas', data: dates.map(d => byDate[d]), borderColor: '#2e86c1', backgroundColor: 'rgba(46,134,193,.1)', tension: .4, fill: true, pointRadius: 4, pointBackgroundColor: '#2e86c1' }] }, options: { plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#64748b' } }, y: { ticks: { color: '#64748b' } } }, responsive: true } });
                       const ts = fichas.reduce((s, f) => s + (f.sim || 0), 0), tn = fichas.reduce((s, f) => s + (f.nao || 0), 0);
                       if (chartDonut2) chartDonut2.destroy();
-                      chartDonut2 = new Chart(document.getElementById('chartDonut2'), { type: 'doughnut', data: { labels: ['Sim', 'Não'], datasets: [{ data: [ts, tn], backgroundColor: ['rgba(0,212,170,.8)', 'rgba(239,68,68,.8)'], borderWidth: 0 }] }, options: { plugins: { legend: { labels: { color: '#94a3b8' } } }, responsive: true, cutout: '65%' } });
+                      chartDonut2 = new Chart(document.getElementById('chartDonut2'), { type: 'doughnut', data: { labels: ['Sim', 'Não'], datasets: [{ data: [ts, tn], backgroundColor: ['rgba(46,134,193,.85)', 'rgba(239,68,68,.8)'], borderWidth: 0 }] }, options: { plugins: { legend: { labels: { color: '#94a3b8' } } }, responsive: true, cutout: '65%' } });
                     }
 
                     // UTILIZADORES
@@ -6591,8 +6596,8 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                       const dataFmt = data ? new Date(data + 'T00:00:00').toLocaleDateString('pt-PT', { day: '2-digit', month: 'long', year: 'numeric' }) : '—';
                       const titulo  = merged ? 'Dados Somados!' : 'Ficha Guardada!';
                       const icone   = merged ? '🔄' : '✅';
-                      const corIcon = merged ? 'rgba(14,165,233,.12)' : 'rgba(34,177,76,.12)';
-                      const corBord = merged ? 'rgba(14,165,233,.3)'  : 'rgba(34,177,76,.3)';
+                      const corIcon = merged ? 'rgba(14,165,233,.12)' : 'rgba(46,134,193,.12)';
+                      const corBord = merged ? 'rgba(14,165,233,.3)'  : 'rgba(46,134,193,.3)';
                       const subtit  = merged
                         ? `<div style="font-size:11px;background:rgba(14,165,233,.1);color:#0369a1;border-radius:6px;padding:5px 10px;margin-bottom:8px">ℹ️ Já existia ficha de <b>${mobilizador}</b> em ${dataFmt}. Os dados foram <b>somados</b>.</div>`
                         : '';
@@ -6606,11 +6611,11 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                           <div style="font-size:12px;color:var(--text3);margin-bottom:12px">${dataFmt}${ronda}</div>
                           ${subtit}
                           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px">
-                            <div style="background:rgba(34,177,76,.07);border:1px solid rgba(34,177,76,.2);border-radius:10px;padding:14px">
+                            <div style="background:rgba(46,134,193,.07);border:1px solid rgba(46,134,193,.2);border-radius:10px;padding:14px">
                               <div style="font-size:26px;font-weight:800;color:var(--surf-dark);font-family:'JetBrains Mono',monospace">${totalPessoas.toLocaleString()}</div>
                               <div style="font-size:11px;color:var(--text3);margin-top:2px">${merged ? 'Total acumulado pessoas' : 'Pessoas alcançadas'}</div>
                             </div>
-                            <div style="background:rgba(44,95,45,.07);border:1px solid rgba(44,95,45,.2);border-radius:10px;padding:14px">
+                            <div style="background:rgba(26,82,118,.07);border:1px solid rgba(26,82,118,.2);border-radius:10px;padding:14px">
                               <div style="font-size:26px;font-weight:800;color:var(--primary);font-family:'JetBrains Mono',monospace">${totalLocais}</div>
                               <div style="font-size:11px;color:var(--text3);margin-top:2px">${merged ? 'Total acumulado locais' : 'Locais visitados'}</div>
                             </div>
