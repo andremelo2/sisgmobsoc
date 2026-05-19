@@ -216,6 +216,7 @@ body{
   background:var(--sidebar-bg);
   display:flex;flex-direction:column;flex-shrink:0;
   overflow-y:auto;
+  overflow-x:hidden;
   box-shadow:1px 0 0 var(--sidebar-border),4px 0 20px rgba(0,0,0,.25);
   position:relative;z-index:10;
   transition:transform 0.3s ease, margin-left 0.3s ease;
@@ -321,6 +322,32 @@ nav{flex:1;padding:10px 8px}
 .nav-item.active svg{opacity:1;color:#5dade2}
 .nav-item:active{transform:scale(.97)}
 .sidebar-footer{padding:12px 8px 16px;border-top:1px solid var(--sidebar-border)}
+.sidebar-db-status{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 13px;margin-bottom:6px;
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:8px;
+  font-size:11px;font-family:'JetBrains Mono',monospace;
+  color:rgba(255,255,255,.45);
+}
+.sidebar-theme-btn{
+  width:100%;
+  display:flex;align-items:center;gap:10px;
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:8px;padding:10px 13px;
+  color:rgba(255,255,255,.65);
+  font-family:'Inter',sans-serif;font-size:12px;font-weight:500;
+  cursor:pointer;transition:var(--transition);
+  margin-bottom:6px;
+  letter-spacing:.2px;
+}
+.sidebar-theme-btn:hover{
+  background:rgba(255,255,255,.1);
+  color:rgba(255,255,255,.9);
+  border-color:rgba(255,255,255,.15);
+}
 .btn-logout{
   width:100%;
   background:transparent;
@@ -340,6 +367,7 @@ nav{flex:1;padding:10px 8px}
 /* ── MAIN AREA ── */
 .main{
   flex:1;overflow-y:auto;
+  overflow-x:hidden;
   background:#f5f5f5;
 }
 
@@ -1297,14 +1325,14 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
 #fichasTopbar{
   position:fixed;top:0;left:0;right:0;z-index:180;
   display:none;
-  background:var(--amber);
-  color:#1a1a1a;
+  background:#0d1f2d;
+  color:#ffffff;
   padding:0 16px;
   height:48px;
   align-items:center;
   gap:10px;
   font-size:13px;font-weight:700;
-  box-shadow:0 2px 8px rgba(212,168,23,.35);
+  box-shadow:0 2px 8px rgba(0,0,0,.35);
   flex-wrap:nowrap;
   overflow:hidden;
   transform:translateY(0);
@@ -1317,18 +1345,18 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
   display:flex;
   align-items:center;
   justify-content:center;
-  background:rgba(0,0,0,.12);
+  background:rgba(255,255,255,.1);
   border:none;
   border-radius:6px;
   padding:6px 8px;
   cursor:pointer;
-  color:#1a1a1a;
+  color:#ffffff;
   transition:var(--transition);
   flex-shrink:0;
   margin-right:8px;
 }
 .topbar-sidebar-toggle:hover{
-  background:rgba(0,0,0,.2);
+  background:rgba(255,255,255,.2);
   transform:scale(1.05);
 }
 .topbar-sidebar-toggle:active{
@@ -1336,32 +1364,35 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
 }
 .topbar-fichas-count{
   display:flex;align-items:center;gap:7px;
-  background:rgba(0,0,0,.12);
+  background:rgba(255,255,255,.1);
+  border:1px solid rgba(255,255,255,.15);
   border-radius:20px;padding:3px 12px;
   font-family:'JetBrains Mono',monospace;
   white-space:nowrap;
+  color:#ffffff;
 }
-.topbar-fichas-count .tf-num{font-size:15px;font-weight:800}
+.topbar-fichas-count .tf-num{font-size:15px;font-weight:800;color:var(--amber)}
 .topbar-ronda{
   display:flex;align-items:center;gap:7px;
-  background:rgba(0,0,0,.12);
+  background:rgba(255,255,255,.08);
   border-radius:20px;padding:3px 14px;
-  white-space:nowrap;font-size:12px;
+  white-space:nowrap;font-size:12px;color:rgba(255,255,255,.8);
 }
 .topbar-ronda .tr-badge{
   font-weight:800;font-size:13px;
-  background:rgba(255,255,255,.25);
-  border-radius:10px;padding:1px 8px;
+  background:rgba(255,255,255,.15);
+  border-radius:10px;padding:1px 8px;color:#ffffff;
 }
 .topbar-spacer{flex:1}
 .topbar-alert-btn{
   display:flex;align-items:center;gap:6px;
-  background:rgba(231,76,60,.25);border:1.5px solid rgba(231,76,60,.5);
+  background:rgba(192,57,43,.3);border:1.5px solid rgba(192,57,43,.6);
   border-radius:20px;padding:3px 12px;cursor:pointer;
-  font-size:11px;font-weight:700;color:#7f0000;
-  white-space:nowrap;transition:var(--transition);
+  font-size:11px;font-weight:700;color:#ffaaaa;
+  white-space:nowrap;transition:var(--transition);animation:pulseAlert 2s infinite;
 }
-.topbar-alert-btn:hover{background:rgba(231,76,60,.4)}
+.topbar-alert-btn:hover{background:rgba(192,57,43,.5)}
+@keyframes pulseAlert{0%,100%{box-shadow:0 0 0 0 rgba(192,57,43,.4)}50%{box-shadow:0 0 0 6px rgba(192,57,43,0)}}
 
 /* ── MOB PROFILE MODAL ── */
 .mob-profile-overlay{
@@ -1675,19 +1706,10 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
       ⚠️ <span id="topbarAlertCount">0</span> sem ficha ontem
     </div>
     <div class="topbar-spacer"></div>
-    <!-- DB Status -->
-    <div class="db-status" id="dbStatus">
-      <div class="db-dot" id="dbDot"></div>
-      <span id="dbLabel">A ligar...</span>
-    </div>
     <!-- Sino notificações -->
     <button class="notif-bell-wrap" id="notifBellBtn" onclick="toggleNotifications()" title="Notificações" style="display:none">
       <span>🔔</span>
       <div class="notif-badge" id="notifBadge" style="display:none">0</div>
-    </button>
-    <!-- Tema -->
-    <button class="theme-toggle" id="themeToggle" title="Alternar tema">
-      <span id="themeIcon">🌙</span>
     </button>
   </div>
 
@@ -1699,6 +1721,19 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
         <button onclick="closeMobAlertModal()" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--text3)">×</button>
       </div>
       <div id="mobAlertList" style="max-height:400px;overflow-y:auto"></div>
+    </div>
+  </div>
+
+  <!-- MODAL DE VISUALIZAÇÃO DE FICHA -->
+  <div class="mob-profile-overlay" id="fichaDetailOverlay" onclick="if(event.target===this)closeFichaDetail()">
+    <div class="mob-profile-modal" style="max-width:700px;max-height:85vh;overflow-y:auto">
+      <button onclick="closeFichaDetail()" style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:22px;cursor:pointer;color:var(--text3)">×</button>
+      <div style="font-size:18px;font-weight:800;color:var(--primary);margin-bottom:16px">📋 Detalhes da Ficha</div>
+      <div id="fichaDetailContent" style="font-size:13px;line-height:1.6"></div>
+      <div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end">
+        <button class="btn btn-outline" onclick="printFichaDetail()">🖨 Imprimir</button>
+        <button class="btn btn-danger" id="fichaDetailDeleteBtn" onclick="deleteFichaFromModal()" style="display:none">🗑 Apagar Ficha</button>
+      </div>
     </div>
   </div>
 
@@ -1914,6 +1949,16 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
               </div>
               </nav>
               <div class="sidebar-footer">
+                <!-- DB Status Firebase -->
+                <div class="sidebar-db-status" id="dbStatus">
+                  <div class="db-dot" id="dbDot"></div>
+                  <span id="dbLabel">A ligar...</span>
+                </div>
+                <!-- Dark / Light toggle -->
+                <button class="sidebar-theme-btn" id="themeToggle" title="Alternar tema claro/escuro">
+                  <span id="themeIcon">🌙</span>
+                  <span id="themeLabel">Modo Escuro</span>
+                </button>
                 <button class="btn-logout" onclick="doLogout()">↩ Sair</button>
               </div>
               </aside>
@@ -4407,12 +4452,14 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                       const rondaLabel = r => {
                         if (!r) return '<span style="color:var(--text3);font-size:11px">—</span>';
                         const c = r=='1'?'#0369a1':r=='2'?'#15803d':'#92400e';
-                        const bg = r=='1'?'rgba(14,165,233,.12)':r=='2'?'rgba(34,197,94,.12)':'rgba(212,168,23,.12)';
+                        const bg = r=='1'?'rgba(14,165,233,.12)':r=='2'?'rgba(46,193,94,.12)':'rgba(202,138,4,.12)';
                         return `<span style="background:${bg};color:${c};padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700">${r}ª Ronda</span>`;
                       };
                       const tbody = document.getElementById('listFichasBody');
                       tbody.innerHTML = '';
+                      const isAdmin = currentUser && currentUser.tipo === 'admin';
                       fichas.forEach((f, i) => {
+                        const podeApagar = isAdmin || (currentUser && f.userId === currentUser.id);
                         tbody.innerHTML += `<tr>
       <td style="font-family:'JetBrains Mono',monospace;color:var(--text3)">${i + 1}</td>
       <td>${f.data || '—'}</td>
@@ -4424,7 +4471,7 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
       <td style="font-family:'JetBrains Mono',monospace;color:var(--accent)">${(f.totalPessoas || 0).toLocaleString()}</td>
       <td style="display:flex;gap:6px">
         <button class="btn btn-blue btn-sm" onclick="verFicha(${f.id})">👁 Ver</button>
-        <button class="btn btn-danger btn-sm" onclick="deleteFicha(${f.id})">🗑</button>
+        ${podeApagar ? `<button class="btn btn-danger btn-sm" onclick="deleteFicha(${f.id})" title="Apagar ficha">🗑 Apagar</button>` : ''}
       </td>
     </tr>`;
                       });
@@ -4434,30 +4481,74 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                     function verFicha(id) {
                       const f = _fichas.find(x => x.id === id);
                       if (!f) return;
+                      const isAdmin = currentUser && currentUser.tipo === 'admin';
+                      const canDelete = isAdmin || (currentUser && f.userId === currentUser.id);
+                      showFichaDetail(f, canDelete, id);
+                    }
+
+                    function showFichaDetail(f, canDelete, fichaId) {
                       const locaisHTML = f.tableData ? Object.entries(f.tableData).map(([k, v]) => {
                         const loc = LOCAIS.find(l => l.key === k);
                         const locs = Array.isArray(v) ? v[0] : 0;
                         const pess = Array.isArray(v) ? v[1] : 0;
                         if (!locs && !pess) return '';
-                        return `<tr><td style="padding:4px 8px;border:1px solid #ddd">${loc ? loc.label : k}</td><td style="padding:4px 8px;border:1px solid #ddd;text-align:center">${locs}</td><td style="padding:4px 8px;border:1px solid #ddd;text-align:center">${pess}</td></tr>`;
+                        return `<tr><td style="padding:8px;border:1px solid var(--border)">${loc ? loc.label : k}</td><td style="padding:8px;border:1px solid var(--border);text-align:center;font-weight:600">${locs}</td><td style="padding:8px;border:1px solid var(--border);text-align:center;font-weight:600;color:var(--accent)">${pess}</td></tr>`;
                       }).filter(Boolean).join('') : '';
-                      const html = `<div style="font-family:Arial,sans-serif;font-size:13px;color:#111">
-    <h2 style="margin:0 0 12px">Ficha de Mobilização</h2>
-    <p><b>Data:</b> ${f.data || '—'} | <b>Mobilizador:</b> ${f.mobilizador || '—'} | <b>Coordenação:</b> ${f.coordNome || '—'}</p>
-    <p><b>Província:</b> ${f.provincia || '—'} | <b>Município:</b> ${f.municipio || '—'} | <b>Bairro:</b> ${f.bairro || '—'}</p>
-    <p><b>Total Locais:</b> ${f.totalLocais || 0} | <b>Total Pessoas:</b> ${f.totalPessoas || 0} | <b>Sim:</b> ${f.sim || 0} | <b>Não:</b> ${f.nao || 0}</p>
-    ${f.motivo ? `<p><b>Motivo recusa:</b> ${f.motivo}</p>` : ''}
-    ${locaisHTML ? `<table style="width:100%;border-collapse:collapse;margin-top:8px"><thead><tr><th style="padding:4px 8px;border:1px solid #ddd;background:#f0f0f0">Local</th><th style="padding:4px 8px;border:1px solid #ddd;background:#f0f0f0">Locais</th><th style="padding:4px 8px;border:1px solid #ddd;background:#f0f0f0">Pessoas</th></tr></thead><tbody>${locaisHTML}</tbody></table>` : ''}
-  </div>`;
-                    document.getElementById('printArea').innerHTML = html;
-                    window.print();
-                  }
+                      const html = `<div><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px"><div><div style="font-size:11px;font-weight:700;color:var(--text3)">Data</div><div style="font-size:14px;font-weight:600;color:var(--text)">${f.data || '—'}</div></div><div><div style="font-size:11px;font-weight:700;color:var(--text3)">Mobilizador</div><div style="font-size:14px;font-weight:600;color:var(--text)">${f.mobilizador || '—'}</div></div><div><div style="font-size:11px;font-weight:700;color:var(--text3)">Coordenação</div><div style="font-size:14px;font-weight:600;color:var(--text)">${f.coordNome || '—'}</div></div><div><div style="font-size:11px;font-weight:700;color:var(--text3)">Ronda</div><div style="font-size:14px;font-weight:600;color:var(--text)">${f.ronda ? f.ronda + 'ª Ronda' : '—'}</div></div></div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:12px;background:rgba(14,165,233,.06);border:1px solid rgba(14,165,233,.2);border-radius:8px;margin-bottom:16px"><div style="text-align:center"><div style="font-size:10px;color:var(--text3)">Locais</div><div style="font-size:24px;font-weight:800;color:var(--primary)">${f.totalLocais || 0}</div></div><div style="text-align:center"><div style="font-size:10px;color:var(--text3)">Pessoas</div><div style="font-size:24px;font-weight:800;color:var(--surf)">${(f.totalPessoas || 0).toLocaleString()}</div></div><div style="text-align:center"><div style="font-size:10px;color:var(--text3)">Sim</div><div style="font-size:24px;font-weight:800;color:var(--primary)">${f.sim || 0}</div></div><div style="text-align:center"><div style="font-size:10px;color:var(--text3)">Não</div><div style="font-size:24px;font-weight:800;color:var(--coral)">${f.nao || 0}</div></div></div>${locaisHTML ? `<div><div style="font-size:13px;font-weight:700;margin-bottom:10px">Detalhes por Local</div><table style="width:100%;border-collapse:collapse"><thead><tr style="background:var(--bg3)"><th style="padding:10px;text-align:left;font-size:12px;font-weight:700">Local</th><th style="padding:10px;text-align:center;font-size:12px;font-weight:700">Locais</th><th style="padding:10px;text-align:center;font-size:12px;font-weight:700">Pessoas</th></tr></thead><tbody>${locaisHTML}</tbody></table></div>` : ''}${f.motivo ? `<div style="padding:12px;background:rgba(202,138,4,.1);border-left:3px solid var(--amber);margin-top:16px"><div style="font-size:11px;font-weight:700;color:var(--text3)">Motivo da Recusa</div><div style="font-size:13px;color:var(--text)">${f.motivo}</div></div>` : ''}</div>`;
+                      document.getElementById('fichaDetailContent').innerHTML = html;
+                      const deleteBtn = document.getElementById('fichaDetailDeleteBtn');
+                      if (deleteBtn) {
+                        deleteBtn.style.display = canDelete ? 'block' : 'none';
+                        deleteBtn.dataset.fichaId = fichaId;
+                      }
+                      document.getElementById('fichaDetailOverlay').classList.add('show');
+                    }
+                    function closeFichaDetail() {
+                      document.getElementById('fichaDetailOverlay').classList.remove('show');
+                    }
+                    function printFichaDetail() {
+                      const content = document.getElementById('fichaDetailContent').innerHTML;
+                      document.getElementById('printArea').innerHTML = `<div style="font-family:Arial,sans-serif;padding:20px">${content}</div>`;
+                      window.print();
+                    }
+                    function deleteFichaFromModal() {
+                      const fichaId = document.getElementById('fichaDetailDeleteBtn').dataset.fichaId;
+                      if (fichaId) {
+                        deleteFicha(fichaId);
+                        closeFichaDetail();
+                      }
+                    }
 
                     async function deleteFicha(id) {
+                      // Verificar permissão: admin pode apagar qualquer ficha, supervisor só as suas
+                      if (!currentUser) return;
                       const f = _fichas.find(x => x.id === id);
-                      if (!confirm(`Apagar a ficha de "${f ? f.mobilizador : '?'}" (${f ? f.data : '?'})?\nEsta acção é irreversível.`)) return;
-                      showLoading('A apagar...'); await deleteFichaRemote(id); hideLoading();
-                      renderListFichas(); showToast('Ficha apagada', 'success');
+                      if (!f) { showToast('Ficha não encontrada', 'error'); return; }
+                      if (currentUser.tipo !== 'admin' && f.userId !== currentUser.id) {
+                        showToast('Sem permissão para apagar esta ficha', 'error'); return;
+                      }
+                      const confirmMsg = `⚠️ Apagar a ficha de "${f.mobilizador || '?'}" do dia ${f.data || '?'}?\n\nEsta acção é IRREVERSÍVEL.`;
+                      if (!confirm(confirmMsg)) return;
+                      showLoading('A apagar ficha...');
+                      try {
+                        await db.collection('fichas_mobilizacao').doc(String(id)).delete();
+                        // Remover também do array local
+                        _fichas = _fichas.filter(x => x.id !== id);
+                        DB.set('fichas', _fichas);
+                        hideLoading();
+                        showToast('Ficha apagada com sucesso', 'success');
+                        renderListFichas();
+                        updateTopbar();
+                      } catch(e) {
+                        console.error('deleteFicha:', e);
+                        // Mesmo que falhe no Firebase, remove localmente
+                        _fichas = _fichas.filter(x => x.id !== id);
+                        DB.set('fichas', _fichas);
+                        hideLoading();
+                        showToast('Ficha removida localmente (erro Firebase: ' + e.message + ')', 'info');
+                        renderListFichas();
+                        updateTopbar();
+                      }
                     }
 
                     // CONSOLIDADO
@@ -5353,13 +5444,30 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                     }
 
                     async function deleteMobilizadorRemote(id) {
+                      const mobilizador = _mobilizadores.find(m => m.id === id);
+                      const mobName = mobilizador ? mobilizador.nome : null;
+                      
                       try {
+                        if (mobName) {
+                          const fichasDoMob = _fichas.filter(f => f.mobilizador === mobName);
+                          for (let f of fichasDoMob) {
+                            try {
+                              await db.collection('fichas_mobilizacao').doc(String(f.id)).delete();
+                            } catch(e) {
+                              console.warn('Erro ao apagar ficha:', e);
+                            }
+                          }
+                        }
                         await db.collection('mobilizadores').doc(String(id)).delete();
                       } catch(e) {
                         console.warn('deleteMobilizadorRemote offline:', e);
                       }
                       _mobilizadores = _mobilizadores.filter(x => x.id !== id);
                       DB.set('mobilizadores', _mobilizadores);
+                      if (mobName) {
+                        _fichas = _fichas.filter(f => f.mobilizador !== mobName);
+                        DB.set('fichas', _fichas);
+                      }
                     }
 
                     // ── Helpers ──
@@ -6698,16 +6806,22 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
 
                     // Tema escuro/claro
                     let isDarkMode = localStorage.getItem('darkMode') === 'true';
+                    function updateThemeBtn() {
+                      const icon = document.getElementById('themeIcon');
+                      const label = document.getElementById('themeLabel');
+                      if (icon) icon.textContent = isDarkMode ? '☀️' : '🌙';
+                      if (label) label.textContent = isDarkMode ? 'Modo Claro' : 'Modo Escuro';
+                    }
                     function toggleTheme() {
                       isDarkMode = !isDarkMode;
                       document.body.classList.toggle('dark-mode', isDarkMode);
-                      document.getElementById('themeIcon').textContent = isDarkMode ? '☀️' : '🌙';
+                      updateThemeBtn();
                       localStorage.setItem('darkMode', isDarkMode);
-                      showToast(isDarkMode ? 'Modo escuro' : 'Modo claro', 'info');
+                      showToast(isDarkMode ? 'Modo escuro activado' : 'Modo claro activado', 'info');
                     }
                     if (isDarkMode) {
                       document.body.classList.add('dark-mode');
-                      document.getElementById('themeIcon').textContent = '☀️';
+                      updateThemeBtn();
                     }
                     document.getElementById('themeToggle').addEventListener('click', toggleTheme);
 
