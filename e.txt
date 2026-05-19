@@ -1943,6 +1943,14 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                 <path d="M12 6v6l4 2"/>
               </svg>Histórico de Rondas
               </div>
+              <div class="nav-item" onclick="showPage('rh')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>Recursos Humanos
+              </div>
               </div>
               </nav>
               <div class="sidebar-footer">
@@ -2297,13 +2305,7 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
             <div class="page-subtitle">Agrupamento por localização geográfica e recursos humanos</div>
           </div>
 
-          <!-- ABAS -->
-          <div class="tabs" id="consolidadoTabs">
-            <div class="tab active" onclick="switchConsolidadoTab(this,'cons-geo')">🗺️ Geográfico</div>
-            <div class="tab" id="cons-rh-tab" style="display:none" onclick="switchConsolidadoTab(this,'cons-rh')">👥 Recursos Humanos</div>
-          </div>
-
-          <!-- ABA: GEOGRÁFICO -->
+          <!-- ABA ÚNICA: GEOGRÁFICO -->
           <div id="cons-geo">
             <!-- FILTROS -->
             <div class="card">
@@ -2373,65 +2375,82 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
             </div>
           </div>
 
-          <!-- ABA: RECURSOS HUMANOS (só admin) -->
-          <div id="cons-rh" style="display:none">
+          </div>
+        </div>
 
-            <!-- KPIs RH -->
-            <div class="stats-grid" style="margin-bottom:24px" id="rhKpis"></div>
+        <!-- RECURSOS HUMANOS -->
+        <div class="page" id="page-rh">
+          <div class="page-header">
+            <div class="page-title">Recursos Humanos</div>
+            <div class="page-subtitle">Supervisores e mobilizadores registados no sistema</div>
+          </div>
 
-            <!-- TABELA SUPERVISORES -->
-            <div class="card">
-              <div class="card-title"><span class="dot"></span>👤 Supervisores por Coordenação</div>
-              <div class="card" style="padding:0;margin-top:12px">
-                <div class="table-wrap">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>#</th>
-                        <th>Nome do Supervisor</th>
-                        <th>Email</th>
-                        <th>Coordenação</th>
-                        <th>Coordenador</th>
-                        <th>Ronda Activa</th>
-                        <th>Mobilizadores</th>
-                        <th>Fichas Lançadas</th>
-                        <th>Estado</th>
-                      </tr>
-                    </thead>
-                    <tbody id="rhSupBody"></tbody>
-                  </table>
-                </div>
+          <!-- KPIs -->
+          <div class="stats-grid" id="rhKpis" style="margin-bottom:20px"></div>
+
+          <!-- SUPERVISORES -->
+          <div class="card">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px">
+              <div class="card-title" style="margin:0"><span class="dot"></span>👤 Supervisores</div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <button class="btn btn-outline btn-sm" onclick="copiarListaSupervisores()" style="font-size:12px">📋 Copiar Lista</button>
+                <button class="btn btn-green btn-sm" onclick="exportarSupervisoresExcel()" style="font-size:12px">📊 Exportar Excel</button>
               </div>
             </div>
-
-            <!-- TABELA MOBILIZADORES -->
-            <div class="card" style="margin-top:20px">
-              <div class="card-title"><span class="dot"></span>🙋 Mobilizadores por Coordenação</div>
-              <div style="margin-bottom:12px;display:flex;gap:10px;flex-wrap:wrap">
-                <input type="text" id="rhMobSearch" placeholder="🔍 Pesquisar mobilizador..." oninput="renderRH()" style="flex:1;min-width:180px;max-width:300px">
-                <select id="rhMobFiltCord" onchange="renderRH()" style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-family:'Inter',sans-serif;font-size:13px;color:var(--text)">
-                  <option value="">Todas as Coordenações</option>
-                </select>
-              </div>
-              <div class="card" style="padding:0;margin-top:0">
-                <div class="table-wrap">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>#</th>
-                        <th>Nome do Mobilizador</th>
-                        <th>Supervisor</th>
-                        <th>Coordenação</th>
-                        <th>Fichas Lançadas</th>
-                        <th>Estado</th>
-                      </tr>
-                    </thead>
-                    <tbody id="rhMobBody"></tbody>
-                  </table>
-                </div>
+            <div class="card" style="padding:0;margin-top:0">
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Nome do Supervisor</th>
+                      <th>Email</th>
+                      <th>Coordenação</th>
+                      <th>Coordenador</th>
+                      <th>Ronda Activa</th>
+                      <th>Mobilizadores</th>
+                      <th>Fichas Lançadas</th>
+                      <th>Estado</th>
+                    </tr>
+                  </thead>
+                  <tbody id="rhSupBody"></tbody>
+                </table>
               </div>
             </div>
+          </div>
 
+          <!-- MOBILIZADORES -->
+          <div class="card" style="margin-top:20px">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px">
+              <div class="card-title" style="margin:0"><span class="dot"></span>🙋 Mobilizadores</div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <button class="btn btn-outline btn-sm" onclick="copiarListaMobilizadores()" style="font-size:12px">📋 Copiar Lista</button>
+                <button class="btn btn-green btn-sm" onclick="exportarMobilizadoresExcel()" style="font-size:12px">📊 Exportar Excel</button>
+              </div>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+              <input type="text" id="rhMobSearch" placeholder="🔍 Pesquisar mobilizador..." oninput="renderRH()" style="flex:1;min-width:180px;max-width:300px">
+              <select id="rhMobFiltCord" onchange="renderRH()" style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-family:'Inter',sans-serif;font-size:13px;color:var(--text)">
+                <option value="">Todas as Coordenações</option>
+              </select>
+            </div>
+            <div class="card" style="padding:0;margin-top:0">
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Nome do Mobilizador</th>
+                      <th>Supervisor</th>
+                      <th>Coordenação</th>
+                      <th>Fichas Lançadas</th>
+                      <th>Estado</th>
+                    </tr>
+                  </thead>
+                  <tbody id="rhMobBody"></tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -4023,6 +4042,7 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                     if (id === 'mapa') renderMapPage();
                     if (id === 'listFichas') renderListFichas();
                     if (id === 'consolidado') renderConsolidado();
+                    if (id === 'rh') renderRH();
                     if (id === 'relatorios') { populateRelCords(); populateRelDiaCords(); populateRelSup(); applyRelGeral(); }
                     if (id === 'graficos') renderGraficos();
                     if (id === 'utilizadores') renderUsers();
@@ -4819,17 +4839,6 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                     }
 
                     // CONSOLIDADO
-                    // ── Consolidado: gestão de abas ──
-                    function switchConsolidadoTab(el, id) {
-                      document.querySelectorAll('#consolidadoTabs .tab').forEach(t => t.classList.remove('active'));
-                      el.classList.add('active');
-                      ['cons-geo','cons-rh'].forEach(s => {
-                        const el2 = document.getElementById(s);
-                        if (el2) el2.style.display = s === id ? 'block' : 'none';
-                      });
-                      if (id === 'cons-rh') renderRH();
-                    }
-
                     // ── Popular filtro de coordenações no Consolidado ──
                     function populateConsFiltCord() {
                       const sel = document.getElementById('consFiltCord');
@@ -4854,10 +4863,6 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
 
                     function renderConsolidado() {
                       populateConsFiltCord();
-
-                      // mostrar aba RH só para admin
-                      const rhTab = document.getElementById('cons-rh-tab');
-                      if (rhTab) rhTab.style.display = currentUser && currentUser.tipo === 'admin' ? 'block' : 'none';
 
                       let fichas = getVisibleFichas();
 
@@ -5076,6 +5081,83 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                           });
                         }
                       }
+                    }
+
+                    // ── RH: Copiar lista de supervisores ──
+                    function copiarListaSupervisores() {
+                      const supervisores = _users.filter(u => u.tipo === 'supervisor');
+                      if (!supervisores.length) { showToast('Sem supervisores para copiar', 'error'); return; }
+                      const linhas = ['#\tNome\tEmail\tCoordenação\tMobilizadores\tFichas\tEstado'];
+                      supervisores.sort((a,b)=>(a.nome||'').localeCompare(b.nome||'')).forEach((s,i) => {
+                        const cord = _cords.find(c => c.id === s.coordId);
+                        const mobs = _mobilizadores.filter(m => String(m.supervisorId) === String(s.id)).length;
+                        const fichas = _fichas.filter(f => String(f.userId) === String(s.id)).length;
+                        linhas.push(`${i+1}\t${s.nome||'—'}\t${s.email||'—'}\t${cord?cord.nome:'—'}\t${mobs}\t${fichas}\t${s.activo!==false?'Activo':'Inactivo'}`);
+                      });
+                      navigator.clipboard.writeText(linhas.join('\n'))
+                        .then(() => showToast(`Lista de ${supervisores.length} supervisores copiada ✓`, 'success'))
+                        .catch(() => showToast('Erro ao copiar', 'error'));
+                    }
+
+                    // ── RH: Exportar supervisores Excel ──
+                    function exportarSupervisoresExcel() {
+                      const supervisores = _users.filter(u => u.tipo === 'supervisor');
+                      if (!supervisores.length) { showToast('Sem supervisores para exportar', 'error'); return; }
+                      const rows = supervisores.sort((a,b)=>(a.nome||'').localeCompare(b.nome||'')).map((s,i) => {
+                        const cord = _cords.find(c => c.id === s.coordId);
+                        const mobs = _mobilizadores.filter(m => String(m.supervisorId) === String(s.id)).length;
+                        const fichas = _fichas.filter(f => String(f.userId) === String(s.id)).length;
+                        return {
+                          '#': i+1, 'Nome': s.nome||'—', 'Email': s.email||'—',
+                          'Coordenação': cord?cord.nome:'—',
+                          'Coordenador': cord&&cord.coordenador?cord.coordenador:'—',
+                          'Ronda Activa': s.ronda?s.ronda+'ª':'—',
+                          'Mobilizadores': mobs, 'Fichas Lançadas': fichas,
+                          'Estado': s.activo!==false?'Activo':'Inactivo'
+                        };
+                      });
+                      const wb = XLSX.utils.book_new();
+                      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), 'Supervisores');
+                      XLSX.writeFile(wb, `SisMob_RH_Supervisores_${new Date().toISOString().split('T')[0]}.xlsx`);
+                      showToast(`Excel de ${supervisores.length} supervisores exportado ✓`, 'success');
+                    }
+
+                    // ── RH: Copiar lista de mobilizadores ──
+                    function copiarListaMobilizadores() {
+                      const lista = [..._mobilizadores].sort((a,b)=>(a.nome||'').localeCompare(b.nome||''));
+                      if (!lista.length) { showToast('Sem mobilizadores para copiar', 'error'); return; }
+                      const linhas = ['#\tNome\tSupervisor\tCoordenação\tFichas\tEstado'];
+                      lista.forEach((m,i) => {
+                        const sup  = _users.find(u => String(u.id) === String(m.supervisorId));
+                        const cord = sup ? _cords.find(c => c.id === sup.coordId) : null;
+                        const fichas = _fichas.filter(f => (f.mobilizador||'').toLowerCase().trim() === (m.nome||'').toLowerCase().trim()).length;
+                        linhas.push(`${i+1}\t${m.nome||'—'}\t${sup?sup.nome:'—'}\t${cord?cord.nome:'—'}\t${fichas}\t${m.activo!==false?'Activo':'Inactivo'}`);
+                      });
+                      navigator.clipboard.writeText(linhas.join('\n'))
+                        .then(() => showToast(`Lista de ${lista.length} mobilizadores copiada ✓`, 'success'))
+                        .catch(() => showToast('Erro ao copiar', 'error'));
+                    }
+
+                    // ── RH: Exportar mobilizadores Excel ──
+                    function exportarMobilizadoresExcel() {
+                      const lista = [..._mobilizadores].sort((a,b)=>(a.nome||'').localeCompare(b.nome||''));
+                      if (!lista.length) { showToast('Sem mobilizadores para exportar', 'error'); return; }
+                      const rows = lista.map((m,i) => {
+                        const sup  = _users.find(u => String(u.id) === String(m.supervisorId));
+                        const cord = sup ? _cords.find(c => c.id === sup.coordId) : null;
+                        const fichas = _fichas.filter(f => (f.mobilizador||'').toLowerCase().trim() === (m.nome||'').toLowerCase().trim()).length;
+                        return {
+                          '#': i+1, 'Nome': m.nome||'—',
+                          'Supervisor': sup?sup.nome:'—',
+                          'Coordenação': cord?cord.nome:'—',
+                          'Fichas Lançadas': fichas,
+                          'Estado': m.activo!==false?'Activo':'Inactivo'
+                        };
+                      });
+                      const wb = XLSX.utils.book_new();
+                      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), 'Mobilizadores');
+                      XLSX.writeFile(wb, `SisMob_RH_Mobilizadores_${new Date().toISOString().split('T')[0]}.xlsx`);
+                      showToast(`Excel de ${lista.length} mobilizadores exportado ✓`, 'success');
                     }
 
                     // RELATÓRIOS
