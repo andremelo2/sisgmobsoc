@@ -1,0 +1,41 @@
+chingo 1
+user: silvio@sismob.ao
+senha: mob2026
+user: anicia@sismob.ao
+senha: mob2026
+
+chingo 2
+user: quilina@sismob.ao
+senha: mob2026
+user: ana@sismob.ao
+senha: mob2026
+user: claudia@sismob.ao
+senha: mob2026
+
+cidade
+user: elsa@sismob.ao
+senha: mob2026
+
+zona alta 1
+user: teofilo@sismob.ao
+senha: mob2026
+user: sergio@sismob.ao
+senha: mob2026
+user: antonio@sismob.ao
+senha: mob2026
+
+zona alta 2
+user: andre@sismob.ao
+senha: mob2026
+user: bulica@sismob.ao
+senha: mob2026
+user: alfa@sismob.ao
+senha: mob2026
+
+kicombo
+user: zeferino@sismob.ao
+senha: mob2026
+
+casa branca
+user: zelya@sismob.ao
+senha: mob2026

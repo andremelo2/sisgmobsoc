@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt">atua
+<html lang="pt">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -2673,7 +2673,7 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                 </select>
               </div>
               </div>
-              <button class="btn btn-accent" style="margin-top:16px" onclick="addUser()">➕ Adicionar Supervisor</button>
+              <button class="btn btn-accent" style="margin-top:16px" onclick="addUser()" id="addUserBtn">➕ Adicionar Supervisor</button>
               </div>
 
           <!-- TABS PARA FILTRAR SUPERVISORES POR RONDA -->
@@ -3223,8 +3223,12 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
     async function testSB() {
       setDbStatus('connecting');
       try {
-        // Uma leitura simples para confirmar ligação
-        await db.collection('coordenacoes').limit(1).get();
+        // ⚡ OTIMIZADO: timeout de 3s para não bloquear
+        const testPromise = db.collection('coordenacoes').limit(1).get();
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Timeout')), 3000)
+        );
+        await Promise.race([testPromise, timeoutPromise]);
         SB_ONLINE = true;
         setDbStatus('online');
         console.log('✓ Firebase conectado com sucesso');
@@ -3232,7 +3236,8 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
         SB_ONLINE = false;
         setDbStatus('offline');
         console.warn('⚠ Firebase offline — dados locais activos:', e.message);
-        showToast('Modo offline — dados locais activos', 'info');
+        // Não mostrar toast aqui para não bloquear UI
+        // showToast('Modo offline — dados locais activos', 'info');
       }
     }
 
@@ -3265,9 +3270,18 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                     }
 
                     async function initLocalDB() {
-                      // Seed inicial: apenas se o Firestore estiver vazio
+                      // ⚡ OTIMIZADO: Seed inicial com timeout curto
+                      if (!SB_ONLINE) return; // Se offline, pula
                       try {
-                        const cordsSnap = await db.collection('coordenacoes').limit(1).get();
+                        const timeoutPromise = new Promise((_, reject) => 
+                          setTimeout(() => reject(new Error('Timeout')), 2000)
+                        );
+                        
+                        const cordsSnap = await Promise.race([
+                          db.collection('coordenacoes').limit(1).get(),
+                          timeoutPromise
+                        ]);
+                        
                         if (cordsSnap.empty) {
                           const batch = db.batch();
                           ['Coordenação Norte', 'Coordenação Sul', 'Coordenação Centro'].forEach(nome => {
@@ -3275,7 +3289,12 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                           });
                           await batch.commit();
                         }
-                        const usersSnap = await db.collection('utilizadores').where('email', '==', 'admin@sismob.ao').limit(1).get();
+                        
+                        const usersSnap = await Promise.race([
+                          db.collection('utilizadores').where('email', '==', 'admin@sismob.ao').limit(1).get(),
+                          timeoutPromise
+                        ]);
+                        
                         if (usersSnap.empty) {
                           await db.collection('utilizadores').add({ nome: 'Administrador', email: 'admin@sismob.ao', senha: 'admin123', tipo: 'admin', coord_id: null, created_at: firebase.firestore.FieldValue.serverTimestamp() });
                           await db.collection('utilizadores').add({ nome: 'João Supervisor', email: 'joao@sismob.ao', senha: 'joao123', tipo: 'supervisor', coord_id: null, created_at: firebase.firestore.FieldValue.serverTimestamp() });
@@ -3475,14 +3494,21 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                         if (fields.activo !== undefined) fsFields.activo = fields.activo;
                         await db.collection('utilizadores').doc(String(userId)).update(fsFields);
                         const u = _users.find(x => x.id === userId);
-                        if (u) Object.assign(u, fields);
+                        if (u) {
+                          Object.assign(u, fields);
+                          // Sincronizar coordId local quando coord_id é actualizado
+                          if (fields.coord_id !== undefined) u.coordId = fields.coord_id;
+                        }
                         DB.set('users', _users);
                         return true;
                       } catch (e) {
                         console.error('updateUserField:', e);
                         // Actualiza localmente se offline
                         const u = _users.find(x => x.id === userId);
-                        if (u) Object.assign(u, fields);
+                        if (u) {
+                          Object.assign(u, fields);
+                          if (fields.coord_id !== undefined) u.coordId = fields.coord_id;
+                        }
                         DB.set('users', _users);
                         return true;
                       }
@@ -4308,7 +4334,7 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                         html += `<div style="font-size:11px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">⚠️ Sem ficha hoje (${naoLancouHoje.length})</div>
                         <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px">`;
                         naoLancouHoje.forEach(u => {
-                          const cord = _cords.find(c => c.id === u.coordId);
+                          const cord = _cords.find(c => String(c.id) === String(u.coordId));
                           html += `<div style="background:rgba(212,168,23,.08);border:1px solid rgba(212,168,23,.25);border-radius:8px;padding:7px 12px;font-size:12px;display:flex;align-items:center;gap:7px">
                             <span style="font-weight:600">${u.nome}</span>
                             ${rondaLabel(u.ronda)}
@@ -5191,7 +5217,7 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                         : '<span style="color:var(--text3);font-size:11px">—</span>';
 
                       filtered.forEach((u, i) => {
-                        const cord = _cords.find(c => c.id === u.coordId);
+                        const cord = _cords.find(c => String(c.id) === String(u.coordId));
                         const protegido = u.tipo === 'admin';
                         const fichasCount = _fichas.filter(f => f.userId === u.id).length;
                         const isActivo = u.activo !== false;
@@ -5219,7 +5245,7 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                       });
                       if (!filtered.length) tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:32px;color:var(--text3)">Nenhum utilizador encontrado</td></tr>';
 
-                      const sel = document.getElementById('u-coord'); if (sel) { sel.innerHTML = ''; _cords.forEach(c => sel.innerHTML += `<option value="${c.id}">${c.nome}</option>`); }
+                      const sel = document.getElementById('u-coord'); if (sel) { sel.innerHTML = '<option value="">— Seleccione uma coordenação —</option>'; _cords.forEach(c => sel.innerHTML += `<option value="${c.id}">${c.nome}</option>`); }
                       renderDesempenho();
                     }
 
@@ -5228,6 +5254,8 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                       document.getElementById('u-cordField').style.display = isAdmin ? 'none' : 'flex';
                       document.getElementById('u-rondaField').style.display = isAdmin ? 'none' : 'flex';
                       document.getElementById('u-contactoField').style.display = isAdmin ? 'none' : 'flex';
+                      const btn = document.getElementById('addUserBtn');
+                      if (btn) btn.textContent = isAdmin ? '➕ Adicionar Administrador' : '➕ Adicionar Supervisor';
                     }
 
                     async function addUser() {
@@ -5236,7 +5264,7 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                       const senha = document.getElementById('u-senha').value;
                       const tipo = document.getElementById('u-tipo').value;
                       const contacto = tipo === 'admin' ? null : (document.getElementById('u-contacto')?.value || '').trim() || null;
-                      const coordId = tipo === 'admin' ? null : parseInt(document.getElementById('u-coord').value);
+                      const coordId = tipo === 'admin' ? null : (document.getElementById('u-coord').value || null);
                       const ronda = tipo === 'admin' ? null : document.getElementById('u-ronda').value;
                       if (!nome || !email || !senha) { showToast('Preencha todos os campos', 'error'); return; }
                       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showToast('Email inválido', 'error'); return; }
@@ -6130,7 +6158,7 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                         } else {
                           html += `<div class="table-wrap"><table><thead><tr><th>#</th><th>Nome</th><th>Email</th><th>Coordenação</th><th>Estado</th><th>Fichas</th><th>Pessoas</th><th>Último Lançamento</th></tr></thead><tbody>`;
                           sups.forEach((u, i) => {
-                            const cord = _cords.find(c => c.id === u.coordId);
+                            const cord = _cords.find(c => String(c.id) === String(u.coordId));
                             const fichasSup = _fichas.filter(f => f.userId === u.id);
                             const tp = fichasSup.reduce((s,f) => s+(f.totalPessoas||0),0);
                             const ultimo = fichasSup.length ? fichasSup.sort((a,b)=>(b.data||'').localeCompare(a.data||''))[0].data : null;
@@ -6343,7 +6371,7 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                       const tipoBadge = document.getElementById('perf-display-tipo');
                       tipoBadge.textContent = u.tipo === 'admin' ? 'Administrador' : 'Supervisor';
                       tipoBadge.className = 'badge ' + (u.tipo === 'admin' ? 'badge-admin' : 'badge-sup');
-                      const cord = _cords.find(c => c.id === u.coordId);
+                      const cord = _cords.find(c => String(c.id) === String(u.coordId));
                       const cordEl = document.getElementById('perf-display-cord');
                       cordEl.textContent = cord ? cord.nome : (u.tipo === 'admin' ? 'Acesso Global' : '—');
                       cordEl.style.display = cord || u.tipo === 'admin' ? 'inline-block' : 'none';
@@ -6442,7 +6470,7 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                       const senha = document.getElementById('sup-edit-senha').value;
                       const conf = document.getElementById('sup-edit-conf').value;
                       const coordIdRaw = document.getElementById('sup-edit-cord').value;
-                      const coordId = coordIdRaw ? parseInt(coordIdRaw) : null;
+                      const coordId = coordIdRaw ? coordIdRaw : null;
                       const rondaRaw = document.getElementById('sup-edit-ronda')?.value || null;
                       const ronda = rondaRaw || null;
                       if (!nome) { showToast('O nome não pode estar vazio', 'error'); return; }
@@ -6453,12 +6481,12 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                       const fields = {};
                       if (nome !== sup.nome) fields.nome = nome;
                       if (senha) fields.senha = senha;
-                      if (coordId !== sup.coordId) fields.coord_id = coordId;
+                      if (String(coordId) !== String(sup.coordId)) fields.coord_id = coordId;
                       if (String(ronda) !== String(sup.ronda)) fields.ronda = ronda;
                       if (!Object.keys(fields).length) { showToast('Nenhuma alteração para guardar', 'info'); return; }
                       showLoading('A guardar alterações...');
                     const ok = await updateUserField(id, fields);
-                    if (ok && coordId !== sup.coordId) sup.coordId = coordId;
+                    if (ok && String(coordId) !== String(sup.coordId)) sup.coordId = coordId;
                     if (ok && String(ronda) !== String(sup.ronda)) sup.ronda = ronda;
                     hideLoading();
                     if (ok) {
@@ -6658,12 +6686,13 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
 
                     // INIT
                     async function main() {
-                      showLoading('A verificar ligação à base de dados...');
-                      await testSB();
-                      await initLocalDB();
+                      showLoading('A inicializar...');
+                      // ⚡ OTIMIZADO: Paralelo quando possível
+                      await Promise.all([
+                        testSB().catch(() => {}),
+                        initLocalDB().catch(() => {})
+                      ]);
                       hideLoading();
-                      // ❌ COMENTADO: Não restaurar sessão automaticamente
-                      // await restoreSession();
                       // ✅ FORÇAR LOGIN: Sempre mostrar a página de login
                       document.getElementById('loginScreen').style.display = 'flex';
                       document.getElementById('appShell').style.display = 'none';
