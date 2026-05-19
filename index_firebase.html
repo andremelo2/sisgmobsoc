@@ -5,12 +5,30 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SisMob — Sistema de Mobilização de Saúde</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<!-- Chart.js carregado no arranque (usado no dashboard) -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<!-- XLSX e jsPDF são carregados sob-demanda via lazy-load quando o utilizador exporta -->
+<script>
+/* ── LAZY LOADERS ─────────────────────────────────────────── */
+const _loaded = {};
+function _lazyLoad(url, globalKey) {
+  if (_loaded[globalKey]) return Promise.resolve();
+  if (window[globalKey]) { _loaded[globalKey] = true; return Promise.resolve(); }
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = url;
+    s.onload = () => { _loaded[globalKey] = true; resolve(); };
+    s.onerror = () => reject(new Error('Falha ao carregar ' + url));
+    document.head.appendChild(s);
+  });
+}
+function loadXLSX() {
+  return _lazyLoad('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js', 'XLSX');
+}
+function loadJsPDF() {
+  return _lazyLoad('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js', 'jspdf');
+}
+</script>
 <style>
 /* ═══════════════════════════════════════════════════════════
    SISMOB — DESIGN SYSTEM MODERNO
@@ -746,49 +764,6 @@ tbody td{padding:11px 14px;color:var(--text2)}
   background:linear-gradient(90deg,var(--primary),var(--surf));
   border-radius:10px;transition:width .6s cubic-bezier(.4,0,.2,1);
 }
-
-/* ── LEAFLET ── */
-.leaflet-control-zoom-in,.leaflet-control-zoom-out{
-  background-color:#ffffff!important;
-  border:1px solid var(--border-solid)!important;
-  color:var(--text)!important;font-weight:700!important;
-  border-radius:8px!important;
-}
-.leaflet-control-zoom-in:hover,.leaflet-control-zoom-out:hover{
-  background-color:var(--primary)!important;color:#fff!important;
-}
-.leaflet-popup-content-wrapper{
-  background-color:#ffffff!important;
-  border:1px solid var(--border-solid)!important;
-  border-radius:12px!important;
-  box-shadow:var(--shadow-lg)!important;
-}
-.leaflet-popup-content{color:var(--text)!important}
-.leaflet-popup-tip{background-color:#ffffff!important}
-
-/* ── MAP ── */
-.map-container{
-  width:100%;height:600px;
-  border-radius:var(--radius);overflow:hidden;
-  margin-bottom:20px;
-  border:1px solid var(--border-solid);
-  box-shadow:var(--shadow-md);
-}
-.leaflet-container{font-family:'Inter',sans-serif}
-.map-legend{
-  position:absolute;bottom:20px;right:20px;
-  background:rgba(255,255,255,.9);
-  backdrop-filter:blur(16px);
-  border:1px solid var(--border-solid);
-  border-radius:12px;padding:16px;
-  z-index:400;box-shadow:var(--shadow-md);
-}
-.map-legend-title{font-size:11px;font-weight:700;color:var(--text);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px}
-.map-legend-item{font-size:11px;color:var(--text2);margin:6px 0;display:flex;align-items:center;gap:8px}
-.map-legend-color{width:16px;height:16px;border-radius:4px;flex-shrink:0}
-.neighborhood-popup{font-family:'Inter',sans-serif}
-.neighborhood-popup-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
-.neighborhood-popup-stat{font-size:11px;color:var(--text2);margin:4px 0;display:flex;justify-content:space-between;gap:8px}
 
 /* ── PRESENCE PANEL ── */
 .presence-panel{
@@ -1570,7 +1545,6 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
   .page-subtitle{font-size:12px}
   .card{padding:16px;margin-bottom:16px}
   .btn{padding:10px 16px;font-size:13px;width:100%;justify-content:center}
-  .map-container{height:400px}
   .nav-item{padding:14px 16px;font-size:14px}
   table{font-size:11px;display:block;overflow-x:auto;white-space:nowrap}
   thead th{padding:10px 8px;font-size:10px;position:sticky;top:0;background:rgba(99,102,241,.07);z-index:1}
@@ -1887,12 +1861,6 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
               <line x1="3" y1="18" x2="3.01" y2="18" />
             </svg>Fichas Registadas
             </div>
-            <div class="nav-item" onclick="showPage('mapa')">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-              <circle cx="12" cy="10" r="3" />
-            </svg>Mapa de Mobilização
-            </div>
             <div class="nav-item" id="navMobilizadores" onclick="showPage('mobilizadores')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
@@ -2093,25 +2061,6 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
           </div>
           </div>
 
-        <!-- MAPA DE MOBILIZAÇÃO -->
-        <div class="page" id="page-mapa">
-          <div class="page-header">
-            <div class="page-title">Mapa de Mobilização</div>
-            <div class="page-subtitle">Visualização geográfica da cobertura por bairro</div>
-          </div>
-          <div class="card">
-            <div class="card-title"><span class="dot"></span>Filtros</div>
-            <div class="form-grid">
-              <div class="form-field"><label>Coordenação</label><select id="mapFiltCord" onchange="renderMapData()">
-                  <option value="">Todas</option>
-                </select></div>
-              <div class="form-field"><label>Data início</label><input type="date" id="mapFiltDtI" oninput="renderMapData()"></div>
-              <div class="form-field"><label>Data fim</label><input type="date" id="mapFiltDtF" oninput="renderMapData()"></div>
-              </div>
-              </div>
-              <div id="mapContainer" class="map-container"></div>
-              <div class="stats-grid" id="mapStats"></div>
-              </div>
 
         <!-- NOVA FICHA -->
         <div class="page" id="page-ficha">
@@ -4009,7 +3958,6 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
 
                     // PAGE ROUTING
                     let chartBar = null, chartDonut = null, chartBar2 = null, chartLine = null, chartDonut2 = null;
-                    let mapInstance = null;
 
                     function showPage(id) {
                       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -4020,7 +3968,6 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                       closeSidebar();
                     if (id === 'ficha') { updateCoordField(); populateMobilizadoresList(); }
                     if (id === 'dashboard') renderDashboard();
-                    if (id === 'mapa') renderMapPage();
                     if (id === 'listFichas') renderListFichas();
                     if (id === 'consolidado') renderConsolidado();
                     if (id === 'relatorios') { populateRelCords(); populateRelDiaCords(); populateRelSup(); applyRelGeral(); }
@@ -4030,129 +3977,6 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                     if (id === 'rondas') renderHistoricoRondas();
                     if (id === 'perfil') renderPerfil();
                     if (id === 'mobilizadores') renderMobilizadoresPage();
-                  }
-
-                    // MAP PAGE
-                    function renderMapPage() {
-                      populateMapCords();
-                      renderMapData();
-                    }
-
-                    function populateMapCords() {
-                      const sel = document.getElementById('mapFiltCord');
-                      if (!sel) return;
-                      sel.innerHTML = '<option value="">Todas as Coordenações</option>';
-                      _cords.forEach(c => sel.innerHTML += `<option value="${c.id}">${c.nome}</option>`);
-                    }
-
-                    function renderMapData() {
-                      let fichas = getVisibleFichas();
-                      const cord = document.getElementById('mapFiltCord')?.value;
-                      const dtI = document.getElementById('mapFiltDtI')?.value;
-                      const dtF = document.getElementById('mapFiltDtF')?.value;
-
-                    if (cord) fichas = fichas.filter(f => String(f.coordId) === cord);
-                    if (dtI) fichas = fichas.filter(f => f.data >= dtI);
-                    if (dtF) fichas = fichas.filter(f => f.data <= dtF);
-
-                    const neighborhoods = {};
-                    fichas.forEach(f => {
-                      const key = f.bairro || 'Sem Bairro';
-                      if (!neighborhoods[key]) {
-                        neighborhoods[key] = { bairro: f.bairro, fichas: 0, pessoas: 0, locais: 0, sim: 0, nao: 0 };
-                      }
-                    neighborhoods[key].fichas += 1;
-                    neighborhoods[key].pessoas += (f.totalPessoas || 0);
-                    neighborhoods[key].locais += (f.totalLocais || 0);
-                    neighborhoods[key].sim += (f.sim || 0);
-                    neighborhoods[key].nao += (f.nao || 0);
-                  });
-
-                    const totalPessoas = fichas.reduce((s, f) => s + (f.totalPessoas || 0), 0);
-                    const totalLocais = fichas.reduce((s, f) => s + (f.totalLocais || 0), 0);
-                    const totalSim = fichas.reduce((s, f) => s + (f.sim || 0), 0);
-                    const totalNao = fichas.reduce((s, f) => s + (f.nao || 0), 0);
-                    const pct = totalSim + totalNao > 0 ? Math.round(totalSim / (totalSim + totalNao) * 100) : 0;
-
-                    document.getElementById('mapStats').innerHTML = `
-    <div class="stat-card green"><div class="stat-icon">👥</div><div class="stat-value">${totalPessoas.toLocaleString()}</div><div class="stat-label">Pessoas Alcançadas</div></div>
-    <div class="stat-card blue"><div class="stat-icon">📍</div><div class="stat-value">${totalLocais}</div><div class="stat-label">Locais Visitados</div></div>
-    <div class="stat-card amber"><div class="stat-icon">🗺️</div><div class="stat-value">${Object.keys(neighborhoods).length}</div><div class="stat-label">Bairros Cobertos</div></div>
-    <div class="stat-card purple"><div class="stat-icon">✅</div><div class="stat-value">${pct}%</div><div class="stat-label">Taxa de Aceitação</div></div>`;
-
-                    if (!mapInstance) {
-                      mapInstance = L.map('mapContainer').setView([-9.25, -13.2], 11);
-                      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        attribution: '© OpenStreetMap', maxZoom: 19,
-                        className: 'map-tile-layer'
-                      }).addTo(mapInstance);
-                    }
-
-                    mapInstance.eachLayer(layer => {
-                      if (layer instanceof L.Marker || layer instanceof L.Circle || layer instanceof L.CircleMarker) {
-                        mapInstance.removeLayer(layer);
-                      }
-                    });
-
-                    const getColor = (pessoas) => {
-                      if (pessoas === 0) return '#64748b';
-                      if (pessoas < 50) return '#60a5fa';
-                      if (pessoas < 100) return '#0ea5e9';
-                      if (pessoas < 200) return '#2e86c1';
-                      if (pessoas < 300) return '#10b981';
-                      return '#059669';
-                    };
-
-                    const coords = {
-                      'Bairro 15 de Março': [-9.246, -13.191],
-                      'Bairro Independência': [-9.245, -13.200],
-                      'Bairro Catata': [-9.255, -13.195],
-                      'Sem Bairro': [-9.25, -13.2]
-                    };
-
-                    Object.entries(neighborhoods).forEach(([nome, data]) => {
-                      const latlng = coords[nome] || [-9.25, -13.2];
-                      const color = getColor(data.pessoas);
-                      const radius = Math.sqrt(data.pessoas) * 2;
-
-                    const circle = L.circleMarker(latlng, {
-                      radius: Math.min(Math.max(radius, 15), 50),
-                      fillColor: color,
-                      color: color,
-                      weight: 2,
-                      opacity: 0.8,
-                      fillOpacity: 0.7
-                    }).addTo(mapInstance);
-
-                    const pct = data.sim + data.nao > 0 ? Math.round(data.sim / (data.sim + data.nao) * 100) : 0;
-                    const popup = `
-      <div class="neighborhood-popup">
-        <div class="neighborhood-popup-title">${nome}</div>
-        <div class="neighborhood-popup-stat"><span>Fichas:</span><strong>${data.fichas}</strong></div>
-        <div class="neighborhood-popup-stat"><span>Pessoas:</span><strong>${data.pessoas.toLocaleString()}</strong></div>
-        <div class="neighborhood-popup-stat"><span>Locais:</span><strong>${data.locais}</strong></div>
-        <div class="neighborhood-popup-stat"><span>Aceitação:</span><strong>${pct}%</strong></div>
-      </div>`;
-                    circle.bindPopup(popup);
-                  });
-
-                    const legend = L.control({ position: 'bottomright' });
-                    legend.onAdd = () => {
-                      const div = L.DomUtil.create('div', 'map-legend');
-                      div.innerHTML = `
-      <div class="map-legend-title">Pessoas por Bairro</div>
-      <div class="map-legend-item"><div class="map-legend-color" style="background:#60a5fa"></div><span>1–49</span></div>
-      <div class="map-legend-item"><div class="map-legend-color" style="background:#0ea5e9"></div><span>50–99</span></div>
-      <div class="map-legend-item"><div class="map-legend-color" style="background:#00d4aa"></div><span>100–199</span></div>
-      <div class="map-legend-item"><div class="map-legend-color" style="background:#10b981"></div><span>200–299</span></div>
-      <div class="map-legend-item"><div class="map-legend-color" style="background:#059669"></div><span>300+</span></div>`;
-                    return div;
-                  };
-
-                    const existingLegend = document.querySelector('.map-legend');
-                    if (existingLegend) existingLegend.remove();
-
-                    legend.addTo(mapInstance);
                   }
 
                     // DASHBOARD
@@ -8032,17 +7856,19 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                     });
 
                     // ══════════════════════════════════════════════
-                    // EXPORTAÇÃO DE GRÁFICOS
+                    // EXPORTAÇÃO DE GRÁFICOS (lazy-load sob demanda)
                     // ══════════════════════════════════════════════
                     
                     // Função para exportar gráfico como PDF
-                    function exportChartPDF(chartId, chartName) {
-                      showToast('Gerando PDF do gráfico...', 'info');
-                      setTimeout(() => {
+                    async function exportChartPDF(chartId, chartName) {
+                      showToast('A carregar módulo PDF...', 'info');
+                      try {
+                        await loadJsPDF();
                         const canvas = document.getElementById(chartId);
                         if (!canvas) { showToast('Gráfico não encontrado', 'error'); return; }
                         
                         const imageData = canvas.toDataURL('image/png');
+                        const { jsPDF } = window.jspdf;
                         const doc = new jsPDF({
                           orientation: 'landscape',
                           unit: 'mm',
@@ -8052,33 +7878,29 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                         const pageWidth = doc.internal.pageSize.getWidth();
                         const pageHeight = doc.internal.pageSize.getHeight();
                         
-                        // Adicionar título
                         doc.setFontSize(18);
                         doc.text(chartName, pageWidth / 2, 15, { align: 'center' });
-                        
-                        // Adicionar data
                         doc.setFontSize(10);
                         doc.text('Data: ' + new Date().toLocaleDateString('pt-PT'), pageWidth / 2, 22, { align: 'center' });
                         
-                        // Adicionar gráfico
                         const imgWidth = pageWidth - 20;
                         const imgHeight = (canvas.height * imgWidth) / canvas.width;
                         doc.addImage(imageData, 'PNG', 10, 30, imgWidth, imgHeight);
-                        
-                        // Salvar
                         doc.save('Grafico_' + chartName.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '_' + new Date().toISOString().split('T')[0] + '.pdf');
                         showToast('PDF do gráfico exportado com sucesso!', 'success');
-                      }, 300);
+                      } catch(e) {
+                        showToast('Erro ao gerar PDF. Verifique a ligação.', 'error');
+                      }
                     }
                     
                     // Função para exportar gráfico como Excel
-                    function exportChartExcel(chartId, chartName) {
-                      showToast('Gerando Excel do gráfico...', 'info');
-                      setTimeout(() => {
+                    async function exportChartExcel(chartId, chartName) {
+                      showToast('A carregar módulo Excel...', 'info');
+                      try {
+                        await loadXLSX();
                         const canvas = document.getElementById(chartId);
                         if (!canvas) { showToast('Gráfico não encontrado', 'error'); return; }
                         
-                        // Obter dados do gráfico através do Chart.js
                         let chartInstance;
                         if (chartId === 'chartBar') chartInstance = chartBar;
                         else if (chartId === 'chartDonut') chartInstance = chartDonut;
@@ -8091,57 +7913,45 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                         const data = chartInstance.data;
                         const excelData = [];
                         
-                        // Adicionar cabeçalho
                         excelData.push({
                           'Gráfico': chartName,
                           'Data Exportação': new Date().toLocaleDateString('pt-PT')
                         });
                         excelData.push({});
                         
-                        // Extrair dados do gráfico
                         if (chartId === 'chartLine') {
-                          // Gráfico de linha - mostrar dados por data
                           const labels = data.labels || [];
                           const values = data.datasets[0]?.data || [];
                           excelData.push({ 'Data': 'Pessoas' });
                           labels.forEach((label, idx) => {
-                            excelData.push({
-                              'Data': label,
-                              'Pessoas': values[idx] || 0
-                            });
+                            excelData.push({ 'Data': label, 'Pessoas': values[idx] || 0 });
                           });
                         } else if (chartId === 'chartDonut' || chartId === 'chartDonut2') {
-                          // Gráficos de rosca
                           const labels = data.labels || [];
                           const values = data.datasets[0]?.data || [];
                           excelData.push({ 'Categoria': 'Valor' });
                           labels.forEach((label, idx) => {
-                            excelData.push({
-                              'Categoria': label,
-                              'Valor': values[idx] || 0
-                            });
+                            excelData.push({ 'Categoria': label, 'Valor': values[idx] || 0 });
                           });
                         } else {
-                          // Gráficos de barras
                           const labels = data.labels || [];
                           const values = data.datasets[0]?.data || [];
                           excelData.push({ 'Local': 'Pessoas' });
                           labels.forEach((label, idx) => {
-                            excelData.push({
-                              'Local': label,
-                              'Pessoas': values[idx] || 0
-                            });
+                            excelData.push({ 'Local': label, 'Pessoas': values[idx] || 0 });
                           });
                         }
                         
-                        // Criar sheet e salvar
                         const ws = XLSX.utils.json_to_sheet(excelData);
                         const wb = XLSX.utils.book_new();
                         XLSX.utils.book_append_sheet(wb, ws, chartName.substring(0, 30));
                         XLSX.writeFile(wb, 'Grafico_' + chartName.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '_' + new Date().toISOString().split('T')[0] + '.xlsx');
                         showToast('Excel do gráfico exportado com sucesso!', 'success');
-                      }, 300);
+                      } catch(e) {
+                        showToast('Erro ao gerar Excel. Verifique a ligação.', 'error');
+                      }
                     }
+
 
                     // Exportação
                     function exportToPDF() {
@@ -8152,19 +7962,25 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                       }, 500);
                     }
 
-                    function exportToExcel() {
-                      const fichas = getVisibleFichas();
-                      const data = fichas.map(f => ({
-                        'Data': f.data || '',
-                        'Mobilizador': f.mobilizador || '',
-                        'Bairro': f.bairro || '',
-                        'Pessoas': f.totalPessoas || 0
-                      }));
-                      const ws = XLSX.utils.json_to_sheet(data);
-                      const wb = XLSX.utils.book_new();
-                      XLSX.utils.book_append_sheet(wb, ws, 'Fichas');
-                      XLSX.writeFile(wb, 'SisMob_' + new Date().toISOString().split('T')[0] + '.xlsx');
-                      showToast('Excel exportado', 'success');
+                    async function exportToExcel() {
+                      showToast('A carregar módulo Excel...', 'info');
+                      try {
+                        await loadXLSX();
+                        const fichas = getVisibleFichas();
+                        const data = fichas.map(f => ({
+                          'Data': f.data || '',
+                          'Mobilizador': f.mobilizador || '',
+                          'Bairro': f.bairro || '',
+                          'Pessoas': f.totalPessoas || 0
+                        }));
+                        const ws = XLSX.utils.json_to_sheet(data);
+                        const wb = XLSX.utils.book_new();
+                        XLSX.utils.book_append_sheet(wb, ws, 'Fichas');
+                        XLSX.writeFile(wb, 'SisMob_' + new Date().toISOString().split('T')[0] + '.xlsx');
+                        showToast('Excel exportado', 'success');
+                      } catch(e) {
+                        showToast('Erro ao gerar Excel. Verifique a ligação.', 'error');
+                      }
                     }
 
                     function exportToWord() {
