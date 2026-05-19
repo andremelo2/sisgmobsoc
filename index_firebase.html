@@ -6321,8 +6321,8 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                     function showToast(msg, type = 'success') { const t = document.getElementById('toast'); t.textContent = msg; t.className = 'toast ' + type + ' show'; setTimeout(() => t.className = 'toast', 3500); }
                     function showLoading(msg = 'A processar...') { document.getElementById('loadingMsg').textContent = msg; document.getElementById('loadingOverlay').classList.add('show'); }
                     function hideLoading() { document.getElementById('loadingOverlay').classList.remove('show'); }
-                    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('open'); }
-                    function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('open'); }
+                    function toggleSidebar() { /* definida abaixo com suporte mobile/desktop */ }
+                    function closeSidebar() { /* definida abaixo com suporte mobile/desktop */ }
 
                     // INIT
                     async function main() {
@@ -6712,28 +6712,47 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                     document.getElementById('themeToggle').addEventListener('click', toggleTheme);
 
                     // Toggle Sidebar
+                    function isMobile() {
+                      return window.innerWidth <= 768;
+                    }
                     function toggleSidebar() {
                       const sidebar = document.querySelector('.sidebar');
-                      if (sidebar) {
+                      const overlay = document.getElementById('sidebarOverlay');
+                      if (!sidebar) return;
+                      if (isMobile()) {
+                        // Mobile: usa classe .open + overlay
+                        const isOpen = sidebar.classList.toggle('open');
+                        if (overlay) overlay.classList.toggle('open', isOpen);
+                      } else {
+                        // Desktop: usa classe .sidebar-hidden + guarda estado
                         sidebar.classList.toggle('sidebar-hidden');
                         const isHidden = sidebar.classList.contains('sidebar-hidden');
                         localStorage.setItem('sidebarHidden', isHidden);
                         const btn = document.getElementById('sidebarToggleBtn');
-                        if (btn) {
-                          btn.textContent = isHidden ? '☰' : '✕';
-                        }
+                        if (btn) btn.textContent = isHidden ? '☰' : '✕';
                       }
                     }
-                    // Restaurar estado do sidebar ao carregar
+                    function closeSidebar() {
+                      const sidebar = document.querySelector('.sidebar');
+                      const overlay = document.getElementById('sidebarOverlay');
+                      if (sidebar) sidebar.classList.remove('open');
+                      if (overlay) overlay.classList.remove('open');
+                    }
+                    // Fechar sidebar mobile ao clicar num item de navegação
+                    document.addEventListener('click', function(e) {
+                      if (isMobile() && e.target.closest('.nav-item')) {
+                        closeSidebar();
+                      }
+                    });
+                    // Restaurar estado do sidebar ao carregar (só desktop)
                     window.addEventListener('load', () => {
+                      if (isMobile()) return;
                       const sidebarHidden = localStorage.getItem('sidebarHidden') === 'true';
                       const sidebar = document.querySelector('.sidebar');
                       if (sidebar && sidebarHidden) {
                         sidebar.classList.add('sidebar-hidden');
                         const btn = document.getElementById('sidebarToggleBtn');
-                        if (btn) {
-                          btn.textContent = '☰';
-                        }
+                        if (btn) btn.textContent = '☰';
                       }
                     });
 
