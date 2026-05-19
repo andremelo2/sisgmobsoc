@@ -3537,11 +3537,17 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
           }
                     function doLogout() {
                       stopPresence();
-                      currentUser = null; DB.set('session', null);
+                      currentUser = null; 
+                      DB.set('session', null); // Limpar sessão salva
+                      localStorage.removeItem('session'); // Garantir remoção
                       const topbar = document.getElementById('fichasTopbar');
                       if (topbar) topbar.classList.remove('show');
                       document.getElementById('appShell').style.display = 'none';
                       document.getElementById('loginScreen').style.display = 'flex';
+                      // Limpar campos de login
+                      document.getElementById('loginEmail').value = '';
+                      document.getElementById('loginPass').value = '';
+                      document.getElementById('loginErr').style.display = 'none';
                     }
                     async function restoreSession() {
                       const sid = DB.get('session'); if (!sid) return;
@@ -6656,7 +6662,11 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
                       await testSB();
                       await initLocalDB();
                       hideLoading();
-                      await restoreSession();
+                      // ❌ COMENTADO: Não restaurar sessão automaticamente
+                      // await restoreSession();
+                      // ✅ FORÇAR LOGIN: Sempre mostrar a página de login
+                      document.getElementById('loginScreen').style.display = 'flex';
+                      document.getElementById('appShell').style.display = 'none';
                     }
 
                     // ══════════════════════════════════
