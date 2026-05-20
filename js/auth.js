@@ -49,6 +49,7 @@
                       localStorage.removeItem('session'); // Garantir remoção
                       const topbar = document.getElementById('fichasTopbar');
                       if (topbar) topbar.classList.remove('show');
+                      document.body.classList.remove('topbar-visible');
                       document.getElementById('appShell').style.display = 'none';
                       document.getElementById('loginScreen').style.display = 'flex';
                       // Limpar campos de login
@@ -97,7 +98,7 @@
                     // Presença: todos registam, só admin vê o painel
                     startPresence();
                     updateTopbar();
-                    adjustForTopbar();
+                    setTimeout(adjustForTopbar, 50);
                     loadNotificationsStore();
                     setTimeout(checkAndFireNotifications, 3000);
                     showPage('dashboard');

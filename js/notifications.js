@@ -1,6 +1,11 @@
                     // ══════════════════════════════════
 
-                    main();
+                    // main() chamado depois do DOM estar pronto (evitar race condition)
+                    if (document.readyState === 'loading') {
+                      document.addEventListener('DOMContentLoaded', () => main());
+                    } else {
+                      main();
+                    }
                     document.getElementById('loginPass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 
                     // Detectar modo offline/online
@@ -21,10 +26,11 @@
 
                     // Scroll: esconder topbar ao rolar para baixo, mostrar ao rolar para cima ou no topo
                     let lastScrollTop = 0;
-                    const fab = document.getElementById('fabButton');
-                    const mainScrollEl = document.querySelector('.main');
 
                     function handleMainScroll() {
+                      // Capturar .main dinamicamente (pode não existir quando o script carrega)
+                      const fab = document.getElementById('fabButton');
+                      const mainScrollEl = document.querySelector('.main');
                       const st = mainScrollEl ? mainScrollEl.scrollTop : (window.pageYOffset || document.documentElement.scrollTop);
                       const topbar = document.getElementById('fichasTopbar');
 
@@ -273,19 +279,22 @@
                       // Alertas: mobilizadores sem ficha ontem (só supervisor e admin vêem)
                       checkMobAlertOntem();
                       updateNotifBadge();
+                      // Garantir padding correcto após mostrar topbar
+                      setTimeout(adjustForTopbar, 50);
                     }
 
                     // Adjust top padding of app when topbar visible
                     function adjustForTopbar() {
-                      const main = document.querySelector('.main');
                       const topbar = document.getElementById('fichasTopbar');
                       const notifCenter = document.getElementById('notificationCenter');
-                      if (!main || !topbar) return;
+                      if (!topbar) return;
                       if (topbar.classList.contains('show')) {
-                        main.style.paddingTop = '48px';
+                        // Marcar body para CSS ajustar padding das .page
+                        document.body.classList.add('topbar-visible');
                         if (notifCenter) notifCenter.style.top = '52px';
                       } else {
-                        main.style.paddingTop = '0';
+                        document.body.classList.remove('topbar-visible');
+                        if (notifCenter) notifCenter.style.top = '0';
                       }
                     }
 

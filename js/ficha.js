@@ -251,7 +251,7 @@
                     function getVisibleFichas() {
                       if (currentUser.tipo === 'admin') return _fichas;
                       // Supervisores veem fichas da sua coordenação (não apenas as que criaram)
-                      return _fichas.filter(f => f.coordId === currentUser.coordId);
+                      return _fichas.filter(f => String(f.coordId) === String(currentUser.coordId));
                     }
 
                     // PAGE ROUTING

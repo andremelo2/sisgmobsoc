@@ -369,6 +369,10 @@ nav{flex:1;padding:10px 8px}
   display:none;padding:48px 32px 32px 32px;
   animation:pageEnter .4s cubic-bezier(.4,0,.2,1) forwards;
 }
+/* Quando topbar está visível, adiciona espaço extra ao topo das páginas */
+body.topbar-visible .page{
+  padding-top:64px;
+}
 .page.active{display:block}
 @keyframes pageEnter{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
@@ -1264,7 +1268,7 @@ body.dark-mode .chart-btn{background:#2a2a2a;border-color:#3a3a3a;color:#b8b8b8}
 
 /* ── TOPBAR FIXA DE FICHAS + RONDA ── */
 #fichasTopbar{
-  position:fixed;top:0;left:260px;right:0;z-index:170;
+  position:fixed;top:0;left:260px;right:0;z-index:1200;
   display:none;
   background:#0d1f2d;
   color:#ffffff;
