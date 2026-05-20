@@ -68,19 +68,23 @@
                       const tbody = document.getElementById('listFichasBody');
                       tbody.innerHTML = '';
                       const isAdmin = currentUser && currentUser.tipo === 'admin';
+                      const isSupervisor = currentUser && currentUser.tipo === 'supervisor';
                       fichas.forEach((f, i) => {
                         const podeApagar = isAdmin || (currentUser && f.userId === currentUser.id);
+                        const semCoordenacao = !f.coordId || !f.coordNome;
+                        const podeReatribuir = isAdmin || (isSupervisor && semCoordenacao);
                         tbody.innerHTML += `<tr>
       <td style="font-family:'JetBrains Mono',monospace;color:var(--text3)">${i + 1}</td>
       <td>${f.data || '—'}</td>
       <td style="font-weight:600">${f.mobilizador || '—'}</td>
-      <td><span class="badge badge-sup">${f.coordNome || '—'}</span></td>
+      <td><span class="badge badge-sup" style="${semCoordenacao ? 'background:rgba(239,68,68,.12);color:var(--coral)' : ''}">${f.coordNome || '⚠️ Sem Coord.'}</span></td>
       <td>${rondaLabel(f.ronda)}</td>
       <td>${f.bairro || '—'}</td>
       <td style="font-family:'JetBrains Mono',monospace">${f.totalLocais || 0}</td>
       <td style="font-family:'JetBrains Mono',monospace;color:var(--accent)">${(f.totalPessoas || 0).toLocaleString()}</td>
-      <td style="display:flex;gap:6px">
+      <td style="display:flex;gap:6px;flex-wrap:wrap">
         <button class="btn btn-blue btn-sm" onclick="verFicha('${f.id}')">👁 Ver</button>
+        ${podeReatribuir ? `<button class="btn btn-outline btn-sm" onclick="abrirReatribuirFicha('${f.id}')" style="border-color:var(--accent);color:var(--accent)">🔄 Reatrib.</button>` : ''}
         ${podeApagar ? `<button class="btn btn-outline btn-sm" onclick="abrirEditFicha('${f.id}')" style="border-color:var(--amber);color:var(--amber)">✏️ Editar</button>` : ''}
         ${podeApagar ? `<button class="btn btn-danger btn-sm" onclick="deleteFicha('${f.id}')" title="Apagar ficha">🗑 Apagar</button>` : ''}
       </td>
@@ -251,6 +255,91 @@
                         renderListFichas();
                         updateTopbar();
                       } catch(e) {
+                        console.error('deleteFicha:', e);
+                        hideLoading();
+                        showToast('Erro ao apagar. Verifique a ligação.', 'error');
+                      }
+                    }
+
+                    // Reatribuir ficha a uma coordenação
+                    async function abrirReatribuirFicha(fichaId) {
+                      const f = _fichas.find(x => String(x.id) === String(fichaId));
+                      if (!f) return;
+                      const isAdmin = currentUser && currentUser.tipo === 'admin';
+                      const isSupervisor = currentUser && currentUser.tipo === 'supervisor';
+                      if (!isAdmin && !isSupervisor) {
+                        showToast('Sem permissão para reatribuir', 'error');
+                        return;
+                      }
+                      
+                      let html = `
+                        <div style="padding:20px">
+                          <h3 style="margin:0 0 16px 0;color:var(--text)">🔄 Reatribuir Ficha</h3>
+                          <p style="color:var(--text2);margin:0 0 12px 0">
+                            <strong>${f.mobilizador}</strong> — ${f.data || '—'} — ${f.bairro || '—'}
+                          </p>
+                          <label style="font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;display:block;margin-bottom:8px">Seleccionar Coordenação Destino</label>
+                          <select id="reatrib-cord-sel" style="width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:13px;cursor:pointer">
+                            <option value="">— Escolher coordenação —</option>`;
+                      _cords.forEach(c => {
+                        html += `<option value="${c.id}">${c.nome}</option>`;
+                      });
+                      html += `
+                          </select>
+                          <div style="display:flex;gap:8px;margin-top:20px;justify-content:flex-end">
+                            <button class="btn btn-outline" onclick="document.getElementById('reatribOverlay').style.display='none'">Cancelar</button>
+                            <button class="btn btn-blue" onclick="confirmarReatribuirFicha('${fichaId}')">✓ Reatribuir</button>
+                          </div>
+                        </div>`;
+                      
+                      let overlay = document.getElementById('reatribOverlay');
+                      if (!overlay) {
+                        overlay = document.createElement('div');
+                        overlay.id = 'reatribOverlay';
+                        overlay.className = 'mob-profile-overlay';
+                        overlay.onclick = function(e) { if(e.target === this) this.style.display = 'none'; };
+                        document.body.appendChild(overlay);
+                      }
+                      overlay.innerHTML = `<div class="mob-profile-modal" style="max-width:400px">${html}</div>`;
+                      overlay.style.display = 'flex';
+                    }
+
+                    async function confirmarReatribuirFicha(fichaId) {
+                      const cordId = document.getElementById('reatrib-cord-sel')?.value;
+                      if (!cordId) {
+                        showToast('Seleccione uma coordenação', 'error');
+                        return;
+                      }
+                      
+                      const f = _fichas.find(x => String(x.id) === String(fichaId));
+                      if (!f) return;
+                      
+                      const cord = _cords.find(c => c.id == cordId);
+                      if (!cord) return;
+                      
+                      showLoading('A reatribuir ficha...');
+                      const fichaAtualizada = {
+                        ...f,
+                        coordId: cord.id,
+                        coordNome: cord.nome
+                      };
+                      
+                      try {
+                        await updateFichaRemote(fichaId, fichaAtualizada);
+                        const idx = _fichas.findIndex(x => String(x.id) === String(fichaId));
+                        if (idx >= 0) _fichas[idx] = fichaAtualizada;
+                        DB.set('fichas', _fichas);
+                        hideLoading();
+                        showToast(`Ficha reatribuída para ${cord.nome}`, 'success');
+                        document.getElementById('reatribOverlay').style.display = 'none';
+                        renderListFichas();
+                        updateTopbar();
+                      } catch(e) {
+                        console.error('confirmarReatribuirFicha:', e);
+                        hideLoading();
+                        showToast('Erro ao reatribuir. Verifique a ligação.', 'error');
+                      }
+                    }
                         console.error('deleteFicha:', e);
                         // Mesmo que falhe no Firebase, remove localmente
                         _fichas = _fichas.filter(x => x.id !== id);

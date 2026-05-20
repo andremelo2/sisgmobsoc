@@ -235,12 +235,24 @@
       <span style="font-size:10px;color:var(--accent);margin-top:2px">✎ Admin — escolha a coordenação destino</span>`;
                     } else {
                       const cord = _cords.find(c => c.id === currentUser.coordId);
+                      // Supervisores podem selecionar mobilizadores da sua coordenação
+                      const mobilizadoresDaCord = _users.filter(u => u.coordId === currentUser.coordId && u.tipo !== 'admin').sort((a,b) => a.nome.localeCompare(b.nome));
+                      const mobOpts = mobilizadoresDaCord.map(u => `<option value="${u.nome}">${u.nome}</option>`).join('');
                       wrap.innerHTML = `<label style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px">Coordenação</label>
-      <input type="text" value="${cord ? cord.nome : '—'}" readonly style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-family:'Inter',sans-serif;font-size:13px;cursor:not-allowed">`;
+      <input type="text" value="${cord ? cord.nome : '—'}" readonly style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-family:'Inter',sans-serif;font-size:13px;cursor:not-allowed">
+      ${mobilizadoresDaCord.length > 0 ? `<label style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-top:12px">Mobilizadores da Coordenação</label>
+      <select id="f-mobilizador-select" style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-family:'Inter',sans-serif;font-size:13px;width:100%;cursor:pointer" onchange="document.getElementById('f-mobilizador').value = this.value; this.value = ''">
+        <option value="">← Seleccionar mobilizador</option>
+        ${mobOpts}
+      </select>` : '<span style="font-size:11px;color:var(--text3);margin-top:12px">Sem mobilizadores nesta coordenação</span>'}`;
                     }
                   }
 
-                    function getVisibleFichas() { return currentUser.tipo === 'admin' ? _fichas : _fichas.filter(f => f.userId === currentUser.id); }
+                    function getVisibleFichas() {
+                      if (currentUser.tipo === 'admin') return _fichas;
+                      // Supervisores veem fichas da sua coordenação (não apenas as que criaram)
+                      return _fichas.filter(f => f.coordId === currentUser.coordId);
+                    }
 
                     // PAGE ROUTING
                     let chartBar = null, chartDonut = null, chartBar2 = null, chartLine = null, chartDonut2 = null;
