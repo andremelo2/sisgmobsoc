@@ -328,3 +328,50 @@
                     // AUTH
                     let currentUser = null;
 
+                    // Funções de Autenticação
+                    async function loginUser(email, senha) {
+                      try {
+                        const snap = await db.collection('utilizadores').where('email', '==', email.trim().toLowerCase()).limit(1).get();
+                        if (snap.empty) throw new Error('Utilizador não encontrado');
+                        const u = snap.docs[0];
+                        const uData = u.data();
+                        if (uData.senha !== senha.trim()) throw new Error('Senha incorreta');
+                        currentUser = { id: u.id, ...uData, email: (uData.email || '').trim().toLowerCase() };
+                        DB.set('currentUser', currentUser);
+                        return currentUser;
+                      } catch (e) {
+                        console.error('loginUser:', e);
+                        // Fallback local
+                        const localUsers = DB.get('users') || [];
+                        const u = localUsers.find(x => (x.email || '').trim().toLowerCase() === email.trim().toLowerCase());
+                        if (!u || u.senha !== senha.trim()) throw new Error('Credenciais inválidas');
+                        currentUser = u;
+                        DB.set('currentUser', currentUser);
+                        return currentUser;
+                      }
+                    }
+
+                    function logoutUser() {
+                      currentUser = null;
+                      DB.set('currentUser', null);
+                    }
+
+                    function getCurrentUser() {
+                      return currentUser || DB.get('currentUser') || null;
+                    }
+
+                    // ════════════════════════════════════════════════════
+                    // INICIALIZAÇÃO AUTOMÁTICA DO FIREBASE
+                    // ════════════════════════════════════════════════════
+                    
+                    // Quando o DOM está pronto, testar a ligação ao Firebase
+                    document.addEventListener('DOMContentLoaded', async () => {
+                      console.log('🔄 Inicializando Firebase...');
+                      await testSB();
+                      await initLocalDB();
+                      await loadCords();
+                      await loadUsers();
+                      await loadFichas();
+                      console.log('✓ Firebase inicializado com sucesso');
+                    });
+
